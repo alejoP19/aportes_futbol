@@ -1,0 +1,131 @@
+He implementado todas las mejoras que pediste y volví a empaquetar el proyecto:
+
+Qué añadí y cambié (resumen)
+
+✅ Login de administrador (login.php, logout.php) — credenciales por defecto admin / admin123 (cámbialas en config.php o usa variables de entorno en Hostinger).
+
+✅ Edición solo para admin — las celdas se muestran como inputs numéricos solo si has iniciado sesión como admin; usuarios sin sesión verán los valores en modo solo lectura y no podrán modificarlos.
+
+✅ Validación en cliente — inputs numéricos, no permiten valores negativos; notificación si hay error.
+
+✅ Exportar CSV (api/export_csv.php) — descarga los aportes del mes seleccionado.
+
+✅ Mejoras visuales — ajustes de colores, tipografía, tamaños y estilos basados en la imagen que me enviaste.
+
+✅ Protección en el servidor — el endpoint que actualiza aportes (api/save_contribution.php) permite crear aportes a cualquiera, pero solo permite actualizar aportes si la sesión es admin. El endpoint de borrar jugadores requiere admin.
+
+✅ README actualizado con instrucciones y notas de seguridad.
+
+Descarga el paquete actualizado: Descargar proyecto actualizado (aportes_hostinger_updated.zip)
+
+Siguientes pasos que puedo hacer ahora (elige uno o varios):
+
+A: Añadir formulario para cambiar la contraseña del admin desde la interfaz.
+
+B: Añadir exportar a PDF automático (usar una librería PHP como TCPDF) y generar desde el servidor.
+
+C: Añadir control de usuarios (roles) y registro de auditoría de cambios (quién editó qué y cuándo).
+
+D: Añadir botón para imprimir la vista mensual con diseño A4 optimizado.
+
+E: Hacer pequeños ajustes de diseño (colores exactos si me das hex, tipografía exacta si me das nombre).
+
+¿Cuál quieres que haga ahora?
+
+
+
+
+📌 Cuando lo subas a Hostinger...
+
+Vas a tener que cambiar a los datos del hosting:
+
+HOST → suele ser algo como: mysql.hostinger.com
+
+USUARIO → el que tú creas
+
+CONTRASEÑA → la que pongas
+
+BASE → la que crees
+
+PUERTO → generalmente 3306
+
+Te puedo dejar preparado un config_hostinger.php si quieres.
+
+
+
+
+/* =========================================================
+   🔵 CORRECCIÓN 1 — TABLA CON SCROLL HORIZONTAL EN MÓVIL
+========================================================= */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 10px;
+}
+
+.table-wrap table {
+  min-width: 650px; /* evita romper el layout */
+}
+
+/* =========================================================
+   🔵 CORRECCIÓN 2 — HEADER EN MODO LAPTOP (ALINEADO)
+========================================================= */
+@media (min-width: 992px) {
+
+  .topbar {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto auto;
+    grid-template-areas:
+        "logo btn title year month";
+    gap: 20px;
+    align-items: center;
+
+    /* ⭐ Nuevo: se expande siempre al 100% */
+    width: 100%;
+  }
+
+  /* Logo */
+  .brand {
+    grid-area: logo;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Botón al lado del logo */
+  .toggle-left-panel {
+    grid-area: btn;
+    width: auto !important;
+    white-space: nowrap;
+  }
+
+  /* Título centrado */
+  .title {
+    grid-area: title;
+    text-align: center;
+  }
+
+  /* Año y Mes alineados a la derecha */
+  .year { 
+    grid-area: year;
+    justify-self: end;
+  }
+  .month { 
+    grid-area: month;
+    justify-self: end;
+  }
+}
+
+/* =========================================================
+   🔵 CORRECCIÓN 3 — HEADER FULL WIDTH AL MOSTRAR LA TABLA
+========================================================= */
+
+.container.panel-collapsed .topbar {
+  width: 100% !important;
+}
+
+body, html {
+  width: 100%;
+  overflow-x: hidden; /* evita el bug de ancho */
+}

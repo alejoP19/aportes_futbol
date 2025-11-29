@@ -1,0 +1,66 @@
+=== REQUEST at 2025-11-26T09:52:03+01:00 ===
+RAW BODY:
+{"nombre":"Prueba Manual","telefono":"3000000000"}
+USING JSON
+Array
+(
+    [nombre] => Prueba Manual
+    [telefono] => 3000000000
+)
+INSERT OK. ID: 1
+
+=== REQUEST at 2025-11-26T09:58:35+01:00 ===
+RAW BODY:
+{"nombre":"Usuario de Prueba 1","telefono":"3216789545"}
+USING JSON
+Array
+(
+    [nombre] => Usuario de Prueba 1
+    [telefono] => 3216789545
+)
+INSERT OK. ID: 2
+
+=== REQUEST at 2025-11-26T10:00:20+01:00 ===
+RAW BODY:
+{"nombre":"Usuario de Prueba 2","telefono":"3112567890"}
+USING JSON
+Array
+(
+    [nombre] => Usuario de Prueba 2
+    [telefono] => 3112567890
+)
+INSERT OK. ID: 3
+
+=== REQUEST at 2025-11-27T21:18:13+01:00 ===
+RAW BODY:
+{"nombre":"Usuario de Prueba 3","telefono":"3112456789"}
+USING JSON
+Array
+(
+    [nombre] => Usuario de Prueba 3
+    [telefono] => 3112456789
+)
+INSERT OK. ID: 4
+
+=== REQUEST at 2025-11-28T10:43:38+01:00 ===
+RAW BODY:
+{"nombre":"jose canseco","telefono":"3256745678"}
+USING JSON
+Array
+(
+    [nombre] => jose canseco
+    [telefono] => 3256745678
+)
+INSERT OK. ID: 5
+
+=== REQUEST at 2025-11-28T10:43:56+01:00 ===
+RAW BODY:
+{"nombre":"Elton TaZO","telefono":"2323424552425"}
+USING JSON
+Array
+(
+    [nombre] => Elton TaZO
+    [telefono] => 2323424552425
+)
+INSERT OK. ID: 6
+

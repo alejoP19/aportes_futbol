@@ -1,0 +1,114 @@
+/* ESTILOS COMPATIBLES CON DOMPDF */
+
+/* reporte_pdf.css */
+body {
+    font-family: DejaVu Sans, sans-serif;
+    margin-top: 100px;  /* menos que antes, para acercar la tabla en la primera página */
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    font-size: 12pt;
+}
+
+.section-title {
+    margin-top: 10%; /* eliminar márgenes grandes que empujan la tabla */
+    margin-bottom: 3%;
+}
+
+th, td {
+    font-size: 10pt; /* escalable */
+}
+
+.section-title, .section-title2 {
+    font-size: 12pt;
+}
+
+
+
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto; /* fuerza columnas a tamaño fijo proporcional */
+    word-wrap: break-word; /* evita que texto largo desborde */
+}
+tr {
+    page-break-inside: avoid; /* evita cortar filas */
+}
+
+table {
+    page-break-inside: auto;
+}
+
+th {
+    background: #0a83b3;
+    color: white;
+    padding: 6px;
+    border: 1px solid #444;
+
+}
+.logo {
+    width: 80px;  /* ya usado */
+    max-width: 15%; /* opcional: escala proporcional */
+    height: auto;
+}
+.right{
+font-weight:bold;   
+font-size: 14px;
+ text-align:center;
+}
+td {
+    padding: 6px;
+    border: 1px solid #444;
+}
+
+tr:nth-child(even) {
+    background: #f2f2f2;
+}
+
+
+/* Ajuste de página */
+.page-break {
+    page-break-before: always;
+}
+
+.observaciones{
+     background-color: #c6d3e0;
+     padding: 3% 3%;
+}
+.observaciones-title{
+    margin-top: 0%;
+    font-size: 17px;
+    margin-bottom: 2%;
+}
+.total-box{
+    margin-top: 3%;
+     background-color: #b4e7c7;
+     padding: 3% 3%;
+}
+
+.total-dia{
+    background: #9cf1bb; 
+    color:white; 
+    font-weight:lighter;
+    
+}
+.small{
+text-align:center;
+
+}
+.obs{
+    font-size: 15px;
+    
+}
+
+
+
+.page-break {
+    page-break-before: always;
+}
+
+.page-spacer {
+    height: 40px; /* ajusta la separación que quieras */
+}
