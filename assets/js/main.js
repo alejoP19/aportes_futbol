@@ -70,17 +70,21 @@ async function loadSheet(mes, anio){
     });
 
     // Inputs de aporte
-    container.querySelectorAll('.cell-aporte').forEach(input=>{
-        input.addEventListener('change', async ev=>{
-            const id = ev.target.dataset.player;
-            const fecha = ev.target.dataset.fecha;
-            const valor = parseInt(ev.target.value) || 0;
-            await postJSON(`${API}/guardar_aporte.php`, { id_jugador:id, fecha, valor });
-            ev.target.classList.add('saved');
-            setTimeout(()=>ev.target.classList.remove('saved'),400);
-            await loadTotals(mes, anio);
-        });
+   container.querySelectorAll('.cell-aporte').forEach(input=>{
+    input.addEventListener('change', async ev=>{
+        const id = ev.target.dataset.player;
+        const fecha = ev.target.dataset.fecha;
+        const valor = parseInt(ev.target.value) || 0;
+
+        await postJSON(`${API}/guardar_aporte.php`, { id_jugador:id, fecha, valor });
+
+        ev.target.classList.add('saved');
+        setTimeout(()=>ev.target.classList.remove('saved'),400);
+
+        // 🔥 Recargar tabla + totales al instante
+        await refreshSheet();
     });
+});
 }
 
 // ----------- OBSERVACIONES -----------------

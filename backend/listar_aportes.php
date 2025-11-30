@@ -52,43 +52,46 @@ $observaciones = $obs_res['texto'] ?? '';
 echo "<div class='monthly-sheet'>";
 echo "<div class='month-header'>Mes: <strong>" . date('F', mktime(0,0,0,$mes,1)) . " $anio</strong></div>";
 
-echo "<table class='planilla' style='width:100%;border-collapse:collapse'>";
+echo "<table class='planilla'>";
 
 /* ---------- THEAD ---------- */
 /* Primera fila: Nombres | Dias de los juegos (days + Fecha Especial) | Otros aportes (colspan 2) */
 echo "<thead>";
 echo "<tr>";
-echo "<th style='border:1px solid #eee;padding:6px'>Nombres</th>";
+echo "<th>Nombres</th>";
 
 // colspan para "Días de los juegos": cantidad de days + 1 (para Fecha Especial)
 $colspan_days = count($days) + 1;
-echo "<th style='border:1px solid #eee;padding:6px;text-align:center' colspan='{$colspan_days}'>Días de los juegos</th>";
+echo "<th  colspan='{$colspan_days}'>Días de los juegos</th>";
 
 // Otros aportes (dos columnas)
-echo "<th style='border:1px solid #eee;padding:6px;text-align:center' colspan='2'>Otros aportes</th>";
+echo "<th colspan='2'>Otros aportes</th>";
+// Aportes mensuales totales por jugador
+echo "<th>Total Mes</th>";
 
-echo "</tr>";
+echo "<tr></tr>";
 
 /* Segunda fila: (vacía para Nombres) -> números de días -> Fecha Especial -> Tipo -> Valor */
 echo "<tr>";
-echo "<th style='border:1px solid #eee;padding:6px'></th>"; // espacio para nombres
+echo "<th></th>"; // espacio para nombres
 
 // números de los días
 foreach ($days as $d) {
-    echo "<th style='border:1px solid #eee;padding:6px;text-align:center'>{$d}</th>";
+    echo "<th>{$d}</th>";
 }
 
 // Fecha Especial (columna dentro 'Días de los juegos')
-echo "<th style='border:1px solid #eee;padding:6px;text-align:center'>Fecha Especial</th>";
+echo "<th>Fecha Especial</th>";
 
 // Sub-headers para "Otros aportes"
-echo "<th style='border:1px solid #eee;padding:6px;text-align:center'>Tipo</th>";
-echo "<th style='border:1px solid #eee;padding:6px;text-align:center'>Valor</th>";
-
+echo "<th>Tipo</th>";
+echo "<th>Valor</th>";
+echo "<th>Por Jugador</th>";
 echo "</tr>";
+
 echo "</thead>";
 
-/* ---------- TBODY ---------- */
+/* ---------- TBODY (CORREGIDO) ---------- */
 echo "<tbody>";
 
 $totales_por_dia = array_fill(0, count($days), 0);
@@ -99,65 +102,101 @@ foreach ($jugadores as $jug) {
     $total_jugador_mes = 0;
 
     echo "<tr data-player='{$jug['id']}'>";
-    // NOMBRE
-    echo "<td style='border:1px solid #eee;padding:6px'>{$jug['nombre']}</td>";
 
-    // CELDAS DE CADA DÍA (inputs cortos)
+    // NOMBRE
+    echo "<td>{$jug['nombre']}</td>";
+
+    // CELDAS DE LOS DÍAS NORMALES
     foreach ($days as $idx => $d) {
+
         $fecha = sprintf("%04d-%02d-%02d", $anio, $mes, $d);
         $aporte = get_aporte($conexion, $jug['id'], $fecha);
 
         $total_jugador_mes += $aporte;
         $totales_por_dia[$idx] += $aporte;
 
-        echo "<td style='border:1px solid #eee;padding:4px;text-align:center'>
-                <input class='cell-aporte' data-player='{$jug['id']}' data-fecha='{$fecha}' type='number' min='0' value='{$aporte}' style='width:70px;padding:4px;font-size:13px'>
+        echo "<td>
+                <input class='cell-aporte' 
+                       data-player='{$jug['id']}' 
+                       data-fecha='{$fecha}' 
+                       type='number' 
+                       placeholder='$'
+                       value='" . ($aporte > 0 ? $aporte : "") . "'>
               </td>";
     }
 
-    // FECHA ESPECIAL (antes de otros aportes)
-    echo "<td style='border:1px solid #eee;padding:6px;text-align:center'>
-            <input class='cell-especial' data-player='{$jug['id']}' type='text' placeholder='Fecha / nota' style='width:120px;padding:4px;font-size:13px'>
+    /* ===== COLUMNA FECHA ESPECIAL (única, bien colocada) ===== */
+    $fechaEspecial = sprintf("%04d-%02d-28", $anio, $mes);
+    $aporteEspecial = get_aporte($conexion, $jug['id'], $fechaEspecial);
+    $total_jugador_mes += $aporteEspecial;
+
+    echo "<td>
+            <input class='cell-aporte' 
+                   data-player='{$jug['id']}' 
+                   data-fecha='{$fechaEspecial}' 
+                   type='number' 
+                   placeholder='$'
+                   value='" . ($aporteEspecial > 0 ? $aporteEspecial : "") . "'>
           </td>";
 
-    // OTROS APORTES: mostrar tipos (line-break) y sumar valores
+    /* ===== OTROS APORTES ===== */
     $otros = get_otros($conexion, $jug['id'], $mes, $anio);
     $tipos = [];
     $valor_otros = 0;
+
     foreach ($otros as $o) {
-        $tipos[] = htmlspecialchars($o['tipo']);
+        $tipos[] = htmlspecialchars($o['tipo']) . " (" . number_format($o['valor'], 0, ',', '.') . ")";
         $valor_otros += intval($o['valor']);
     }
 
     $total_jugador_mes += $valor_otros;
     $total_otros_global += $valor_otros;
 
-    // Tipo(s)
-    echo "<td style='border:1px solid #eee;padding:6px'>" . (empty($tipos) ? '' : implode('<br>', $tipos)) . "</td>";
-    // Valor total de los otros aportes del jugador (en esta fila)
-    echo "<td style='border:1px solid #eee;padding:6px;text-align:right'>" . ( $valor_otros ? number_format($valor_otros,0,',','.') : '' ) . "</td>";
+    echo "<td>" . (empty($tipos) ? '' : implode('<br>', $tipos)) . "</td>";
+    echo "<td>" . ($valor_otros ? number_format($valor_otros, 0, ',', '.') : '') . "</td>";
+    echo "<td><strong>" . number_format($total_jugador_mes, 0, ',', '.') . "</strong></td>";
 
     echo "</tr>";
 }
 
 echo "</tbody>";
 
-/* ---------- TFOOT: Totales por día y Total Otros (no hay total mes) ---------- */
+/* ---------- TFOOT (CORREGIDO) ---------- */
 echo "<tfoot>";
 
-// Totales por día (fila)
-echo "<tr style='background:#fafafa'>";
-echo "<td style='border:1px solid #eee;padding:6px'><strong>TOTAL DÍA</strong></td>";
-foreach ($totales_por_dia as $td) {
-    echo "<td style='border:1px solid #eee;padding:6px;text-align:right'><strong>" . number_format($td,0,',','.') . "</strong></td>";
-}
-// columna Fecha Especial (vacía en totales)
-echo "<td style='border:1px solid #eee;padding:6px'></td>";
+echo "<tr>";
 
-// "TOTAL OTROS" label under Tipo column
-echo "<td style='border:1px solid #eee;padding:6px'><strong>TOTAL OTROS</strong></td>";
-// total valor otros in Valor column
-echo "<td style='border:1px solid #eee;padding:6px;text-align:right'><strong>" . number_format($total_otros_global,0,',','.') . "</strong></td>";
+echo "<td ><strong>TOTAL DÍA</strong></td>";
+
+/* Totales de días normales */
+foreach ($totales_por_dia as $td) {
+    echo "<td>
+            <strong>" . number_format($td, 0, ',', '.') . "</strong>
+          </td>";
+}
+
+/* TOTAL FECHA ESPECIAL */
+$fechaEspecial = sprintf('%04d-%02d-28', $anio, $mes);
+$totEspecialRes = $conexion->query("
+    SELECT SUM(aporte_principal) AS t 
+    FROM aportes 
+    WHERE fecha = '{$fechaEspecial}'
+");
+$totEspecial = ($totEspecialRes && $totEspecialRes->num_rows) 
+    ? intval($totEspecialRes->fetch_assoc()['t']) 
+    : 0;
+
+echo "<td>
+        <strong>" . number_format($totEspecial, 0, ',', '.') . "</strong>
+      </td>";
+
+/* Total Otros Aportes (global) */
+echo "<td><strong>TOTAL OTROS</strong></td>";
+echo "<td>
+        <strong>" . number_format($total_otros_global, 0, ',', '.') . "</strong>
+      </td>";
+
+echo "<td></td>";
 
 echo "</tr>";
 

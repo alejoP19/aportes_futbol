@@ -64,13 +64,15 @@ include "conexion.php";
     <div class="controls">
       <div class="add-player-title">Ingresar Nuevo Aportante</div>
       <form id="addPlayerForm" class="add-player-box">
-        <input type="text" id="playerName" placeholder="Nombre del aportante" required>
-        <input type="text" id="playerPhone" placeholder="Teléfono del aportante" required>
+        <label for="playerName"> Nombre Del Aportante</label>
+        <input type="text" id="playerName" placeholder="Ingresar Nombre" required>
+        <label for="playerPhone"> Telefono Del Aportante</label>
+        <input type="text" id="playerPhone" placeholder="Ingresar Número" required>
         <button type="submit" id="btnAddPlayer" class="save-player-btn">Guardar Aportante</button>
       </form>
     </div>
     <div id="playersTableContainer">
-      <div class="loading">Cargando lista de aportantes...</div>
+      <div class="loading"></div>
     </div>
     <div class="pagination" id="paginationContainer"></div>
   </section>
@@ -103,9 +105,12 @@ include "conexion.php";
 
     <div class="otros-aportes-card">
       <h4>Agregar Otro Aporte</h4>
+      <label for="selectPlayerOtro">Aportante</label>
       <select id="selectPlayerOtros"></select>
-      <input id="otroTipo" type="text" placeholder="Tipo (ej. Balón)" />
-      <input id="otroValor" type="number" placeholder="Valor (COP)" />
+      <label for="otroTipo"> Tipo</label>
+      <input id="otroTipo" type="text" placeholder=" Ejemplo: Balón)" />
+      <label for="otroValor"> Valor Aportado</label>
+      <input id="otroValor" type="number" placeholder="$" />
       <button id="btnAddOtro" class="otro-aporte">Agregar</button>
     </div>
 
