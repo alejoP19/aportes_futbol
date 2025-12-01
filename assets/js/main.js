@@ -3,28 +3,33 @@ const API = "backend";
 let selectedPlayerId = null; // fila seleccionada global
 
 // ----------- UTILS -----------------
-async function fetchText(url){ 
-    const r = await fetch(url); 
-    return await r.text(); 
+async function fetchText(url) {
+    const r = await fetch(url);
+    return await r.text();
 }
 
-async function postJSON(url, data){ 
-    const r = await fetch(url, { 
-        method:'POST', 
-        headers:{'Accept':'application/json'}, 
-        body: (data instanceof FormData ? data : JSON.stringify(data)) 
-    }); 
-    try { return await r.json(); } catch(e){ return null; } 
+async function postJSON(url, data) {
+    const r = await fetch(url, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: (data instanceof FormData ? data : JSON.stringify(data))
+    });
+    try { return await r.json(); } catch (e) { return null; }
 }
 
 // ----------- JUGADORES -----------------
-async function loadPlayersList(){
-    const res = await fetch(`${API}/get_players.php`);
+async function loadPlayersList() {
+    const res = await fetch(`${API}/aportantes/get_players.php`);
     const players = await res.json();
     const sel = document.getElementById('selectPlayerOtros');
-    if(sel){
-        sel.innerHTML = '<option value="">-- selecciona --</option>';
-        players.forEach(p=>{
+
+    if (sel) {
+        // Opción tipo placeholder
+        sel.innerHTML = `
+            <option value="" disabled selected>Elige un Aportante</option>
+        `;
+
+        players.forEach(p => {
             const opt = document.createElement('option');
             opt.value = p.id;
             opt.textContent = p.nombre;
@@ -33,119 +38,187 @@ async function loadPlayersList(){
     }
 }
 
-async function agregarJugador(){
+
+async function agregarJugador() {
     const nombre = document.getElementById("playerName").value.trim();
     const telefono = document.getElementById("playerPhone").value.trim();
-    if(nombre===""){ alert("El nombre es obligatorio"); return; }
-    const data = { nombre, telefono };
-    const resp = await postJSON(`${API}/add_player.php`, data);
-    if(resp && resp.status==="ok"){
-        alert("Jugador agregado correctamente");
-        document.getElementById("playerName").value="";
-        document.getElementById("playerPhone").value="";
-        await loadPlayersList();
-        await refreshSheet();
-    } else { alert("Error guardando jugador"); }
-}
 
+    if (nombre === "") {
+        Swal.fire({
+            icon: 'info',
+            title: 'Nombre Requerido',
+            text: 'El Nombre es Obligatorio'
+        });
+        return;
+    }
+    if (telefono === "") {
+        Swal.fire({
+            icon: 'info',
+            title: 'Telefono Requerido',
+            text: 'El Telefono es Obligatorio'
+        });
+        return;
+    }
+
+    const data = { nombre, telefono };
+    const resp = await postJSON(`${API}/aportantes/add_player.php`, data);
+
+    if (resp && resp.status === "ok") {
+
+        Swal.fire({
+            icon: 'success',
+            title: '¡Excelente!',
+            text: 'Nuevo Aportante Registrado Correctamente',
+            showConfirmButton: false,
+            timer: 1800
+        });
+
+        document.getElementById("playerName").value = "";
+        document.getElementById("playerPhone").value = "";
+
+        await loadPlayersList();   // refresca select
+        await refreshSheet();      // refresca tabla
+
+        // 👉 Abre la tabla automáticamente
+        const toggleBtn = document.querySelector('.toggle-left-panel');
+        if (toggleBtn) toggleBtn.click();
+    } else {
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error guardando el aportante'
+        });
+
+    }
+}
 // ----------- TABLA Y APORTE -----------------
-async function loadSheet(mes, anio){
-    const html = await fetchText(`${API}/listar_aportes.php?mes=${mes}&anio=${anio}`);
+async function loadSheet(mes, anio) {
+    const html = await fetchText(`${API}/aportes/listar_aportes.php?mes=${mes}&anio=${anio}`);
     const container = document.getElementById('monthlyTableContainer');
     container.innerHTML = html;
 
     // Mantener fila seleccionada
-    if(selectedPlayerId){
+    if (selectedPlayerId) {
         const row = container.querySelector(`tr[data-player='${selectedPlayerId}']`);
-        if(row) row.classList.add('selected-row');
+        if (row) row.classList.add('selected-row');
     }
 
     // Click en filas
-    container.querySelectorAll("tr").forEach(r=>{
-        r.addEventListener("click", ()=>{
-            container.querySelectorAll("tr.selected-row").forEach(rr=>rr.classList.remove("selected-row"));
+    container.querySelectorAll("tr").forEach(r => {
+        r.addEventListener("click", () => {
+            container.querySelectorAll("tr.selected-row").forEach(rr => rr.classList.remove("selected-row"));
             r.classList.add("selected-row");
             selectedPlayerId = r.getAttribute("data-player");
         });
     });
 
     // Inputs de aporte
-   container.querySelectorAll('.cell-aporte').forEach(input=>{
-    input.addEventListener('change', async ev=>{
-        const id = ev.target.dataset.player;
-        const fecha = ev.target.dataset.fecha;
-        const valor = parseInt(ev.target.value) || 0;
+    container.querySelectorAll('.cell-aporte').forEach(input => {
+        input.addEventListener('change', async ev => {
+            const id = ev.target.dataset.player;
+            const fecha = ev.target.dataset.fecha;
+            const valor = parseInt(ev.target.value) || 0;
 
-        await postJSON(`${API}/guardar_aporte.php`, { id_jugador:id, fecha, valor });
+            await postJSON(`${API}/aportes/guardar_aporte.php`, { id_jugador: id, fecha, valor });
 
-        ev.target.classList.add('saved');
-        setTimeout(()=>ev.target.classList.remove('saved'),400);
+            ev.target.classList.add('saved');
+            setTimeout(() => ev.target.classList.remove('saved'), 400);
 
-        // 🔥 Recargar tabla + totales al instante
-        await refreshSheet();
+            // 🔥 Recargar tabla + totales al instante
+            await refreshSheet();
+        });
+    });
+    // Botones eliminar
+container.querySelectorAll(".btn-del-player").forEach(btn => {
+    btn.addEventListener("click", ev => {
+        ev.stopPropagation(); // para no seleccionar fila
+        eliminarJugador(btn.dataset.id);
     });
 });
 }
 
 // ----------- OBSERVACIONES -----------------
-function loadObservaciones(mes, anio){
-    fetch(`${API}/get_observaciones.php?mes=${mes}&anio=${anio}`)
-        .then(res=>res.json())
-        .then(data=>{
+function loadObservaciones(mes, anio) {
+    fetch(`${API}/aportes/get_observaciones.php?mes=${mes}&anio=${anio}`)
+        .then(res => res.json())
+        .then(data => {
             document.getElementById("obsMes").value = data.observaciones || "";
         });
 }
 
-function saveObservaciones(){
+function saveObservaciones() {
     const mes = monthSelect.value;
     const anio = yearSelect.value;
     const texto = document.getElementById("obsMes").value;
-    fetch(`${API}/save_observaciones.php`,{
-        method:"POST",
-        headers: {"Content-Type":"application/x-www-form-urlencoded"},
-        body:`mes=${mes}&anio=${anio}&texto=${encodeURIComponent(texto)}`
+    fetch(`${API}/aportes/save_observaciones.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `mes=${mes}&anio=${anio}&texto=${encodeURIComponent(texto)}`
     })
-    .then(res=>res.json())
-    .then(data=>{
-        if(data.ok) alert("Observaciones guardadas correctamente.");
-        else alert("Error al guardar observaciones.");
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.ok)  Swal.fire({
+  title: "Observación o Gasto Guardada Exitosamente!",
+  icon: "success",
+  draggable: true
+});
+else  
+Swal.fire({
+  icon: "error",
+  title: "Oops...",
+  text: "Error al Guardar la Observación o Gasto!",
+  footer: '<a href="#">Why do I have this issue?</a>'
+});;
+        });
 }
 
 // ----------- OTROS APORTES -----------------
-async function addOtroAporte(){
+async function addOtroAporte() {
     const sel = document.getElementById('selectPlayerOtros');
     const id = sel.value;
     const tipo = document.getElementById('otroTipo').value.trim();
     const valor = parseInt(document.getElementById('otroValor').value) || 0;
-    if(!id || tipo===""){ alert("Selecciona jugador y escribe el tipo"); return; }
+    if (!id || tipo === "") {
+        Swal.fire({
+  title: "¡Importante!",
+  text: "Debe Elegir un Aportante y un Tipo de Aporte",
+  icon:"info",
+});  
+return; 
+
+}
     const fd = new FormData();
     fd.append('id_jugador', id);
     fd.append('mes', monthSelect.value);
     fd.append('anio', yearSelect.value);
     fd.append('tipo', tipo);
     fd.append('valor', valor);
-    const j = await postJSON(`${API}/add_otro_aporte.php`, fd);
-    if(j && j.ok){
-        alert("Otro aporte agregado");
-        document.getElementById('otroTipo').value="";
-        document.getElementById('otroValor').value="";
+    const j = await postJSON(`${API}/aportes/add_otro_aporte.php`, fd);
+    if (j && j.ok) {
+      Swal.fire({
+  title: "Otro Aporte Agregado Exitosamente!",
+  icon: "success",
+  draggable: true
+});
+        document.getElementById('otroTipo').value = "";
+        document.getElementById('otroValor').value = "";
         await refreshSheet();
     }
 }
 
 // ----------- TOTALES -----------------
-async function loadTotals(mes, anio){
-    const res = await fetch(`${API}/get_totals.php?mes=${mes}&anio=${anio}`);
+async function loadTotals(mes, anio) {
+    const res = await fetch(`${API}/aportes/get_totals.php?mes=${mes}&anio=${anio}`);
     const j = await res.json();
-    if(!j) return;
-    document.getElementById('dailyTotal').innerText = j.today ? j.today.toLocaleString('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}) : '';
-    document.getElementById('monthlyTotal').innerText = j.month_total ? j.month_total.toLocaleString('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}) : '';
-    document.getElementById('yearlyTotal').innerText = j.year_total ? j.year_total.toLocaleString('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}) : '';
+    if (!j) return;
+    document.getElementById('dailyTotal').innerText = j.today ? j.today.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }) : '';
+    document.getElementById('monthlyTotal').innerText = j.month_total ? j.month_total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }) : '';
+    document.getElementById('yearlyTotal').innerText = j.year_total ? j.year_total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }) : '';
 }
 
 // ----------- REFRESH COMPLETA -----------------
-async function refreshSheet(){
+async function refreshSheet() {
     const mes = monthSelect.value;
     const anio = yearSelect.value;
     await loadSheet(mes, anio);
@@ -154,17 +227,17 @@ async function refreshSheet(){
 }
 
 // ----------- PANEL IZQUIERDO -----------------
-function toggleLeftPanel(){
+function toggleLeftPanel() {
     const container = document.querySelector('.container');
     const middlePanel = document.querySelector('.middle-panel');
 
     container.classList.toggle('panel-collapsed');
 
-    if(middlePanel){
+    if (middlePanel) {
         middlePanel.classList.toggle('expanded');
 
         // reset scroll al expandir
-        if(middlePanel.classList.contains('expanded')){
+        if (middlePanel.classList.contains('expanded')) {
             middlePanel.scrollTop = 0;
             middlePanel.scrollLeft = 0;
         }
@@ -179,19 +252,19 @@ function toggleLeftPanel(){
 const monthSelect = document.getElementById("monthSelect");
 const yearSelect = document.getElementById("yearSelect");
 
-document.addEventListener("DOMContentLoaded", async ()=>{
+document.addEventListener("DOMContentLoaded", async () => {
     await loadPlayersList();
     await refreshSheet();
 
     // botones
     const btnAddPlayer = document.getElementById("btnAddPlayer");
-    if(btnAddPlayer) btnAddPlayer.addEventListener("click", agregarJugador);
+    if (btnAddPlayer) btnAddPlayer.addEventListener("click", agregarJugador);
 
     const btnAddOtro = document.getElementById('btnAddOtro');
-    if(btnAddOtro) btnAddOtro.addEventListener('click', addOtroAporte);
+    if (btnAddOtro) btnAddOtro.addEventListener('click', addOtroAporte);
 
     const saveObsBtn = document.getElementById('saveObsBtn');
-    if(saveObsBtn) saveObsBtn.addEventListener('click', saveObservaciones);
+    if (saveObsBtn) saveObsBtn.addEventListener('click', saveObservaciones);
 
     // cambiar mes/año
     monthSelect.addEventListener("change", refreshSheet);
@@ -199,18 +272,65 @@ document.addEventListener("DOMContentLoaded", async ()=>{
 
     // export PDF
     const exportPdf = document.querySelector('.export-pdf-butt');
-    if(exportPdf){
-        exportPdf.addEventListener('click', e=>{
+    if (exportPdf) {
+        exportPdf.addEventListener('click', e => {
             e.preventDefault();
             const mes = monthSelect.value;
             const anio = yearSelect.value;
-            window.open(`backend/export_pdf.php?mes=${mes}&anio=${anio}`,'_blank');
+            window.open(`backend/reportes/export_pdf.php?mes=${mes}&anio=${anio}`, '_blank');
         });
     }
 
     // toggle panel izquierdo
     const toggleBtn = document.querySelector('.toggle-left-panel');
-    if(toggleBtn){
+    if (toggleBtn) {
         toggleBtn.addEventListener('click', toggleLeftPanel);
     }
 });
+
+
+async function eliminarJugador(id) {
+    Swal.fire({
+       title: "¿Eliminar Este Aportante?",
+  text: "Sus Aportes No Serán Eliminados!",
+  icon: "question",
+  iconColor: '#ff0040ff',
+  showCancelButton: true,
+  confirmButtonColor: "#1ead5eff",
+  cancelButtonColor: "#ff0040ff",
+  confirmButtonText: "Yes, delete it!"
+    }).then(async (result) => {
+
+        if (result.isConfirmed) {
+
+            // --- ENVÍO CORRECTO DEL ID ---
+            const form = new FormData();
+            form.append("id", id);
+
+            const response = await fetch(`${API}/aportantes/delete_player.php`, {
+                method: "POST",
+                body: form
+            });
+
+            const resp = await response.json();
+            console.log("Respuesta delete:", resp);
+
+            // --- RESPUESTA ---
+            if (resp && resp.ok) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Aportante eliminado",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                await loadPlayersList(); 
+                await refreshSheet(); 
+            } 
+            else {
+                Swal.fire("Error", resp.msg || "No se pudo eliminar", "error");
+            }
+        }
+
+    });
+}

@@ -1,0 +1,11 @@
+=== REQUEST at 2025-12-01T09:05:04+01:00 ===
+RAW BODY:
+{"nombre":"seven stivens","telefono":"3122345789"}
+USING JSON
+Array
+(
+    [nombre] => seven stivens
+    [telefono] => 3122345789
+)
+INSERT OK. ID: 14
+

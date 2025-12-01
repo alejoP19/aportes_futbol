@@ -1,5 +1,5 @@
 <?php
-include "../conexion.php";
+include "../../conexion.php";
 header("Content-Type: text/html; charset=utf-8");
 
 
@@ -26,7 +26,13 @@ for ($d = 1; $d <= $days_count; $d++) {
 }
 
 // jugadores
-$jug_res = $conexion->query("SELECT id, nombre FROM jugadores ORDER BY nombre ASC");
+$jug_res = $conexion->query("
+   SELECT id, nombre FROM jugadores
+UNION ALL
+SELECT id, nombre FROM jugadores_eliminados
+ORDER BY nombre ASC
+");
+
 $jugadores = [];
 while ($r = $jug_res->fetch_assoc()) $jugadores[] = $r;
 
@@ -40,10 +46,15 @@ function get_aporte($conexion, $id_jugador, $fecha) {
 }
 
 function get_otros($conexion, $id_jugador, $mes, $anio) {
-    $stmt = $conexion->prepare("SELECT tipo, valor FROM otros_aportes WHERE id_jugador=? AND mes=? AND anio=?");
+    $stmt = $conexion->prepare("
+        SELECT tipo, valor
+        FROM otros_aportes
+        WHERE id_jugador = ? AND mes = ? AND anio = ?
+    ");
     $stmt->bind_param("iii", $id_jugador, $mes, $anio);
     $stmt->execute();
     $res = $stmt->get_result();
+
     $list = [];
     while ($row = $res->fetch_assoc()) $list[] = $row;
     return $list;
@@ -66,7 +77,7 @@ $total_otros_global = 0;
 
 // preparar $logo_src para usar en <img>
 $logo_src = '';
-$logoPath = __DIR__ . "/../assets/img/reliquias_logo.jpg";
+$logoPath = __DIR__ . "/../../assets/img/reliquias_logo.jpg";
 if (!file_exists($logoPath)) {
     echo "Logo no encontrado en $logoPath";
     exit;
@@ -78,14 +89,20 @@ if (!file_exists($logoPath)) {
 <meta charset="utf-8">
 <title>Reporte mensual - <?= $mesName . " " . $anio ?></title>
 
-<style>
-<?php echo file_get_contents(__DIR__ . "/reporte_pdf.css"); ?>
-</style>
 
 </head>
 <body>
 
 <br>
+<?php
+// Calcular totales por cada día
+$totalesDias = [];
+foreach ($days as $d) {
+    $fecha = sprintf("%04d-%02d-%02d",$anio,$mes,$d);
+    $q = $conexion->query("SELECT SUM(aporte_principal) AS s FROM aportes WHERE fecha='$fecha'");
+    $totalesDias[$d] = intval($q->fetch_assoc()['s'] ?? 0);
+}
+?>
 
 <div class="section-title"><strong>Aportantes y Aportes Diarios</strong></div>
 
@@ -133,21 +150,15 @@ if (!file_exists($logoPath)) {
 <?php endforeach; ?>
 
 <!-- NUEVA FILA: Totales por día -->
-<tr style="background:#b4e7c7; color:black; font-weight:lighter;">
-    <td style="font-weight:bold;   font-size: 14px; text-align:center;">Total por día</td>
-    <?php
-    foreach ($days as $d) {
-        $s = $conexion->query(
-            "SELECT IFNULL(SUM(aporte_principal),0) s 
-             FROM aportes 
-             WHERE fecha='" . sprintf("%04d-%02d-%02d",$anio,$mes,$d) . "'"
-        )->fetch_assoc()['s'];
-        echo "<td class='right'>" . number_format(intval($s),0,',','.') . "</td>";
-    }
-    ?>
-    <td></td> <!-- columna "Otros" vacía -->
+<tr style="background:#b4e7c7; color:black; font-weight:bold;">
+    <td style="text-align:center;">Total por día</td>
+    <?php foreach ($days as $d): ?>
+        <td class="right"><?= number_format($totalesDias[$d],0,',','.') ?></td>
+    <?php endforeach; ?>
+    <td></td>
     <td class="right"><strong><?= number_format($total_mes_global - $total_otros_global,0,',','.') ?></strong></td>
 </tr>
+
 
 </tbody>
 </table>

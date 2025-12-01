@@ -129,3 +129,40 @@ body, html {
   width: 100%;
   overflow-x: hidden; /* evita el bug de ancho */
 }
+
+
+
+
+backend/
+├─ auth/          <-- para login y auth.php
+│   ├─ login.php
+│   ├─ login_action.php
+│   └─ auth.php
+├─ aportes/       <-- para todo lo relacionado con aportes
+│   ├─ add_otro_aporte.php
+│   ├─ guardar_aporte.php
+│   └─ delete_aporte.php
+├─ players/       <-- para jugadores
+│   ├─ add_player.php
+│   ├─ delete_player.php
+│   └─ get_players.php
+├─ reportes/
+│   ├─ reporte_mes.php
+│   ├─ export_pdf.php
+│   └─ preview_pdf.php
+
+
+<!-- <?php
+include "../../conexion.php";
+
+$nombre = "Admin";
+$email = "admin@correo.com";
+$password = password_hash("123456", PASSWORD_DEFAULT);
+$rol = "administrador";
+
+$conexion->query("
+    INSERT INTO usuarios (nombre,email,password,rol)
+    VALUES ('$nombre','$email','$password','$rol')
+");
+
+echo "Administrador creado correctamente"; -->

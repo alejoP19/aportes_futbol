@@ -1,5 +1,5 @@
 <?php
-include "../conexion.php";
+include "../../conexion.php";
 header("Content-Type: application/json");
 
 $mes = isset($_GET['mes']) ? intval($_GET['mes']) : intval(date('n'));

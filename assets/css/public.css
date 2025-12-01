@@ -1,0 +1,79 @@
+/* public/public.css - estilo limpio para la vista pública */
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  background:#f1f4f6;
+  color:#222;
+}
+
+.topbar {
+  background:#2f6b5a;
+  color: #fff;
+  padding:12px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.brand .logo { width:50px; height:50px; border-radius:6px; object-fit:cover; }
+
+.titles h1 { margin:0; font-size:20px; }
+.titles .subtitle { font-size:12px; opacity:0.85; }
+
+.actions-right { display:flex; gap:8px; align-items:center; }
+.btn-admin, .btn-pdf {
+  background:#194f3f; color:#fff; padding:8px 12px;
+  border-radius:6px; text-decoration:none; border:none; cursor:pointer;
+}
+.btn-pdf { background:#1673a1; }
+
+.selectors, #selectors { text-align:center; margin:14px 0; }
+#selectors select { padding:6px 8px; margin:0 10px; }
+
+/* tabla */
+.planilla {
+  width: 98%;
+  margin: 8px auto 24px auto;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+}
+
+.planilla th, .planilla td {
+  padding: 8px 10px;
+  border: 1px solid rgba(0,0,0,0.06);
+  text-align: center;
+  font-size: 14px;
+}
+
+.planilla thead th { background: #2f6b5a; color: #fff; font-weight:700; }
+.planilla thead tr:nth-child(2) th { background:#1fa67a; opacity:0.95; }
+
+.planilla tbody tr:nth-child(even) { background: #f7fbfa; }
+.player-name { text-align:left; padding-left: 14px; font-style: italic; }
+
+/* otros y observaciones */
+.otros-tipos { text-align:left; padding-left:10px; white-space:pre-line; }
+.otros-valor { font-weight:700; color:#0b6b3a; }
+
+/* totales card */
+.totales-card {
+  width:98%;
+  margin: 12px auto;
+  padding: 12px;
+  background: #fff;
+  border-radius:8px;
+  border:1px solid #e0e6e6;
+}
+
+/* observaciones */
+.observaciones-box {
+  width:98%;
+  margin: 12px auto 40px auto;
+  padding: 12px;
+  background: #fff;
+  border-radius:8px;
+  border: 1px solid #e0e6e6;
+  white-space: pre-line;
+}

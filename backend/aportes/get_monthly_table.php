@@ -1,5 +1,5 @@
 <?php
-include "../conexion.php";
+include "../../conexion.php";
 
 $mes = date("m");
 $anio = date("Y");

@@ -1,7 +1,9 @@
 <?php
 // backend/guardar_aporte.php
 header("Content-Type: application/json");
-include "../conexion.php";
+include "../auth/auth.php";
+protegerAdmin();
+include "../../conexion.php";
 
 $input = file_get_contents("php://input");
 $data = json_decode($input, true);
@@ -26,3 +28,19 @@ $ok = $stmt->execute();
 $stmt->close();
 
 echo json_encode(['ok' => (bool)$ok]);
+
+
+
+include "auth.php";
+
+$fecha_aporte = $_POST['fecha'];
+if(!puedeModificarAporte($fecha_aporte)) {
+    die("No tiene permisos para agregar este aporte.");
+}
+
+// Inserción segura
+$consulta = $conexion->prepare("INSERT INTO aportes (id_aportante, fecha, monto) VALUES (?, ?, ?)");
+$consulta->bind_param("isd", $_POST['id_aportante'], $fecha_aporte, $_POST['monto']);
+$consulta->execute(); 
+
+

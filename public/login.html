@@ -1,0 +1,26 @@
+<form id="loginForm">
+    <input type="email" name="email" placeholder="Correo" required>
+    <input type="password" name="password" placeholder="Contraseña" required>
+    <button type="submit">Ingresar</button>
+</form>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    let data = new FormData(e.target);
+
+    let r = await fetch("../backend/auth/login.php", {
+        method: "POST",
+        body: data
+    });
+
+    let txt = await r.text();
+
+    if (txt === "OK") {
+        window.location = "../index.php";
+    } else {
+        alert("Correo o contraseña incorrectos");
+    }
+});
+</script>

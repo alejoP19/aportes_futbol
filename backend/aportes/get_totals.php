@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json");
-include "../conexion.php";
+include "../../conexion.php";
 
 $mes = isset($_GET['mes']) ? intval($_GET['mes']) : intval(date('n'));
 $anio = isset($_GET['anio']) ? intval($_GET['anio']) : intval(date('Y'));

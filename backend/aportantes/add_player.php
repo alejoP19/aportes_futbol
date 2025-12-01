@@ -8,7 +8,12 @@ $logfile = __DIR__ . '/debug_add_player.log';
 file_put_contents($logfile, "=== REQUEST at " . date('c') . " ===\n", FILE_APPEND);
 
 // include conexion
-include __DIR__ . "/../conexion.php";
+
+include "../auth/auth.php";
+protegerAdmin();
+
+include __DIR__ . "/../../conexion.php";
+
 
 // 1) Raw body (posible JSON)
 $raw = file_get_contents("php://input");

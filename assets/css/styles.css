@@ -499,7 +499,18 @@ width: 120px;
 
 
 }
+.btn-del-player {
+    background: #ff3b3b;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
 
+.btn-del-player:hover {
+    background: #d80f0f;
+}
 
 /* ============================
 ZEBRA PARA TBODY (mobile-first)
@@ -565,6 +576,72 @@ max-width: 100vw; overflow-x: hidden;
 #monthlyTableContainer table tr:hover { background-color: #f0f8ff; cursor: pointer; }
 #monthlyTableContainer table tr.selected-row { background-color: #c0e0ff; }
 #monthlyTableContainer table tr { transition: background-color 0.2s ease; }
+
+
+.gastos-block h3{
+background-color: #e2e2e2;
+width: 100%;
+padding: 2%;
+color: #e2c107;
+font-weight:lighter; 
+text-shadow: -1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0);
+font-style:italic;
+justify-self: center;
+text-align: center;
+border-top-left-radius: 3px;
+border-top-right-radius: 3px;
+border-bottom-left-radius: 3px;
+border-bottom-right-radius: 3px;
+}
+textarea{
+width: 100%;
+margin-top: -5%;
+background-color: #ebeff0;
+color: rgb(0, 0, 0);
+font-weight:lighter !important; 
+font-size: large;
+text-shadow: -1px 1px 1px rgb(241, 241, 241),
+-1px 1px 1px rgb(238, 238, 238),
+-1px 1px 1px rgb(235, 235, 235);
+border-top-left-radius: 10px;
+border-top-right-radius: 10px;
+border-bottom-left-radius: 10px;
+border-bottom-right-radius: 10px;
+
+}
+
+.guardar-observaciones { 
+display:flex; 
+width:65%; 
+margin-top:3%; 
+margin-bottom: 3%;
+margin-right: 3%;
+justify-content: center;
+justify-self: flex-end;
+padding:8px 15px; 
+background-color:#2ebe76e7; 
+color:rgba(255, 255, 255, 0.888);
+text-shadow: -1px 1px 1px #000;
+border: 1px solid rgb(151, 151, 151); 
+outline:0; 
+font-size:16px; 
+border-radius:10px; 
+transition: .3s;
+}
+.guardar-observaciones:hover { 
+background-color: rgba(80, 230, 125, 0.979); 
+outline:1px solid rgba(0, 199, 73, 0.87); 
+color:#ffffff; border-radius:25px; 
+text-shadow: -1px 1px 1px #000,
+-1px 1px 1px #000;
+box-shadow:0 0 20px rgba(114, 252, 155, 0.842); 
+border: none;
+padding:7px 39px; 
+}
+
+
 
 /* Desktop layout */
 @media (min-width: 992px) {
@@ -696,13 +773,22 @@ padding:2px;
 margin-top: -4%;
 }
 
-
-
 .export-pdf-butt{ 
 width:30%; 
 }
+.gastos-block h3{
+background-color: #e2e2e2;
+padding: 2%;
 
+}
+textarea{
+margin-top: -1%;
+}
+.guardar-observaciones { 
+width:25%; 
+font-size:17px; 
 
+}
 }
 @media (min-width: 1200px) {
 .container {

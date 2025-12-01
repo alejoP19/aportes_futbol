@@ -1,6 +1,8 @@
 <?php
 header("Content-Type: application/json");
-include "../conexion.php";
+include "../auth/auth.php";
+protegerAdmin();
+include "../../conexion.php";
 
 $mes = intval($_POST['mes'] ?? date('n'));
 $anio = intval($_POST['anio'] ?? date('Y'));

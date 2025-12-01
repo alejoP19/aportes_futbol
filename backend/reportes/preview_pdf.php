@@ -1,6 +1,6 @@
 <?php
 // preview_pdf.php - previsualización rápida del PDF en HTML
-include __DIR__ . "/../conexion.php";
+include __DIR__ . "/../../conexion.php";
 
 // obtener mes y año (igual que en export_pdf.php)
 $mes = isset($_GET['mes']) ? intval($_GET['mes']) : intval(date("n"));
@@ -15,7 +15,7 @@ include __DIR__ . "/reporte_mes.php";
 $html = ob_get_clean();
 
 // ruta al logo
-$logoPath =  '../assets/img/reliquias_logo.jpg';
+$logoPath =  '../../assets/img/reliquias_logo.jpg';
 $logoWidth = 80;
 $logoY = 25;
 $titulo = "Reporte Mensual - " . date("F Y");

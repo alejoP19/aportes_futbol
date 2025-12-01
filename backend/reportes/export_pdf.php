@@ -1,6 +1,6 @@
 <?php
 // export_pdf.php - genera PDF usando el HTML de reporte_mes.php
-include __DIR__ . "/../conexion.php";
+include __DIR__ . "/../../conexion.php";
 
 // obtener mes y año de la URL
 $mes = isset($_GET['mes']) ? intval($_GET['mes']) : intval(date("n"));
@@ -20,7 +20,7 @@ include __DIR__ . "/reporte_mes.php";
 $html = ob_get_clean();
 
 // cargar Dompdf
-require_once __DIR__ . "/../dompdf_2-0-3/dompdf/vendor/autoload.php";
+require_once __DIR__ . "/../../dompdf_2-0-3/dompdf/vendor/autoload.php";
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -42,7 +42,7 @@ $dompdf->render();
 
 // encabezado y pie
 $canvas = $dompdf->get_canvas();
-$logoPath = __DIR__ . "/../assets/img/reliquias_logo.jpg";
+$logoPath = __DIR__ . "/../../assets/img/reliquias_logo.jpg";
 $logoWidth  = 80;
 $logoY      = 105; // ajustado para separar mejor de tablas
 
@@ -54,7 +54,9 @@ $meses = [
     10 => "Octubre", 11 => "Noviembre", 12 => "Diciembre"
 ];
 $mesName = $meses[$mes];
-
+if (!file_exists($logoPath)) {
+    $logoPath = __DIR__ . "/../../assets/img/default_logo.png";
+}
 $canvas->page_script(function($pageNumber, $pageCount, $canvas, $fontMetrics) use ($logoPath, $logoWidth, $logoY, $mesName, $anio) {
     $w = $canvas->get_width();
     $h = $canvas->get_height();

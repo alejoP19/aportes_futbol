@@ -1,4 +1,9 @@
+
+
 <?php
+
+include "backend/auth/auth.php";
+protegerAdmin();
 include "conexion.php";
 ?>
 <!doctype html>
@@ -43,15 +48,22 @@ include "conexion.php";
     </div>
     <div class="month">
       <label>Mes</label>
+
       <select id="monthSelect">
-        <?php
-        $months = [1=>'Enero',2=>'Febrero',3=>'Marzo',4=>'Abril',5=>'Mayo',6=>'Junio',7=>'Julio',8=>'Agosto',9=>'Septiembre',10=>'Octubre',11=>'Noviembre',12=>'Diciembre'];
-        foreach($months as $k=>$m){
-          $sel = ($k==date('n'))? ' selected' : '';
-          echo "<option value='$k'$sel>$m</option>";
-        }
-        ?>
-      </select>
+  <?php
+  $months = [
+    1=>'Enero',2=>'Febrero',3=>'Marzo',4=>'Abril',5=>'Mayo',6=>'Junio',
+    7=>'Julio',8=>'Agosto',9=>'Septiembre',10=>'Octubre',11=>'Noviembre',12=>'Diciembre'
+  ];
+
+  $currentMonth = date('n'); // mes actual en número
+
+  foreach($months as $k=>$m){
+      $sel = ($k == $currentMonth) ? " selected" : "";
+      echo "<option value='$k'$sel>$m</option>";
+  }
+  ?>
+</select>
     </div>
   </div>
 
@@ -62,13 +74,14 @@ include "conexion.php";
   <!-- PANEL IZQUIERDO: APORTANTES -->
   <section class="left-panel">
     <div class="controls">
-      <div class="add-player-title">Ingresar Nuevo Aportante</div>
+      <div class="add-player-title">Registrar Nuevo Aportante</div>
       <form id="addPlayerForm" class="add-player-box">
         <label for="playerName"> Nombre Del Aportante</label>
         <input type="text" id="playerName" placeholder="Ingresar Nombre" required>
         <label for="playerPhone"> Telefono Del Aportante</label>
         <input type="text" id="playerPhone" placeholder="Ingresar Número" required>
-        <button type="submit" id="btnAddPlayer" class="save-player-btn">Guardar Aportante</button>
+      <button type="button" id="btnAddPlayer" class="save-player-btn">Registrar</button>
+
       </form>
     </div>
     <div id="playersTableContainer">
@@ -82,15 +95,16 @@ include "conexion.php";
     <!-- Tabla scrollable -->
     <div class="table-wrap" id="monthlyTableContainer">
       <div class="loading">Cargando planilla mensual...</div>
+      <button class="btn-delete-player" data-id="<?= $p['id'] ?>">🗑️</button>
     </div>
 
     <!-- Observaciones -->
     <div class="gastos-block" id="gastosWrapper">
-      <h3>GASTOS Y OBSERVACIONES DEL MES</h3>
+      <h3>Gastos y Observaciones Del Mes</h3>
       <textarea id="obsMes" style="width:100%;min-height:120px;padding:8px;border:1px solid #ddd;"></textarea>
-      <div style="margin-top:8px;text-align:right">
-        <button id="saveObsBtn" class="btn">Guardar Observaciones</button>
-      </div>
+     
+        <button id="saveObsBtn" class="guardar-observaciones">Guardar Observaciones</button>
+
     </div>
   </section>
 
@@ -105,11 +119,11 @@ include "conexion.php";
 
     <div class="otros-aportes-card">
       <h4>Agregar Otro Aporte</h4>
-      <label for="selectPlayerOtro">Aportante</label>
+      <label for="selectPlayerOtro">¿Quién va a Aporta?</label>
       <select id="selectPlayerOtros"></select>
-      <label for="otroTipo"> Tipo</label>
+      <label for="otroTipo"> Tipo de Aporte</label>
       <input id="otroTipo" type="text" placeholder=" Ejemplo: Balón)" />
-      <label for="otroValor"> Valor Aportado</label>
+      <label for="otroValor"> Valor a Aportar</label>
       <input id="otroValor" type="number" placeholder="$" />
       <button id="btnAddOtro" class="otro-aporte">Agregar</button>
     </div>
@@ -128,8 +142,8 @@ include "conexion.php";
 <script>window.API_BASE = "backend"; window.isAdmin = <?php echo isset($_SESSION['is_admin'])? "true":"false"; ?>;</script>
 
 <!-- MAIN JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="assets/js/main.js"></script>
-
 
 <!-- SCRIPT PERSONALIZADO PARA TABLA Y OBSERVACIONES -->
 
