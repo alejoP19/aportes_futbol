@@ -27,9 +27,9 @@ include "conexion.php";
     Ver Aportantes
   </button>
 
-    <button id="btnLogout"  class="logout-button">Cerrar sesión</button>
-
-
+  <button id="btnLogout"  class="logout-button">   
+  Cerrar sesión 
+  </button>
 
   <!-- TÍTULO -->
   <div class="title">
@@ -39,9 +39,9 @@ include "conexion.php";
 
   <!-- SELECTS FECHA -->
   <div class="date-selectors">
-    <div class="year">
+ 
       <label>Año</label>
-      <select id="yearSelect">
+      <select id="yearSelect" class="year">
         <?php
         $year = date('Y');
         for($i = $year; $i >= $year - 5; $i--) {
@@ -49,28 +49,25 @@ include "conexion.php";
         }
         ?>
       </select>
-    </div>
-    <div class="month">
+ 
       <label>Mes</label>
+    <select id="monthSelect" class="month">
+            <?php
+            $months = [
+              1=>'Enero',2=>'Febrero',3=>'Marzo',4=>'Abril',5=>'Mayo',6=>'Junio',
+              7=>'Julio',8=>'Agosto',9=>'Septiembre',10=>'Octubre',11=>'Noviembre',12=>'Diciembre'
+            ];
 
-      <select id="monthSelect">
-  <?php
-  $months = [
-    1=>'Enero',2=>'Febrero',3=>'Marzo',4=>'Abril',5=>'Mayo',6=>'Junio',
-    7=>'Julio',8=>'Agosto',9=>'Septiembre',10=>'Octubre',11=>'Noviembre',12=>'Diciembre'
-  ];
+            $currentMonth = date('n'); // mes actual en número
 
-  $currentMonth = date('n'); // mes actual en número
-
-  foreach($months as $k=>$m){
-      $sel = ($k == $currentMonth) ? " selected" : "";
-      echo "<option value='$k'$sel>$m</option>";
-  }
-  ?>
-</select>
-    </div>
+            foreach($months as $k=>$m){
+                $sel = ($k == $currentMonth) ? " selected" : "";
+                echo "<option value='$k'$sel>$m</option>";
+            }
+            ?>
+      </select>
+ 
   </div>
-
 </header>
 
 <main class="container">

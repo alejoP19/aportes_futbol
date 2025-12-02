@@ -37,7 +37,7 @@ grid-template-areas:
 "title"
 "btn";
 gap: 15px;
-padding: 22px 15px;
+padding: 22px 15px 50px 15px;
 margin: 1px 1px;
 background: var(--topbar-bg);
 border-bottom: 1px solid var(--border);
@@ -147,9 +147,10 @@ border: none;
 .date-selectors { 
 grid-area: month; 
 display:inline-flex; 
-justify-self:center; 
+justify-self:center;
+align-items: center;
 margin-top:-6%; 
-gap:0px;  
+gap:10px;  
 }
 .year {
 grid-area: year; 
@@ -158,14 +159,14 @@ grid-area: year;
 .month { 
 grid-area: month;
 }
-.year label, .month label { 
+.date-selectors label, .date-selectors label { 
 color:white; 
 font-weight:lighter; 
-text-shadow: -1px 1px 1px rgba(0,0,0,0.7); 
+text-shadow: -1px 1px 1px rgba(0,0,0,0.7), -1px 1px 1px rgba(0,0,0,0.7);
+ 
 }
 select {
-width:80%; 
-padding:6px; 
+padding:6px 10px; 
 border:1px solid #aaa; 
 border-radius:8px; 
 }
@@ -198,21 +199,9 @@ justify-self: center;
 width: 0;
 opacity: 0;
 pointer-events: none;
-transition: all 0.3s ease;
+transition: all 1s ease;
 }
-/* Tabla expandida */
-.middle-panel.expanded {
-display: block !important;
-width: 100%;
-height: auto; /* altura dinámica */
-max-height: calc(100vh - 100px); /* 100px: espacio aproximado para header */
-overflow-y: auto;
-overflow-x: auto;
-padding: 15px;
-background: #f0f0f0;
-border-radius: 8px;
-margin-top: 100% !important;
-}
+
 
 /* Móvil */
 @media (max-width: 991px) {
@@ -402,14 +391,26 @@ width: auto;
 border-collapse: collapse; 
 }
 .middle-panel { overflow-x: hidden;
-transition: all 0.3s ease; 
+transition: all 1s; 
 }
+/* Tabla expandida */
+/* .middle-panel .expanded {
+display: block !important;
+width: 100%;
+height: auto; 
+max-height: calc(100vh - 100px); 
+overflow-y: auto;
+overflow-x: auto;
+padding: 15px;
+background: #858585;
+border-radius: 8px;
 
+} */
 /* CLASE NUEVA: tabla expandida al presionar boton */
 .middle-panel.expanded {
 display: block !important;
 position: absolute;
-top: 100px; /* debajo del header */
+top: 25%; /* debajo del header */
 left: 0;
 width: 100vw;
 max-width: 100%;
@@ -672,8 +673,8 @@ grid-template-areas: "brand btn title selects";
 grid-template-columns: auto auto 1fr auto;
 align-items: center; 
 gap: 20px; 
-padding: 30px 30px;
-min-height: 80px;
+padding: 20px 30px;
+max-height: fit-content;
   
 
 }
@@ -692,50 +693,53 @@ justify-content:flex-start;
   }
 
 .logout-button {
-position: relative;
+  
+display: flex;
 justify-self: flex-end;
-top: 3%;
-width: 10%;
-right: 1%;
-padding: 5px 7px;
-  z-index: 10;  /* para asegurarnos que esté arriba */
+top:50%;
+width: 100%;
+right: 10%;
+padding: 3px 5px;
+z-index: 10;  /* para asegurarnos que esté arriba */
 
 }
 .logout-button:hover {
-background-color: rgba(241, 241, 241, 0.966);
-outline:1px solid rgba(145, 145, 145, 0.87); 
-color: rgb(255,255,255);
-text-shadow: -1px 1px 1px #000000, -1px 1px 1px #000000;
-box-shadow: 0 0 20px rgba(230,241,255,1);
-border-radius: 25px;
-padding: 8px 19px;
-border: none;
+padding: 4px 6px;
+color: #000;
+text-shadow: -1px 1px 1px #ffffff,  -1px 1px 1px #ffffff;
 }
 .title { 
 grid-area: title; 
-position: absolute;
 display:flex; 
 flex-direction: column;
 justify-self: center;
 width: 100%;
-margin-right: 12%;
+margin-right: 2%;
+
 }
 .date-selectors { 
 grid-area: selects; 
-justify-self:flex-end;
-position: absolute; 
+position: absolute;
 display:flex;
- gap:0px; 
+justify-self:flex-end;
 align-items:center;
-margin-top:5%; 
-right: 1%;
+margin-top: -4%;
+
 }
-.logo { width: 80px; }
+
+.date-selectors label, .date-selectors label { 
+color:white; 
+font-weight:lighter; 
+text-shadow: -1px 1px 1px rgba(0,0,0,0.7); 
+}
+select{
+    padding: 3px;
+}
+.logo { 
+    width: 80px; 
+}
 .title h1 { 
 font-size: 40px;
-}
-.title h1,.subtitle { 
-margin-left: 20%;
 }
 .subtitle { 
 margin-top: 1%;
@@ -747,17 +751,9 @@ padding: 15px;
 }
 /* CLASE NUEVA: tabla expandida al presionar boton */
 .middle-panel.expanded {
-
 position: absolute;
-top:-190%; /* debajo del header */
+top:22%; /* debajo del header */
 left: 0;
-width: 100vw;
-max-width: 100%;
-z-index: 999;
-background: #f1f1f1f8;
-padding: 15px;
-border-radius: 0;
-box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 .container.panel-collapsed { 
 grid-template-columns: 1fr var(--aside-width) !important;
