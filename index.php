@@ -27,6 +27,10 @@ include "conexion.php";
     Ver Aportantes
   </button>
 
+    <button id="btnLogout"  class="logout-button">Cerrar sesión</button>
+
+
+
   <!-- TÍTULO -->
   <div class="title">
     <h1>Aportes</h1>
@@ -112,9 +116,10 @@ include "conexion.php";
   <aside class="right-panel">
     <div class="totals-card">
       <h3>Totales (COP)</h3>
-      <div>Hoy: <strong id="dailyTotal">0</strong></div>
-      <div>Mes: <strong id="monthlyTotal">0</strong></div>
-      <div>Año: <strong id="yearlyTotal">0</strong></div>
+      <div>Mes: <strong id="tMes">0</strong></div>
+      <div>Año: <strong id="tAnio">0</strong></div>
+      <div>Otros Aportes: <strong id="tOtros">0</strong></div>
+      <div > <strong id="tDia">0</strong></div>
     </div>
 
     <div class="otros-aportes-card">

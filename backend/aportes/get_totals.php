@@ -15,6 +15,7 @@ $month_total = $conexion->query("SELECT IFNULL(SUM(aporte_principal),0) as s FRO
 // total otros aportes mes
 $otros_total = $conexion->query("SELECT IFNULL(SUM(valor),0) as s FROM otros_aportes WHERE mes = $mes AND anio = $anio")->fetch_assoc()['s'];
 
+// total mes incluyendo otros aportes
 $month_total_all = $month_total + $otros_total;
 
 // total año
@@ -23,8 +24,10 @@ $otros_year = $conexion->query("SELECT IFNULL(SUM(valor),0) as s FROM otros_apor
 $year_total_all = $year_total + $otros_year;
 
 echo json_encode([
-    'ok'=>true,
-    'today'=>intval($today),
-    'month_total'=>intval($month_total_all),
-    'year_total'=>intval($year_total_all)
+    'ok' => true,
+    'today' => intval($today),
+    'month_total' => intval($month_total_all),
+    'year_total' => intval($year_total_all),
+    'otros_mes' => intval($otros_total),   // <-- nuevo
+    'otros_anio' => intval($otros_year)    // <-- nuevo
 ]);

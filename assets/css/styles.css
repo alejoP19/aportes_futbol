@@ -115,10 +115,39 @@ padding: 8px 19px;
 border: none;
 }
 
+.logout-button {
+display: flex;
+position: relative;
+justify-self: flex-start;
+width: 38%;
+margin-bottom:10%;
+justify-content: center;
+padding: 8px 8px;
+border: 1px solid rgb(184, 184, 184);
+background-color: #757575f6;
+color: rgba(255, 255, 255, 0.888);
+text-shadow: -1px 1px 1px #000000;
+font-weight: lighter;
+border-radius: 10px;
+outline: 0;
+transition: background-color 0.5s, border-radius 0.5s, outline 0.5s;
+font-size: 16px;
+}
+.logout-button:hover {
+background-color: rgba(241, 241, 241, 0.966);
+outline:1px solid rgba(145, 145, 145, 0.87); 
+color: rgb(255,255,255);
+text-shadow: -1px 1px 1px #000000, -1px 1px 1px #000000;
+box-shadow: 0 0 20px rgba(230,241,255,1);
+border-radius: 25px;
+padding: 7px 7px;
+border: none;
+}
+
 .date-selectors { 
 grid-area: month; 
 display:inline-flex; 
-justify-self:flex-start; 
+justify-self:center; 
 margin-top:-6%; 
 gap:0px;  
 }
@@ -182,6 +211,7 @@ overflow-x: auto;
 padding: 15px;
 background: #f0f0f0;
 border-radius: 8px;
+margin-top: 100% !important;
 }
 
 /* Móvil */
@@ -191,13 +221,6 @@ max-height: calc(100vh - 140px); /* dejar espacio para header y botón */
 margin-top: 85%;
 }
 
-.toggle-left-panel {
-position: relative;
-top: 0;
-right: 0;
-margin-bottom: 10px;
-z-index: auto;
-}
 }
 
 /* =====================================================
@@ -395,7 +418,6 @@ background: #f1f1f1f8;
 padding: 15px;
 border-radius: 0;
 box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-margin-top: 80%;
 }
 .month-header{ 
 color: #f1c500;
@@ -651,36 +673,62 @@ grid-template-columns: auto auto 1fr auto;
 align-items: center; 
 gap: 20px; 
 padding: 30px 30px;
-min-height: 18dvh;
+min-height: 80px;
+  
 
 }
 .brand { 
 grid-area: brand; 
 justify-content:flex-start; 
 }
-.toggle-left-panel {
-position:  absolute !important;
-margin-left: 11%;
-grid-area: btn; 
-position: static; 
-bottom: auto; left: auto; 
-width: auto; 
-justify-self:flex-start;
+ .toggle-left-panel {
+    position: relative;  /* dejar que respete grid */
+    justify-self: center;
+    margin: 0;
+    bottom: auto;
+    left: auto;
+    width: auto;
+    z-index: 10;  /* para asegurarnos que esté arriba */
+  }
 
+.logout-button {
+position: relative;
+justify-self: flex-end;
+top: 3%;
+width: 10%;
+right: 1%;
+padding: 5px 7px;
+  z-index: 10;  /* para asegurarnos que esté arriba */
+
+}
+.logout-button:hover {
+background-color: rgba(241, 241, 241, 0.966);
+outline:1px solid rgba(145, 145, 145, 0.87); 
+color: rgb(255,255,255);
+text-shadow: -1px 1px 1px #000000, -1px 1px 1px #000000;
+box-shadow: 0 0 20px rgba(230,241,255,1);
+border-radius: 25px;
+padding: 8px 19px;
+border: none;
 }
 .title { 
 grid-area: title; 
-position: static;
+position: absolute;
 display:flex; 
-flex-direction:column; 
-align-items:center; 
+flex-direction: column;
+justify-self: center;
+width: 100%;
+margin-right: 12%;
 }
 .date-selectors { 
 grid-area: selects; 
-justify-self:flex-end; 
-display:flex; gap:10px; 
+justify-self:flex-end;
+position: absolute; 
+display:flex;
+ gap:0px; 
 align-items:center;
-margin-top:0; 
+margin-top:5%; 
+right: 1%;
 }
 .logo { width: 80px; }
 .title h1 { 
@@ -697,9 +745,19 @@ font-size: 20px;
 grid-template-columns: 300px 1fr var(--aside-width); 
 padding: 15px;
 }
-/* CLASE NUEVA: tabla expandida al presionar boton  */
+/* CLASE NUEVA: tabla expandida al presionar boton */
 .middle-panel.expanded {
-margin-top: 4.2%;
+
+position: absolute;
+top:-190%; /* debajo del header */
+left: 0;
+width: 100vw;
+max-width: 100%;
+z-index: 999;
+background: #f1f1f1f8;
+padding: 15px;
+border-radius: 0;
+box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 .container.panel-collapsed { 
 grid-template-columns: 1fr var(--aside-width) !important;
@@ -794,4 +852,24 @@ font-size:17px;
 .container {
 grid-template-columns: 320px 1fr var(--aside-width);
 }
+}
+
+
+
+/* Jugadores eliminados */
+.planilla tbody tr.eliminado {
+    background-color: #fc8e97 !important;  /* rojo suave */
+    color: #000000 !important;             /* texto en rojo oscuro */
+}
+
+/* Evitar que la zebra afecte filas eliminadas */
+.planilla tbody tr.eliminado:nth-child(odd),
+.planilla tbody tr.eliminado:nth-child(even) {
+    background-color: #f59ba3 !important;
+}
+
+/* Evitar hover sobre eliminados */
+.planilla tbody tr.eliminado:hover {
+    background-color: #ff747f !important;
+    cursor: default;
 }

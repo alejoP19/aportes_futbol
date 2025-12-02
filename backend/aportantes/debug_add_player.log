@@ -9,3 +9,30 @@ Array
 )
 INSERT OK. ID: 14
 
+=== REQUEST at 2025-12-02T02:20:43+01:00 ===
+RAW BODY:
+{"nombre":"jose canseco","telefono":"3112456789"}
+USING JSON
+Array
+(
+    [nombre] => jose canseco
+    [telefono] => 3112456789
+)
+=== REQUEST at 2025-12-02T02:22:14+01:00 ===
+RAW BODY:
+{"nombre":"jose canseco","telefono":"3256745678"}
+USING JSON
+Array
+(
+    [nombre] => jose canseco
+    [telefono] => 3256745678
+)
+=== REQUEST at 2025-12-02T02:22:25+01:00 ===
+RAW BODY:
+{"nombre":"jose canseco","telefono":"2323424552425"}
+USING JSON
+Array
+(
+    [nombre] => jose canseco
+    [telefono] => 2323424552425
+)

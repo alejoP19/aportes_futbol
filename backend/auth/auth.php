@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 
 function esAdmin() {
@@ -8,6 +9,6 @@ function esAdmin() {
 function protegerAdmin() {
     if (!esAdmin()) {
         http_response_code(403);
-        die("No autorizado");
+        die("Usuario No autorizado, No es Administrador");
     }
 }

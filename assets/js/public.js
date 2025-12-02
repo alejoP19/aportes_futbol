@@ -128,10 +128,13 @@ function renderTablaPublic(data) {
 }
 
 function renderTotales(t) {
-    document.getElementById("tDia").textContent = t.today ? formatMoney(t.today) : "";
     document.getElementById("tMes").textContent = t.month_total ? formatMoney(t.month_total) : "";
     document.getElementById("tAnio").textContent = t.year_total ? formatMoney(t.year_total) : "";
+    document.getElementById("tOtros").textContent = t.otros_mes_total ? formatMoney(t.otros_mes_total) : "";
 }
+
+
+
 
 function renderObservaciones(text) {
     const el = document.getElementById("observaciones");

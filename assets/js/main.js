@@ -38,25 +38,16 @@ async function loadPlayersList() {
     }
 }
 
-
 async function agregarJugador() {
     const nombre = document.getElementById("playerName").value.trim();
     const telefono = document.getElementById("playerPhone").value.trim();
 
     if (nombre === "") {
-        Swal.fire({
-            icon: 'info',
-            title: 'Nombre Requerido',
-            text: 'El Nombre es Obligatorio'
-        });
+        Swal.fire({ icon: 'info', title: 'Nombre Requerido', text: 'El Nombre es Obligatorio' });
         return;
     }
     if (telefono === "") {
-        Swal.fire({
-            icon: 'info',
-            title: 'Telefono Requerido',
-            text: 'El Telefono es Obligatorio'
-        });
+        Swal.fire({ icon: 'info', title: 'Telefono Requerido', text: 'El Telefono es Obligatorio' });
         return;
     }
 
@@ -64,32 +55,17 @@ async function agregarJugador() {
     const resp = await postJSON(`${API}/aportantes/add_player.php`, data);
 
     if (resp && resp.status === "ok") {
-
-        Swal.fire({
-            icon: 'success',
-            title: '¡Excelente!',
-            text: 'Nuevo Aportante Registrado Correctamente',
-            showConfirmButton: false,
-            timer: 1800
-        });
+        Swal.fire({ icon: 'success', title: '¡Excelente!', text: 'Nuevo Aportante Registrado', showConfirmButton: false, timer: 1800 });
 
         document.getElementById("playerName").value = "";
         document.getElementById("playerPhone").value = "";
 
-        await loadPlayersList();   // refresca select
-        await refreshSheet();      // refresca tabla
-
-        // 👉 Abre la tabla automáticamente
-        const toggleBtn = document.querySelector('.toggle-left-panel');
-        if (toggleBtn) toggleBtn.click();
+        await loadPlayersList();
+        await refreshSheet();
+    } else if (resp && resp.msg === "Nombre de jugador ya existe") {
+        Swal.fire({ icon: 'info',title: '¡Atención!', text: 'Nombre de Aportante ya Registrado, Elige Otro' });
     } else {
-
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Error guardando el aportante'
-        });
-
+        Swal.fire({ icon: 'error', title: 'Error', text: 'Error al guardar el aportante' });
     }
 }
 // ----------- TABLA Y APORTE -----------------
@@ -212,10 +188,26 @@ async function loadTotals(mes, anio) {
     const res = await fetch(`${API}/aportes/get_totals.php?mes=${mes}&anio=${anio}`);
     const j = await res.json();
     if (!j) return;
-    document.getElementById('dailyTotal').innerText = j.today ? j.today.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }) : '';
-    document.getElementById('monthlyTotal').innerText = j.month_total ? j.month_total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }) : '';
-    document.getElementById('yearlyTotal').innerText = j.year_total ? j.year_total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }) : '';
+
+    // Ajustado a los IDs de tu HTML de administrador
+    document.getElementById('tDia').innerText = j.today
+        ? j.today.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
+        : '';
+    document.getElementById('tMes').innerText = j.month_total
+        ? j.month_total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
+        : '';
+    document.getElementById('tAnio').innerText = j.year_total
+        ? j.year_total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
+        : '';
+
+        // otros aportes
+document.getElementById('tOtros').innerText = j.otros_mes
+    ? j.otros_mes.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
+    : '';
+
+        
 }
+
 
 // ----------- REFRESH COMPLETA -----------------
 async function refreshSheet() {
@@ -334,3 +326,9 @@ async function eliminarJugador(id) {
 
     });
 }
+
+
+document.getElementById("btnLogout").addEventListener("click", function() {
+    // Redirige al logout.php para destruir la sesión
+    window.location = "backend/auth/logout.php";
+});

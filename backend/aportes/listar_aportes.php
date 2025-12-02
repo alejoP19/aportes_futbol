@@ -1,16 +1,8 @@
 <?php
-// backend/listar_aportes.php
 include "../../conexion.php";
 header("Content-Type: text/html; charset=utf-8");
 
-// include "../auth/auth.php";
-
-// if(esAdministrador()) {
-//     include "backend/aportes/listar_aportes.php"; // admin ve todo
-// } else {
-//     include "backend/reportes/reporte_mes.php"; // usuario solo ve reportes y tablas
-// }
-
+// --- Obtener mes y año ---
 $mes = isset($_GET['mes']) ? intval($_GET['mes']) : intval(date('n'));
 $anio = isset($_GET['anio']) ? intval($_GET['anio']) : intval(date('Y'));
 
@@ -23,18 +15,18 @@ for ($d = 1; $d <= $days_count; $d++) {
     if ($w == 3 || $w == 6) $days[] = $d;
 }
 
-// obtener jugadores
-$jug_res = $conexion->query("SELECT id, nombre FROM jugadores WHERE activo = 1 ORDER BY nombre ASC");
+// --- obtener todos los jugadores (activos y eliminados)
+$jug_res = $conexion->query("SELECT id, nombre, activo FROM jugadores ORDER BY nombre ASC");
 $jugadores = [];
 while ($r = $jug_res->fetch_assoc()) $jugadores[] = $r;
 
-// helpers
+// --- helpers
 function get_aporte($conexion, $id_jugador, $fecha) {
-    $stmt = $conexion->prepare("SELECT aporte_principal FROM aportes WHERE id_jugador=? AND fecha=?");
+    $stmt = $conexion->prepare("SELECT SUM(aporte_principal) AS total FROM aportes WHERE id_jugador=? AND fecha=?");
     $stmt->bind_param("is", $id_jugador, $fecha);
     $stmt->execute();
     $res = $stmt->get_result()->fetch_assoc();
-    return $res ? intval($res['aporte_principal']) : 0;
+    return $res ? intval($res['total']) : 0;
 }
 
 function get_otros($conexion, $id_jugador, $mes, $anio) {
@@ -47,7 +39,7 @@ function get_otros($conexion, $id_jugador, $mes, $anio) {
     return $list;
 }
 
-// observaciones
+// --- observaciones
 $stmt = $conexion->prepare("SELECT texto FROM gastos_observaciones WHERE mes=? AND anio=? LIMIT 1");
 $stmt->bind_param("ii", $mes, $anio);
 $stmt->execute();
@@ -74,23 +66,20 @@ echo "<th colspan='{$colspan_days}'>Días de los juegos</th>";
 
 echo "<th colspan='2'>Otros aportes</th>";
 echo "<th>Total Mes</th>";
-echo "<th>Acciones</th>";   // ⭐ NUEVA COLUMNA
+echo "<th>Acciones</th>";
 echo "</tr>";
 
 echo "<tr>";
 echo "<th></th>";
 
-foreach ($days as $d) {
-    echo "<th>{$d}</th>";
-}
+foreach ($days as $d) echo "<th>{$d}</th>";
 
 echo "<th>Fecha Especial</th>";
 echo "<th>Tipo</th>";
 echo "<th>Valor</th>";
 echo "<th>Por Jugador</th>";
-echo "<th></th>";  // acciones
+echo "<th></th>"; 
 echo "</tr>";
-
 echo "</thead>";
 
 /* ---------- TBODY ---------- */
@@ -98,68 +87,50 @@ echo "<tbody>";
 
 $totales_por_dia = array_fill(0, count($days), 0);
 $total_otros_global = 0;
+$totales_mes = 0; // Total mes incluyendo eliminados
 
 foreach ($jugadores as $jug) {
-
     $total_jugador_mes = 0;
+    $row_class = $jug['activo'] ? '' : 'eliminado'; // clase para jugadores eliminados
 
-    echo "<tr data-player='{$jug['id']}'>";
-
+    echo "<tr data-player='{$jug['id']}' class='{$row_class}'>";
     echo "<td>{$jug['nombre']}</td>";
 
     foreach ($days as $idx => $d) {
-
         $fecha = sprintf("%04d-%02d-%02d", $anio, $mes, $d);
         $aporte = get_aporte($conexion, $jug['id'], $fecha);
-
         $total_jugador_mes += $aporte;
         $totales_por_dia[$idx] += $aporte;
-
-        echo "<td>
-                <input class='cell-aporte' 
-                       data-player='{$jug['id']}' 
-                       data-fecha='{$fecha}' 
-                       type='number' 
-                       placeholder='$'
-                       value='" . ($aporte > 0 ? $aporte : "") . "'>
-              </td>";
+        echo "<td><input class='cell-aporte' data-player='{$jug['id']}' data-fecha='{$fecha}' type='number' placeholder='$' value='" . ($aporte>0?$aporte:"") . "'></td>";
     }
 
+    // Fecha especial
     $fechaEspecial = sprintf("%04d-%02d-28", $anio, $mes);
     $aporteEspecial = get_aporte($conexion, $jug['id'], $fechaEspecial);
     $total_jugador_mes += $aporteEspecial;
+    echo "<td><input class='cell-aporte' data-player='{$jug['id']}' data-fecha='{$fechaEspecial}' type='number' placeholder='$' value='" . ($aporteEspecial>0?$aporteEspecial:"") . "'></td>";
 
-    echo "<td>
-            <input class='cell-aporte' 
-                   data-player='{$jug['id']}' 
-                   data-fecha='{$fechaEspecial}' 
-                   type='number' 
-                   placeholder='$'
-                   value='" . ($aporteEspecial > 0 ? $aporteEspecial : "") . "'>
-          </td>";
-
+    // Otros aportes
     $otros = get_otros($conexion, $jug['id'], $mes, $anio);
     $tipos = [];
     $valor_otros = 0;
-
     foreach ($otros as $o) {
-        $tipos[] = htmlspecialchars($o['tipo']) . " (" . number_format($o['valor'], 0, ',', '.') . ")";
+        $tipos[] = htmlspecialchars($o['tipo']) . " (" . number_format($o['valor'],0,',','.') . ")";
         $valor_otros += intval($o['valor']);
     }
-
     $total_jugador_mes += $valor_otros;
     $total_otros_global += $valor_otros;
 
-    echo "<td>" . (empty($tipos) ? '' : implode('<br>', $tipos)) . "</td>";
-    echo "<td>" . ($valor_otros ? number_format($valor_otros, 0, ',', '.') : '') . "</td>";
-    echo "<td><strong>" . number_format($total_jugador_mes, 0, ',', '.') . "</strong></td>";
+    echo "<td>" . (empty($tipos)?'':implode('<br>',$tipos)) . "</td>";
+    echo "<td>" . ($valor_otros?number_format($valor_otros,0,',','.'):'') . "</td>";
+    echo "<td><strong>" . number_format($total_jugador_mes,0,',','.') . "</strong></td>";
 
-    /* ⭐ COLUMNA ACCIONES */
-    echo "<td class='acciones'>
-            <button class='btn-del-player' data-id='{$jug['id']}'>🗑️</button>
-          </td>";
+    // Acciones
+    echo "<td class='acciones'><button class='btn-del-player' data-id='{$jug['id']}'>🗑️</button></td>";
 
     echo "</tr>";
+
+    $totales_mes += $total_jugador_mes; // sumamos al total global
 }
 
 echo "</tbody>";
@@ -169,29 +140,31 @@ echo "<tfoot>";
 echo "<tr>";
 echo "<td><strong>TOTAL DÍA</strong></td>";
 
+// Totales por días normales
 foreach ($totales_por_dia as $td) {
-    echo "<td><strong>" . number_format($td, 0, ',', '.') . "</strong></td>";
+    echo "<td><strong>" . number_format($td,0,',','.') . "</strong></td>";
 }
 
-$fechaEspecial = sprintf('%04d-%02d-28', $anio, $mes);
-$totEspecialRes = $conexion->query("
-    SELECT SUM(aporte_principal) AS t 
-    FROM aportes 
-    WHERE fecha = '{$fechaEspecial}'
-");
-$totEspecial = ($totEspecialRes && $totEspecialRes->num_rows) 
-    ? intval($totEspecialRes->fetch_assoc()['t']) 
-    : 0;
+// Fecha especial: totalizar
+$fechaEspecial = sprintf("%04d-%02d-28", $anio, $mes);
+$totEspecialRes = $conexion->query("SELECT SUM(aporte_principal) AS t FROM aportes WHERE fecha='{$fechaEspecial}'");
+$totEspecial = ($totEspecialRes && $totEspecialRes->num_rows) ? intval($totEspecialRes->fetch_assoc()['t']) : 0;
 
-echo "<td><strong>" . number_format($totEspecial, 0, ',', '.') . "</strong></td>";
+// Mostrar total de la fecha especial
+echo "<td><strong>" . number_format($totEspecial,0,',','.') . "</strong></td>";
 
+// Totales de otros aportes
 echo "<td><strong>TOTAL OTROS</strong></td>";
-echo "<td><strong>" . number_format($total_otros_global, 0, ',', '.') . "</strong></td>";
+echo "<td><strong>" . number_format($total_otros_global,0,',','.') . "</strong></td>";
 
-echo "<td></td>"; // Total Mes
-echo "<td></td>"; // ⭐ Acciones
+// Total mes incluyendo eliminados (ahora sumando totales por día + fecha especial + otros aportes)
+$totales_mes_actualizado = array_sum($totales_por_dia) + $totEspecial + $total_otros_global;
+echo "<td><strong>" . number_format($totales_mes_actualizado,0,',','.') . "</strong></td>";
+
+echo "<td></td>"; 
 echo "</tr>";
 echo "</tfoot>";
+
 
 echo "</table>";
 ?>
