@@ -192,7 +192,21 @@ justify-self: center;
 }
 
 /* tabla oculta por defecto */
-.middle-panel { display: none; }
+/* -----será por esta linea que hay conflictos????????? */
+
+.middle-panel {
+  opacity: 0;
+  transform: translateY(-20px);
+  pointer-events: none; /* desactiva interacción mientras está oculto */
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.middle-panel.expanded {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto; /* habilita interacción */
+}
+
 
 /* panel izquierdo colapsado */
 .container.panel-collapsed .left-panel {
@@ -393,19 +407,7 @@ border-collapse: collapse;
 .middle-panel { overflow-x: hidden;
 transition: all 1s; 
 }
-/* Tabla expandida */
-/* .middle-panel .expanded {
-display: block !important;
-width: 100%;
-height: auto; 
-max-height: calc(100vh - 100px); 
-overflow-y: auto;
-overflow-x: auto;
-padding: 15px;
-background: #858585;
-border-radius: 8px;
 
-} */
 /* CLASE NUEVA: tabla expandida al presionar boton */
 .middle-panel.expanded {
 display: block !important;
@@ -433,9 +435,7 @@ margin-left: 4%;
 padding: 25px;
 
 }
-/* thead tr th{
-  padding: 8px 8px;
-} */
+
 thead tr:first-child{
 background-color: #3a6352;
 color: #ffffff;
@@ -869,3 +869,9 @@ grid-template-columns: 320px 1fr var(--aside-width);
     background-color: #ff747f !important;
     cursor: default;
 }
+
+
+
+
+
+

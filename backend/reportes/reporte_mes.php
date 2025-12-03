@@ -41,6 +41,10 @@ while ($r = $jug_res->fetch_assoc()) {
     $jugadores[] = $r;
 }
 
+/*  >>>>>>>>>>>>>>>>>>  ESTA LÍNEA ERA LA QUE FALTABA <<<<<<<<<<<<<<<<<<< */
+$totalJugadores = count($jugadores);
+/*  >>>>>>>>>>>>>>>>>>  SIN ESTO DABA ERROR <<<<<<<<<<<<<<<<<<< */
+
 // --- FUNCIONES NECESARIAS ---
 function get_aporte($conexion, $id_jugador, $fecha) {
     $stmt = $conexion->prepare("SELECT aporte_principal FROM aportes WHERE id_jugador=? AND fecha=?");
@@ -96,7 +100,15 @@ foreach ($days as $d) {
     <meta charset="utf-8">
     <title>Reporte mensual - <?= $mesName . " " . $anio ?></title>
 </head>
-<body>
+
+<?php
+$clase = "";
+if ($totalJugadores > 30) $clase = "many-rows";
+if ($totalJugadores > 40) $clase = "too-many-rows";
+?>
+
+<body class="<?= $clase ?>">
+
 <br><br>
 
 <div class="section-title">
@@ -133,7 +145,7 @@ foreach ($jugadores as $jug) :
         echo "<td class='right-'>" . ($ap ? number_format($ap,0,',','.') : "") . "</td>";
     }
 
-    // --- FECHA ESPECIAL (días que NO son miércoles ni sábado) ---
+    // --- FECHA ESPECIAL (NO miércoles ni sábado) ---
     $totalEspecial = 0;
     for ($d = 1; $d <= $days_count; $d++) {
         $w = date('N', strtotime("$anio-$mes-$d"));
@@ -168,8 +180,9 @@ foreach ($jugadores as $jug) :
     <?php foreach ($days as $d): ?>
         <td class="right"><?= number_format($totalesDias[$d],0,',','.') ?></td>
     <?php endforeach; ?>
+
     <?php
-    // Total de fecha especial por todos los jugadores
+    // Total de fecha especial por todos
     $totalEspecialMes = 0;
     for ($d = 1; $d <= $days_count; $d++) {
         $w = date('N', strtotime("$anio-$mes-$d"));
@@ -189,9 +202,13 @@ foreach ($jugadores as $jug) :
 </tr>
 </tbody>
 </table>
+
 <div class="page-break page-spacer"></div>
 
 <div class="section-title"><strong>Otros aportes (resumen)</strong></div>
+
+<!-- resto del archivo SIN CAMBIOS... -->
+
 <table>
     <thead>
         <tr>

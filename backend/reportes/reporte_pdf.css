@@ -119,3 +119,50 @@ tr[style*="color:#999;"] {
 
 
 
+/* ----- BASE NORMAL ----- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+td, th {
+    padding: 3px;
+}
+
+/* ----- SI HAY MUCHOS JUGADORES: REDUCE AUTOMÁTICO ----- */
+body.many-rows table {
+    font-size: 10px;
+    transform: scale(0.92);
+    transform-origin: top left;
+}
+
+body.many-rows td,
+body.many-rows th {
+    padding: 2px;
+}
+
+/* Si aún hay demasiados registros */
+body.too-many-rows table {
+    font-size: 9px;
+    transform: scale(0.85);
+    transform-origin: top left;
+}
+
+/* Evitar filas partidas, siempre */
+tr, td, th {
+    page-break-inside: avoid;
+}
+/* SUBIR TABLA MÁS CERCA DEL ENCABEZADO */
+section, table {
+    margin-top: 10px !important;
+    padding-top: 0 !important;
+}
+
+body.many-rows table,
+body.too-many-rows table {
+    margin-top: 5px !important;
+}
+section {
+    margin-top: 0 !important;
+}

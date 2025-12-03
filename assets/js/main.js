@@ -1,3 +1,5 @@
+console.log("MAIN.JS SE CARGÓ CORRECTAMENTE");
+
 // assets/js/main.js
 const API = "backend";
 let selectedPlayerId = null; // fila seleccionada global
@@ -274,11 +276,76 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // toggle panel izquierdo
-    const toggleBtn = document.querySelector('.toggle-left-panel');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', toggleLeftPanel);
-    }
+    // const toggleBtn = document.querySelector('.toggle-left-panel');
+    // if (toggleBtn) {
+    //     toggleBtn.addEventListener('click', toggleLeftPanel);
+    // }
+// --- MOSTRAR / OCULTAR TABLA APORTANTES ---
+const btnVer = document.getElementById("btnVerAportantes");
+const tabla = document.getElementById("playersTableContainer");
+
+if (btnVer && tabla) {
+    btnVer.addEventListener("click", () => {
+        const middlePanel = document.querySelector('.middle-panel');
+        const isExpanded = middlePanel.classList.toggle("expanded");
+        btnVer.textContent = isExpanded ? "Ocultar Aportantes" : "Ver Aportantes";
+    });
+}
+
+
+
+    
+btnLogout.addEventListener("click", function (e) {
+    e.preventDefault();
+
+    Swal.fire({
+        title: "¿Cerrar tu Sesión?",
+        text: "¡La Sesión de Administrador se Cerrará!",
+        icon: "question",
+        iconColor: "#16cc34ff",
+        showCancelButton: true,
+        confirmButtonColor: "#16cc34ff",
+        cancelButtonColor: "rgba(233, 37, 53, 1)",
+        confirmButtonText: "Sí, Cerrar!",
+        cancelButtonText: "Cancelar"
+    }).then((result) => {
+
+        if (!result.isConfirmed) {
+            Swal.fire({
+                title: "¡Perfecto, Continuemos!",
+                icon: "success",
+                draggable: true
 });
+            return;
+        }
+
+        // 🟢 Mostrar mensaje de despedida (tu estilo)
+        Swal.fire({
+            title: "¡Sesión Cerrada!",
+            text: "¡Te Esperamos Pronto!",
+            icon: "success",
+            iconColor: "#0e9625ff",
+            confirmButtonText: "OK"
+        }).then(() => {
+
+            // 🔥 Llamada real al logout.php
+            fetch('/aportes_futbol/backend/auth/logout.php', {
+                method: 'POST',
+                credentials: 'same-origin'
+            })
+            .then(() => {
+                // 🔁 Redirigir a la página pública
+                window.location.href = "/aportes_futbol/public/index.php";
+            })
+            .catch(() => {
+                window.location.href = "/apportes_futbol/public/index.php";
+            });
+
+        });
+    });
+});
+})
+
 
 
 async function eliminarJugador(id) {
@@ -328,7 +395,3 @@ async function eliminarJugador(id) {
 }
 
 
-document.getElementById("btnLogout").addEventListener("click", function() {
-    // Redirige al logout.php para destruir la sesión
-    window.location = "backend/auth/logout.php";
-});

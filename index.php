@@ -23,13 +23,11 @@ include "conexion.php";
   </div>
 
   <!-- BOTÓN APORTANTES -->
-  <button class="toggle-left-panel">
+  <button class="toggle-left-panel" id="btnVerAportantes">
     Ver Aportantes
   </button>
 
-  <button id="btnLogout"  class="logout-button">   
-  Cerrar sesión 
-  </button>
+<button id="btnLogout" class="logout-button">Cerrar Sesión</button>
 
   <!-- TÍTULO -->
   <div class="title">
@@ -96,7 +94,6 @@ include "conexion.php";
     <!-- Tabla scrollable -->
     <div class="table-wrap" id="monthlyTableContainer">
       <div class="loading">Cargando planilla mensual...</div>
-      <button class="btn-delete-player" data-id="<?= $p['id'] ?>">🗑️</button>
     </div>
 
     <!-- Observaciones -->
@@ -133,9 +130,10 @@ include "conexion.php";
     <div class="notes-card">
       <h4>Ver Reporte Actual Del Mes</h4>
       <div class="actions">
-        <a href="/aportes_futbol/backend/export_pdf.php?mes=<?=$mes?>&anio=<?=$anio?>" target="_blank" class="export-pdf-butt">Generar PDF</a>
+        <a href="#" class="export-pdf-butt">Generar PDF</a>
       </div>
     </div>
+
   </aside>
 
 </main>
@@ -143,8 +141,8 @@ include "conexion.php";
 <!-- VARIABLES GLOBALES -->
 <script>window.API_BASE = "backend"; window.isAdmin = <?php echo isset($_SESSION['is_admin'])? "true":"false"; ?>;</script>
 
-<!-- MAIN JS -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- MAIN JS -->
 <script src="assets/js/main.js"></script>
 
 <!-- SCRIPT PERSONALIZADO PARA TABLA Y OBSERVACIONES -->
