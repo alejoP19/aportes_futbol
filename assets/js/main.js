@@ -129,7 +129,15 @@ function saveObservaciones() {
     const mes = monthSelect.value;
     const anio = yearSelect.value;
     const texto = document.getElementById("obsMes").value;
-    fetch(`${API}/aportes/save_observaciones.php`, {
+    if (texto == '') {
+        Swal.fire({
+  icon: "error",
+  title: "No Hay Observaciónes",
+  text: "Debe Ingresar una Observación!",
+  
+});
+    }else{
+ fetch(`${API}/aportes/save_observaciones.php`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `mes=${mes}&anio=${anio}&texto=${encodeURIComponent(texto)}`
@@ -149,6 +157,8 @@ Swal.fire({
   footer: '<a href="#">Why do I have this issue?</a>'
 });;
         });
+    }
+   
 }
 
 // ----------- OTROS APORTES -----------------
@@ -275,11 +285,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // toggle panel izquierdo
-    // const toggleBtn = document.querySelector('.toggle-left-panel');
-    // if (toggleBtn) {
-    //     toggleBtn.addEventListener('click', toggleLeftPanel);
-    // }
+  
 // --- MOSTRAR / OCULTAR TABLA APORTANTES ---
 const btnVer = document.getElementById("btnVerAportantes");
 const tabla = document.getElementById("playersTableContainer");

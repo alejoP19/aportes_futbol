@@ -166,3 +166,69 @@ $conexion->query("
 ");
 
 echo "Administrador creado correctamente"; -->
+
+
+
+
+
+?php
+// public/public_reportes/export_pdf_publico.php
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+// --- Cargar DOMPDF ---
+$dompdfAutoload = realpath(__DIR__ . "/../../dompdf_2-0-3/dompdf/autoload.inc.php");
+if (!$dompdfAutoload || !file_exists($dompdfAutoload)) {
+    throw new Exception("No se encontró DOMPDF autoload en: $dompdfAutoload");
+}
+require_once $dompdfAutoload;
+
+// --- IMPORTANTE: los use DEBEN IR AQUÍ ---
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
+try {
+
+    // Ejecutar PHP → HTML
+    $htmlFile = realpath(__DIR__ . "/reporte_mes_publico.php");
+    if (!$htmlFile) throw new Exception("No se encontró reporte HTML.");
+    ob_start();
+    include $htmlFile;
+    $htmlContent = ob_get_clean();
+
+    // CSS
+    $cssPath = realpath(__DIR__ . "/../../backend/reportes/reporte_pdf.css");
+    if (!$cssPath) throw new Exception("No se encontró CSS.");
+    $cssContent = file_get_contents($cssPath);
+
+    // Convertir logo a base64
+    $logo = realpath(__DIR__ . "/../../assets/img/reliquias_logo.jpg");
+    if (!$logo) throw new Exception("No se encontró logo.");
+    $info = getimagesize($logo);
+    $mime = $info["mime"];
+    $base64 = base64_encode(file_get_contents($logo));
+    $logoTag = '<img src="data:' . $mime . ';base64,' . $base64 . '" width="120">';
+
+    // Insertar logo
+    $htmlContent = str_replace("{{LOGO}}", $logoTag, $htmlContent);
+
+    // Dompdf options
+    $opts = new Options();
+    $opts->set("isRemoteEnabled", true);
+    $opts->set("isHtml5ParserEnabled", true);
+
+    $dompdf = new Dompdf($opts);
+
+    // HTML final
+    $finalHtml = "<style>$cssContent</style>" . $htmlContent;
+
+    $dompdf->loadHtml($finalHtml);
+    $dompdf->setPaper("letter", "portrait");
+    $dompdf->render();
+    $dompdf->stream("reporte_mes_publico.pdf", ["Attachment" => false]);
+
+} catch (Exception $e) {
+    echo "<h2>Error:</h2>";
+    echo "<pre>" . $e->getMessage() . "</pre>";
+}
+

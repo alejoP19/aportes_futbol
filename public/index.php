@@ -24,8 +24,8 @@
   </div>
 
   <div class="actions-right">
-    <a href="login.html" class="btn-admin">Administrar</a>
-    <button id="btnPDF" class="btn-pdf">Exportar PDF</button>
+    <a href="login.html" class="admin_public_butt">Administrar</a>
+    <a  class="export_public_pdf_butt">Exportar PDF</a>
   </div>
 </header>
 

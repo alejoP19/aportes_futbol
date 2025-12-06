@@ -579,7 +579,8 @@ margin: 0;
 
 /* Firefox */
 input[type="number"] {
--moz-appearance: textfield;
+    appearance: textfield;      /* estándar */
+    -moz-appearance: textfield; /* Firefox */
 }
 
 /* Móvil scroll horizontal */

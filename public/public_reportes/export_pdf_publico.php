@@ -11,10 +11,10 @@ $_GET['mes'] = $mes;
 $_GET['anio'] = $anio;
 
 ob_start();
-include __DIR__ . "/reporte_mes.php";
+include realpath(__DIR__ . "/reporte_mes_publico.php");
 $html = ob_get_clean();
 
-require_once __DIR__ . "/../../dompdf_2-0-3/dompdf/vendor/autoload.php";
+require_once realpath(__DIR__ . "/../../dompdf_2-0-3/dompdf/autoload.inc.php");
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -25,7 +25,7 @@ $options->set("defaultFont", "DejaVu Sans");
 
 $dompdf = new Dompdf($options);
 
-$cssPath = __DIR__ . "/reporte_pdf.css";
+$cssPath =realpath(__DIR__ . "/../../backend/reportes/reporte_pdf.css");
 $css = file_get_contents($cssPath);
 
 $html = "<style>" . $css . "</style>" . $html;
@@ -34,7 +34,7 @@ $dompdf->setPaper("A4", "portrait");
 $dompdf->render();
 
 $canvas = $dompdf->get_canvas();
-$logoPath = __DIR__ . "/../../assets/img/reliquias_logo.jpg";
+$logoPath = realpath(__DIR__ . "/../../assets/img/reliquias_logo.jpg");
 $logoWidth = 80;
 $logoY = 105;
 $meses = [
@@ -44,7 +44,7 @@ $meses = [
 $mesName = $meses[$mes];
 
 if (!file_exists($logoPath)) {
-    $logoPath = __DIR__ . "/../../assets/img/default_logo.png";
+    $logoPath = realpath(__DIR__ . "/../../assets/img/reliquias_logo.jpg");
 }
 
 $canvas->page_script(function($pageNumber, $pageCount, $canvas, $fontMetrics) use ($logoPath, $logoWidth, $logoY, $mesName, $anio) {
