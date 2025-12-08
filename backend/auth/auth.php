@@ -9,6 +9,8 @@ function esAdmin() {
 function protegerAdmin() {
     if (!esAdmin()) {
         http_response_code(403);
-        die("Usuario No autorizado, No es Administrador");
+        header("Location: /APORTES_FUTBOL/backend/auth/acceso_denegado.php");
+exit;
+
     }
 }

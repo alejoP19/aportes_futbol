@@ -91,22 +91,58 @@ async function loadSheet(mes, anio) {
         });
     });
 
-    // Inputs de aporte
-    container.querySelectorAll('.cell-aporte').forEach(input => {
-        input.addEventListener('change', async ev => {
-            const id = ev.target.dataset.player;
-            const fecha = ev.target.dataset.fecha;
-            const valor = parseInt(ev.target.value) || 0;
+   // Inputs de aporte
+container.querySelectorAll('.cell-aporte').forEach(input => {
+    input.addEventListener('change', async ev => {
+    const id = ev.target.dataset.player;
+    const fecha = ev.target.dataset.fecha;
+    const raw = (ev.target.value || "").toString().trim();
 
-            await postJSON(`${API}/aportes/guardar_aporte.php`, { id_jugador: id, fecha, valor });
+    let valorToSend = null;
 
-            ev.target.classList.add('saved');
-            setTimeout(() => ev.target.classList.remove('saved'), 400);
+    if (raw === "") {
+        valorToSend = null;
+    } else {
+        const digits = raw.replace(/[^\d\-]/g, "");
+        valorToSend = parseInt(digits, 10);
+        if (isNaN(valorToSend)) valorToSend = null;
+    }
 
-            // 🔥 Recargar tabla + totales al instante
-            await refreshSheet();
-        });
+    /* --------------------------------------------
+       ⭐ MOSTRAR ESTRELLA INMEDIATA (ANTES DEL REFRESH)
+    ----------------------------------------------*/
+    let wrapper = ev.target.closest(".aporte-wrapper");
+if (wrapper) {
+    let flag = wrapper.querySelector(".saldo-flag");
+    if (flag) {
+
+        if (valorToSend > 2000) {
+            flag.textContent = "★";
+            flag.classList.add("show");   // ← activa animación
+        } else {
+            flag.classList.remove("show"); // ← oculta animación
+            setTimeout(() => flag.textContent = "", 200);
+        }
+
+    }
+}
+
+
+    // Guardar en backend
+    await postJSON(`${API}/aportes/guardar_aporte.php`, { 
+        id_jugador: id, 
+        fecha, 
+        valor: valorToSend 
     });
+
+    ev.target.classList.add('saved');
+    setTimeout(() => ev.target.classList.remove('saved'), 400);
+
+    // Ahora sí refrescamos todo
+    await refreshSheet();
+});
+
+});
     // Botones eliminar
 container.querySelectorAll(".btn-del-player").forEach(btn => {
     btn.addEventListener("click", ev => {
@@ -399,5 +435,6 @@ async function eliminarJugador(id) {
 
     });
 }
+
 
 

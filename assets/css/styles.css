@@ -486,6 +486,50 @@ overflow: hidden; /* redondea las esquinas reales */
 .planilla thead tr:first-child th:last-child {
     padding-right: 25px;
 }
+.aporte-wrapper {
+    position: relative;
+}
+
+.saldo-flag {
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    font-weight: bold;
+    color: #ffcc00;
+    pointer-events: none;
+}
+
+.aporte-wrapper input {
+    padding-left: 22px !important; /* deja espacio a la estrella */
+}
+/* Estrella animada dentro del input */
+.saldo-flag {
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%) scale(0.3);
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffcc00;
+    opacity: 0;
+    pointer-events: none;
+    transition: 
+        opacity 0.35s ease,
+        transform 0.35s cubic-bezier(0.25, 1.3, 0.5, 1);
+}
+
+/* Cuando la estrella debe mostrarse */
+.saldo-flag.show {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+
+/* Espacio dentro del input para que no tape el número */
+.aporte-wrapper input {
+    padding-left: 28px !important;
+}
 
 tbody tr{
 padding: 10%;

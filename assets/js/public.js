@@ -98,7 +98,7 @@ function renderTablaPublic(data) {
     html += `</tbody>`;
 
     // Pie
-    html += `<tfoot><tr><td><strong>TOTAL DÍA</strong></td>`;
+    html += `<tfoot ><tr><td><strong>TOTAL DÍA</strong></td>`;
     const totalsPorDia = Array(dias.length).fill(0);
     let totalEspecial = 0;
     let totalOtros = 0;
@@ -311,3 +311,13 @@ if (tObj && typeof tObj === "object") {
     if (elOtros) elOtros.textContent = totalOtros ? formatMoney(totalOtros) : "0";
     if (elAnio) elAnio.textContent = totalAnio ? formatMoney(totalAnio) : "0";
 }
+
+
+
+
+
+
+
+
+
+

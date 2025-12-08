@@ -1,0 +1,205 @@
+.actions-butt-right {
+  display: flex;
+  justify-self: end;
+  padding-right: 15px;
+  margin-right: -10%;
+}
+.volver-butt{ 
+display:flex; 
+align-items: center;
+justify-content:center; 
+border: 1px solid rgb(184, 184, 184);
+background-color: #feffacf6;
+color: rgba(255, 255, 255, 0.888);
+text-shadow: -1px 1px 1px #000000,-1px 1px 1px #000000,
+-1px 1px 1px #000000;
+font-weight: lighter;
+text-decoration: none;
+padding:8px 18px;
+border: 1px solid black;
+outline:-5; 
+border-radius:10px; 
+font-size:14px; 
+transition: .3s;
+}
+.volver-butt:hover { 
+background-color: #f3f3dbf6;
+outline:1px solid rgba(251, 255, 0, 0.87); 
+color:#000000; 
+text-shadow: -1px 1px 1px #ffffff,-1px 1px 1px #ffffff;
+border-radius:25px; 
+box-shadow:0 0 20px rgba(238, 238, 238, 0.938); 
+border: none;
+padding:7px 17px;
+}
+
+
+/* --------------------------- */
+  /*       ADMIN CARD          */
+  /* --------------------------- */
+  .admin-card {
+    display:flex;
+    flex-direction: column;
+    width: 80%; /* más ancho y centrado */
+    min-width:80%;
+    margin: 0 auto;
+    margin-top: 20%;
+    padding: 20px;
+    background: #dfe2e1;
+    border-radius: 8px;
+    border: 1px solid #e0e6e6;
+    box-shadow: -1px -2px 5px #b1ffbb, -1px 1px 5px #a2f7b8 ;
+     
+  }
+
+  .title-admin-form {
+    display: flex;
+    text-align: center;
+    margin-top: 2%;
+    justify-self: center;
+    color: #dbbb05;
+    font-weight: bold;
+    font-size: 20px;
+    padding: 0%;
+    text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
+  }
+
+  .subtitle-form {
+    color: rgb(23, 189, 87);
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    text-shadow: -1px 1px 1px black,-1px 1px 1px black;
+    margin-bottom: 15%;
+    margin-top: 8%;
+   
+  }
+.title-labels-form{
+    color: rgb(23, 189, 87);
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+    text-shadow: -1px 1px 1px black,-1px 1px 1px black;
+    margin-bottom: 1%;
+    margin-top: 1%;
+}
+   .warning-title-admin {
+    display: flex;
+    align-self: center;
+    bottom: 0%;
+    margin-top: 10%;
+    justify-self: center;
+    color: #e20000;
+    font-weight: bold;
+    font-size: 17px;
+    padding: 0%;
+    text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
+  }
+.ingresar-butt {
+display:flex; 
+margin:auto; 
+width:90%; 
+margin-top:10%; 
+margin-bottom: 7%;
+justify-content:center; 
+padding:8px 40px; 
+background-color:#2ebe76e7; 
+color:rgba(255, 255, 255, 0.888);
+text-shadow: -1px 1px 1px #000;
+
+border: 1px solid rgb(151, 151, 151); 
+outline:0; 
+font-size:16px; 
+border-radius:10px; 
+transition: .3s;
+}
+.ingresar-butt:hover {
+background-color: rgba(80, 230, 125, 0.979); 
+outline:1px solid rgba(0, 199, 73, 0.87); 
+color:#ffffff; border-radius:25px; 
+text-shadow: -1px 1px 1px #000,
+-1px 1px 1px #000;
+box-shadow:0 0 20px rgba(114, 252, 155, 0.842); 
+border: none;
+padding:7px 39px; 
+}
+
+
+/* --------------------------- */
+/*      ESTILOS PARA LAPTOP    */
+/* --------------------------- */
+@media (min-width: 1024px) {
+
+.actions-butt-right {
+  justify-self: center;
+  margin-right: -70%;
+}
+.admin-card {
+   
+    width: 35%; /* más ancho y centrado */
+    min-width:35%;
+    margin-top: 6%;
+    border-radius: 8px;
+    margin-bottom: 10%;
+  }
+
+  .title-admin-form {
+    text-align: center;
+    margin-top: 3%;
+    align-self: center;
+    font-size: 23px;
+  }
+
+
+  .subtitle-form {
+    font-size: 20px;
+    margin-bottom: 8%;
+    margin-top: 15%;
+   
+  }
+.title-labels-form{
+    color: rgb(23, 189, 87);
+    font-size: 16px;
+    text-align: center;
+    text-shadow: -1px 1px 1px black,-1px 1px 1px black;
+    margin-bottom: 2%;
+    margin-top: 1%;
+}
+.form-control{
+    margin-bottom: 4%;
+}
+
+ .warning-title-admin {
+    font-size: large;
+ }
+.ingresar-butt {
+display:flex; 
+margin:auto; 
+width:90%; 
+margin-top:10%; 
+margin-bottom: 7%;
+justify-content:center; 
+padding:8px 40px; 
+background-color:#2ebe76e7; 
+color:rgba(255, 255, 255, 0.888);
+text-shadow: -1px 1px 1px #000;
+
+border: 1px solid rgb(151, 151, 151); 
+outline:0; 
+font-size:16px; 
+border-radius:10px; 
+transition: .3s;
+}
+.ingresar-butt:hover {
+background-color: rgba(80, 230, 125, 0.979); 
+outline:1px solid rgba(0, 199, 73, 0.87); 
+color:#ffffff; border-radius:25px; 
+text-shadow: -1px 1px 1px #000,
+-1px 1px 1px #000;
+box-shadow:0 0 20px rgba(114, 252, 155, 0.842); 
+border: none;
+padding:7px 39px; 
+}
+
+    
+}

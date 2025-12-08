@@ -170,65 +170,101 @@ echo "Administrador creado correctamente"; -->
 
 
 
+function renderTablaPublic(datos) {
+    let html = `
+        <table class="tabla-aportes">
+            <thead>
+                <tr>
+                    <th>Nombres</th>
+    `;
 
-?php
-// public/public_reportes/export_pdf_publico.php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+    // Encabezados de días dinámicos
+    datos.dias.forEach(dia => {
+        html += `<th>${dia}</th>`;
+    });
 
-// --- Cargar DOMPDF ---
-$dompdfAutoload = realpath(__DIR__ . "/../../dompdf_2-0-3/dompdf/autoload.inc.php");
-if (!$dompdfAutoload || !file_exists($dompdfAutoload)) {
-    throw new Exception("No se encontró DOMPDF autoload en: $dompdfAutoload");
-}
-require_once $dompdfAutoload;
+    html += `
+        <th>Fecha Especial</th>
+        <th>Tipo</th>
+        <th>Valor</th>
+        <th>Total Mes</th>
+        <th>Saldo</th>        <!-- CORRECTO -->
+        <th>Acciones</th>     <!-- SIEMPRE AL FINAL -->
+                </tr>
+            </thead>
+            <tbody>
+    `;
 
-// --- IMPORTANTE: los use DEBEN IR AQUÍ ---
-use Dompdf\Dompdf;
-use Dompdf\Options;
+    datos.jugadores.forEach(jug => {
+        html += `<tr>`;
 
-try {
+        html += `<td>${jug.nombre}</td>`;
 
-    // Ejecutar PHP → HTML
-    $htmlFile = realpath(__DIR__ . "/reporte_mes_publico.php");
-    if (!$htmlFile) throw new Exception("No se encontró reporte HTML.");
-    ob_start();
-    include $htmlFile;
-    $htmlContent = ob_get_clean();
+        // Días normales
+        datos.dias.forEach(dia => {
+            const aporteDia = jug.aportes_dias[dia] ?? "";
+            html += `
+                <td>
+                    <input type="text" class="valor-dia" data-id="${jug.id}" data-dia="${dia}" value="${aporteDia}">
+                </td>
+            `;
+        });
 
-    // CSS
-    $cssPath = realpath(__DIR__ . "/../../backend/reportes/reporte_pdf.css");
-    if (!$cssPath) throw new Exception("No se encontró CSS.");
-    $cssContent = file_get_contents($cssPath);
+        // Fecha especial
+        html += `
+            <td>
+                <input type="text" class="fecha-especial" data-id="${jug.id}" value="${jug.fecha_especial ?? ''}">
+            </td>
+        `;
 
-    // Convertir logo a base64
-    $logo = realpath(__DIR__ . "/../../assets/img/reliquias_logo.jpg");
-    if (!$logo) throw new Exception("No se encontró logo.");
-    $info = getimagesize($logo);
-    $mime = $info["mime"];
-    $base64 = base64_encode(file_get_contents($logo));
-    $logoTag = '<img src="data:' . $mime . ';base64,' . $base64 . '" width="120">';
+        // Tipo (otros aportes)
+        html += `<td>${jug.tipo_otro ?? ""}</td>`;
 
-    // Insertar logo
-    $htmlContent = str_replace("{{LOGO}}", $logoTag, $htmlContent);
+        // Valor (otros aportes)
+        html += `<td>${formatMoney(jug.valor_otro ?? 0)}</td>`;
 
-    // Dompdf options
-    $opts = new Options();
-    $opts->set("isRemoteEnabled", true);
-    $opts->set("isHtml5ParserEnabled", true);
+        // Total Mes
+        html += `<td class="total-por-jugador"><strong>${formatMoney(jug.total_mes)}</strong></td>`;
 
-    $dompdf = new Dompdf($opts);
+        // Saldo (NUEVA COLUMNA)
+        html += `<td class="saldo"><strong>${formatMoney(jug.saldo ?? 0)}</strong></td>`;
 
-    // HTML final
-    $finalHtml = "<style>$cssContent</style>" . $htmlContent;
+        // Acciones siempre al final
+        html += `
+            <td class="acciones">
+                <button class="btn-borrar" data-id="${jug.id}">
+                    🗑️
+                </button>
+            </td>
+        `;
 
-    $dompdf->loadHtml($finalHtml);
-    $dompdf->setPaper("letter", "portrait");
-    $dompdf->render();
-    $dompdf->stream("reporte_mes_publico.pdf", ["Attachment" => false]);
+        html += `</tr>`;
+    });
 
-} catch (Exception $e) {
-    echo "<h2>Error:</h2>";
-    echo "<pre>" . $e->getMessage() . "</pre>";
+    html += `
+        </tbody>
+        <tfoot>
+            <tr>
+                <td><strong>TOTAL DÍA</strong></td>
+    `;
+
+    datos.total_dias.forEach(total => {
+        html += `<td><strong>${formatMoney(total)}</strong></td>`;
+    });
+
+    html += `
+        <td></td>  <!-- Fecha especial -->
+        <td></td>  <!-- Tipo -->
+        <td><strong>${formatMoney(datos.total_otros)}</strong></td>
+
+        <td><strong>${formatMoney(datos.total_mes_general)}</strong></td>   <!-- Total Mes -->
+        <td><strong>${formatMoney(datos.total_saldo ?? 0)}</strong></td>    <!-- Total Saldo -->
+        <td></td>  <!-- Acciones (vacío) -->
+            </tr>
+        </tfoot>
+    </table>
+    `;
+
+    document.getElementById("contenedorTabla").innerHTML = html;
 }
 
