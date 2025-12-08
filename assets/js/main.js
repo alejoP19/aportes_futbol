@@ -252,6 +252,12 @@ async function loadTotals(mes, anio) {
 document.getElementById('tOtros').innerText = j.otros_mes
     ? j.otros_mes.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
     : '';
+ document.getElementById("tGastosMes").innerText =
+        j.gastos_mes ? j.gastos_mes.toLocaleString('es-CO') : "0";
+
+    document.getElementById("tGastosAnio").innerText =
+        j.gastos_anio ? j.gastos_anio.toLocaleString('es-CO') : "0";
+
 
         
 }
@@ -263,6 +269,7 @@ async function refreshSheet() {
     const anio = yearSelect.value;
     await loadSheet(mes, anio);
     await loadTotals(mes, anio);
+     await loadGastos(); 
     loadObservaciones(mes, anio);
 }
 
@@ -435,6 +442,171 @@ async function eliminarJugador(id) {
 
     });
 }
+document.getElementById("btnAddGasto").addEventListener("click", async () => {
+    const nombre = document.getElementById("gastoNombre").value.trim();
+    const valor = parseInt(document.getElementById("gastoValor").value || 0);
+
+    if (!nombre || valor <= 0) {
+        Swal.fire({
+            icon: "warning",
+            title: "Datos incompletos",
+            text: "Debes ingresar el nombre del gasto y un valor mayor a cero."
+        });
+        return;
+    }
+
+    // 🟡 Confirmación antes de crear gasto
+    const confirm = await Swal.fire({
+        title: "¿Registrar este gasto?",
+        html: `<b>${nombre}</b><br>Valor: <b>${valor.toLocaleString()}</b>`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Sí, registrar",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33"
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    // 🟢 Enviar al backend
+    const formData = new FormData();
+    formData.append("nombre", nombre);
+    formData.append("valor", valor);
+    formData.append("mes", monthSelect.value);
+    formData.append("anio", yearSelect.value);
+
+    const res = await fetch(`${API}/aportes/add_gasto.php`, {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+
+    if (data.ok) {
+        // 🟢 Mostrar mensaje de éxito
+        Swal.fire({
+            icon: "success",
+            title: "Gasto registrado",
+            text: "El gasto fue agregado correctamente."
+        });
+
+        // limpiar inputs
+        document.getElementById("gastoNombre").value = "";
+        document.getElementById("gastoValor").value = "";
+
+        // 🟢 Actualizar totales y lista de gastos sin recargar página
+        await loadGastos();
+        await loadTotals(monthSelect.value, yearSelect.value);
+    } else {
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "No fue posible registrar el gasto."
+        });
+    }
+});
+
+async function loadGastos() {
+    let res = await fetch(`${API}/aportes/listar_gastos.php?mes=${monthSelect.value}&anio=${yearSelect.value}`);
+    let data = await res.json();
+
+    const ul = document.getElementById("listaGastos");
+    ul.innerHTML = "";
+
+    data.gastos.forEach(g => {
+        let li = document.createElement("li");
+        li.style.marginBottom = "8px";
+
+        li.innerHTML = `
+            ${g.nombre}: <strong>${g.valor.toLocaleString()}</strong>
+            &nbsp; 
+            <button class="btnEditGasto" data-id="${g.id}" data-nombre="${g.nombre}" data-valor="${g.valor}">✏️</button>
+            <button class="btnDeleteGasto" data-id="${g.id}">🗑️</button>
+        `;
+
+        ul.appendChild(li);
+    });
+
+    // Botones editar
+    document.querySelectorAll(".btnEditGasto").forEach(b => {
+        b.addEventListener("click", editarGasto);
+    });
+
+    // Botones borrar
+    document.querySelectorAll(".btnDeleteGasto").forEach(b => {
+        b.addEventListener("click", eliminarGasto);
+    });
+}
+
+
+async function editarGasto(e) {
+    const id = e.target.dataset.id;
+    const nombre = e.target.dataset.nombre;
+    const valor = e.target.dataset.valor;
+
+    const result = await Swal.fire({
+        title: "Editar Gasto",
+        html: `
+            <input id="editNombre" class="swal2-input" value="${nombre}">
+            <input id="editValor" type="number" class="swal2-input" value="${valor}">
+        `,
+        showCancelButton: true,
+        confirmButtonText: "Guardar cambios"
+    });
+
+    if (!result.isConfirmed) return;
+
+    const nuevoNombre = document.getElementById("editNombre").value.trim();
+    const nuevoValor = parseInt(document.getElementById("editValor").value || 0);
+
+    let fd = new FormData();
+    fd.append("id", id);
+    fd.append("nombre", nuevoNombre);
+    fd.append("valor", nuevoValor);
+
+    let res = await fetch(`${API}/aportes/update_gasto.php`, {
+        method: "POST",
+        body: fd
+    });
+
+    let j = await res.json();
+
+    if (j.ok) {
+        Swal.fire("Gasto actualizado", "", "success");
+        loadGastos();
+        loadTotals(monthSelect.value, yearSelect.value);
+    }
+}
 
 
 
+async function eliminarGasto(e) {
+    const id = e.target.dataset.id;
+
+    const confirm = await Swal.fire({
+        title: "¿Eliminar este gasto?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Eliminar",
+        cancelButtonText: "Cancelar"
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    let fd = new FormData();
+    fd.append("id", id);
+
+    let res = await fetch(`${API}/aportes/delete_gasto.php`, {
+        method: "POST",
+        body: fd
+    });
+
+    let j = await res.json();
+
+    if (j.ok) {
+        Swal.fire("Gasto eliminado", "", "success");
+        loadGastos();
+        loadTotals(monthSelect.value, yearSelect.value);
+    }
+}

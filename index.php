@@ -77,17 +77,35 @@ include "conexion.php";
       <form id="addPlayerForm" class="add-player-box">
         <label for="playerName"> Nombre Del Aportante</label>
         <input type="text" id="playerName" placeholder="Ingresar Nombre" required>
+
         <label for="playerPhone"> Telefono Del Aportante</label>
         <input type="text" id="playerPhone" placeholder="Ingresar Número" required>
-      <button type="button" id="btnAddPlayer" class="save-player-btn">Registrar</button>
 
+        <button type="button" id="btnAddPlayer" class="save-player-btn">Registrar</button>
       </form>
     </div>
+
     <div id="playersTableContainer">
       <div class="loading"></div>
     </div>
-    <div class="pagination" id="paginationContainer"></div>
+
+    <div class="pagination" id="paginationContainer">
+      
+    </div>
+    <div class="gastos-card">
+        <h4>Agregar Gasto</h4>
+    
+        <label for="gastoNombre">Nombre del gasto</label>
+        <input id="gastoNombre" type="text" placeholder="Ej: Árbitro, Balón, Limpieza">
+    
+        <label for="gastoValor">Valor del gasto</label>
+        <input id="gastoValor" type="number" placeholder="$">
+    
+        <button id="btnAddGasto" class="save-gasto">Registrar Gasto</button>
+    </div>
   </section>
+
+
 
   <!-- PANEL CENTRAL: TABLA + OBSERVACIONES -->
   <section class="middle-panel">
@@ -98,7 +116,7 @@ include "conexion.php";
 
     <!-- Observaciones -->
     <div class="gastos-block" id="gastosWrapper">
-      <h3>Gastos y Observaciones Del Mes</h3>
+      <h3>Observaciones Del Mes</h3>
       <textarea id="obsMes" style="width:100%;min-height:120px;padding:8px;border:1px solid #ddd;"></textarea>
      
         <button id="saveObsBtn" class="guardar-observaciones">Guardar Observaciones</button>
@@ -113,8 +131,19 @@ include "conexion.php";
       <div>Mes: <strong id="tMes">0</strong></div>
       <div>Año: <strong id="tAnio">0</strong></div>
       <div>Otros Aportes: <strong id="tOtros">0</strong></div>
+      <div>Gastos del Mes: <strong id="tGastosMes">0</strong></div>
+      <div>Gastos del Año: <strong id="tGastosAnio">0</strong></div>
+
       <div > <strong id="tDia">0</strong></div>
     </div>
+
+
+    <div class="otros-aportes-card" id="cardGastosListado">
+        <h4>Gastos Registrados</h4>
+        <ul id="listaGastos" style="list-style:none;padding-left:0;"></ul>
+    </div>
+
+
 
     <div class="otros-aportes-card">
       <h4>Agregar Otro Aporte</h4>

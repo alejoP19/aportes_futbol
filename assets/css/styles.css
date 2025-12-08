@@ -63,6 +63,7 @@ grid-area: title;
 .toggle-left-panel { 
 grid-area: btn; 
 justify-self:center;
+
 }
 
 .logo { 
@@ -89,7 +90,7 @@ text-shadow: -1px 1px 2px rgba(0,0,0,0.8),
 .toggle-left-panel {
 display: flex;
 position: relative;
-bottom: -35%;
+top: 0;
 left: -1%;
 width: 100%;
 justify-content: center;
@@ -166,7 +167,7 @@ text-shadow: -1px 1px 1px rgba(0,0,0,0.7), -1px 1px 1px rgba(0,0,0,0.7);
  
 }
 select {
-padding:6px 10px; 
+padding:8px 16px; 
 border:1px solid #aaa; 
 border-radius:8px; 
 }
@@ -175,6 +176,7 @@ border-radius:8px;
 LAYOUT PRINCIPAL (mobile-first)
 ===================================================== */
 .container {
+position: relative;
 display: grid;
 grid-template-columns: 1fr;
 gap: 15px;
@@ -182,6 +184,7 @@ padding: 15px;
 }
 
 /* paneles */
+
 .left-panel, .middle-panel, .right-panel {
 background: #f0f0f0;
 border-radius: 8px;
@@ -190,9 +193,19 @@ padding: 15px;
 width: 98%;
 justify-self: center;
 }
+.left-panel {
+margin-top: -1% !important;
+margin-bottom: 0% !important;
+}
 
-/* tabla oculta por defecto */
-/* -----será por esta linea que hay conflictos????????? */
+  .middle-panel:not(.expanded) {
+      display: none !important;
+      height: 0 !important;
+      max-height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+  }
+
 
 .middle-panel {
   opacity: 0;
@@ -202,9 +215,13 @@ justify-self: center;
 }
 
 .middle-panel.expanded {
+
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto; /* habilita interacción */
+  max-height: calc(100vh - 140px); /* dejar espacio para header y botón */
+  margin-top: -55%;
+
 }
 
 
@@ -214,25 +231,22 @@ width: 0;
 opacity: 0;
 pointer-events: none;
 transition: all 1s ease;
+
 }
 
 
-/* Móvil */
-@media (max-width: 991px) {
-.middle-panel.expanded {
-max-height: calc(100vh - 140px); /* dejar espacio para header y botón */
-margin-top: 85%;
-}
 
-}
+
+
 
 /* =====================================================
 BOTONES / FORMULARIOS
 ===================================================== */
 .add-player-box {
 margin-top:10px;
+
 }
-.add-player-title, .otros-aportes-card h4, .notes-card h4 {
+.add-player-title, .otros-aportes-card h4, .gastos-card h4, .notes-card h4 {
 margin-top:10%; 
 font-size:18px;
 margin-bottom:15%; 
@@ -274,14 +288,66 @@ border: none;
 padding:7px 39px; 
 }
 
+.gastos-card{
+margin-top: 20% !important;
+background:#c4d7d8; 
+border:1px solid var(--border); 
+border-radius:8px; 
+padding:12px; 
+margin-bottom:10px ; 
+margin: auto;
+min-width: 100%;
+}
+.gastos-card input { 
+width:100%;
+padding:9px;
+border-radius:8px;
+border:1px solid #bbb;
+margin-bottom:5%;
+margin-top: 2%;
+}
+.save-gasto{ 
+background:var(--primary-blue); 
+display:flex; 
+width:80%; 
+margin:auto; 
+margin-top:8%; 
+margin-bottom: 4%;
+justify-content:center; 
+padding:8px 20px; 
+color:rgba(255,255,255,0.888); 
+text-shadow: -1px 1px 1px #000;
+border: 1px solid black;
+outline:-5; 
+border-radius:10px; 
+font-size:16px; 
+transition: .3s;
+}
+.save-gasto:hover { 
+background-color: rgba(11, 122, 167, 0.842); 
+outline:1px solid rgba(0, 119, 255, 0.87); 
+color:#ffffff; 
+text-shadow: -1px 1px 1px #000000;
+border-radius:25px; 
+box-shadow:0 0 20px rgba(160, 255, 250, 0.938); 
+border: none;
+padding:7px 29px; 
+}
+
 /* right panel cards */
 .right-panel { 
+
 border:1px solid var(--border);
 border-radius:8px; 
-width:100%; 
-padding:13px; 
-margin-bottom:20px; 
+width:99%; 
+padding:10px;
+background:#ebebeb; 
+top:100%;
+margin-bottom: 2%;
 }
+
+ 
+
 .totals-card{
 background:#cfecdd; 
 border:1px solid var(--border); 
@@ -308,7 +374,7 @@ margin: auto;
 min-width: 100%;
 }
 
-.add-player-box  label, .otros-aportes-card label{
+.add-player-box  label, .otros-aportes-card label, .gastos-card label{
 font-weight:lighter; 
 font-style:italic;
 color: #ffffff;
@@ -635,10 +701,12 @@ overflow-x: auto;
 .middle-panel {
 overflow-x: hidden;
 }
+
 .right-panel, .left-panel, .notes-card {
 max-width: 100vw; overflow-x: hidden;
 }
 }
+
 
 /* Hover */
 #monthlyTableContainer table tr:hover { background-color: #f0f8ff; cursor: pointer; }
@@ -650,11 +718,12 @@ max-width: 100vw; overflow-x: hidden;
 background-color: #e2e2e2;
 width: 100%;
 padding: 2%;
-color: #e2c107;
-font-weight:lighter; 
-text-shadow: -1px 1px 1px rgb(0, 0, 0),
--1px 1px 1px rgb(0, 0, 0),
--1px 1px 1px rgb(0, 0, 0);
+color: #f1c500;
+font-weight:bold; 
+font-size: large;
+text-shadow: -1px 1px 1px black,
+-1px 1px 1px black,
+-1px 1px 1px black;
 font-style:italic;
 justify-self: center;
 text-align: center;
@@ -778,7 +847,7 @@ font-weight:lighter;
 text-shadow: -1px 1px 1px rgba(0,0,0,0.7); 
 }
 select{
-    padding: 3px;
+    padding: 5px;
 }
 .logo { 
     width: 80px; 
@@ -794,11 +863,21 @@ font-size: 20px;
 grid-template-columns: 300px 1fr var(--aside-width); 
 padding: 15px;
 }
+
+  .middle-panel:not(.expanded) {
+     
+      height: 100dvh;
+      max-height: max-content;
+    
+  }
 /* CLASE NUEVA: tabla expandida al presionar boton */
+
 .middle-panel.expanded {
-position: absolute;
-top:22%; /* debajo del header */
-left: 0;
+  margin-top: -27%;
+}
+.month-header{ 
+
+font-size: 20px;
 }
 .container.panel-collapsed { 
 grid-template-columns: 1fr var(--aside-width) !important;
@@ -820,9 +899,15 @@ background-color: #e5dfc3;
 .planilla tbody tr.selected-row {
 background-color: #c0e0ff !important;
 }
+.left-panel{
+    width: 105%;
+    margin-top: -4% !important;
+
+}
 .right-panel {
 justify-self: end;
 width: 72dvw; 
+margin-top:-1.3% !important;
 }
 
 .otros-aportes-card h4, .notes-card h4 {
@@ -878,6 +963,7 @@ width:30%;
 .gastos-block h3{
 background-color: #e2e2e2;
 padding: 2%;
+font-size: 23px;
 
 }
 textarea{
@@ -914,6 +1000,7 @@ grid-template-columns: 320px 1fr var(--aside-width);
     background-color: #ff747f !important;
     cursor: default;
 }
+
 
 
 

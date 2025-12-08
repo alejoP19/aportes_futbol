@@ -2,32 +2,44 @@
 header("Content-Type: application/json");
 include "../../conexion.php";
 
-$mes = isset($_GET['mes']) ? intval($_GET['mes']) : intval(date('n'));
-$anio = isset($_GET['anio']) ? intval($_GET['anio']) : intval(date('Y'));
-$hoy = date('Y-m-d');
+$mes = intval($_GET['mes'] ?? date('n'));
+$anio = intval($_GET['anio'] ?? date('Y'));
 
-// totales por día (hoy)
-$today = $conexion->query("SELECT IFNULL(SUM(aporte_principal),0) as s FROM aportes WHERE fecha = '$hoy'")->fetch_assoc()['s'];
+// aportes
+$today = $conexion->query("SELECT IFNULL(SUM(aporte_principal),0) s FROM aportes WHERE fecha = CURDATE()")->fetch_assoc()['s'];
+$month_total = $conexion->query("SELECT IFNULL(SUM(aporte_principal),0) s FROM aportes WHERE MONTH(fecha)=$mes AND YEAR(fecha)=$anio")->fetch_assoc()['s'];
+$year_total = $conexion->query("SELECT IFNULL(SUM(aporte_principal),0) s FROM aportes WHERE YEAR(fecha)=$anio")->fetch_assoc()['s'];
 
-// total mes aportes
-$month_total = $conexion->query("SELECT IFNULL(SUM(aporte_principal),0) as s FROM aportes WHERE MONTH(fecha) = $mes AND YEAR(fecha) = $anio")->fetch_assoc()['s'];
+// otros aportes
+$otros_total = $conexion->query("SELECT IFNULL(SUM(valor),0) s FROM otros_aportes WHERE mes=$mes AND anio=$anio")->fetch_assoc()['s'];
+$otros_year = $conexion->query("SELECT IFNULL(SUM(valor),0) s FROM otros_aportes WHERE anio=$anio")->fetch_assoc()['s'];
 
-// total otros aportes mes
-$otros_total = $conexion->query("SELECT IFNULL(SUM(valor),0) as s FROM otros_aportes WHERE mes = $mes AND anio = $anio")->fetch_assoc()['s'];
+// gastos
+// gastos
+$gastos_mes = $conexion->query("
+    SELECT IFNULL(SUM(valor),0) s 
+    FROM gastos 
+    WHERE mes=$mes AND anio=$anio
+")->fetch_assoc()['s'];
 
-// total mes incluyendo otros aportes
-$month_total_all = $month_total + $otros_total;
+$gastos_anio = $conexion->query("
+    SELECT IFNULL(SUM(valor),0) s 
+    FROM gastos 
+    WHERE anio=$anio AND mes <= $mes
+")->fetch_assoc()['s'];
 
-// total año
-$year_total = $conexion->query("SELECT IFNULL(SUM(aporte_principal),0) as s FROM aportes WHERE YEAR(fecha) = $anio")->fetch_assoc()['s'];
-$otros_year = $conexion->query("SELECT IFNULL(SUM(valor),0) as s FROM otros_aportes WHERE anio = $anio")->fetch_assoc()['s'];
-$year_total_all = $year_total + $otros_year;
+
+
+// aplicar restas
+$month_total_final = $month_total + $otros_total - $gastos_mes;
+$year_total_final = $year_total + $otros_year - $gastos_anio;
 
 echo json_encode([
-    'ok' => true,
-    'today' => intval($today),
-    'month_total' => intval($month_total_all),
-    'year_total' => intval($year_total_all),
-    'otros_mes' => intval($otros_total),   // <-- nuevo
-    'otros_anio' => intval($otros_year)    // <-- nuevo
+    'ok'=>true,
+    'today'=>intval($today),
+    'month_total'=>intval($month_total_final),
+    'otros_mes'=>intval($otros_total),
+    'year_total'=>intval($year_total_final),
+    'gastos_mes'=>intval($gastos_mes),
+    'gastos_anio'=>intval($gastos_anio)
 ]);

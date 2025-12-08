@@ -1,9 +1,9 @@
-/* ESTILOS COMPATIBLES CON DOMPDF */
-
-/* reporte_pdf.css */
+/* ===========================
+   BASE COMPATIBLE DOMPDF
+=========================== */
 body {
     font-family: DejaVu Sans, sans-serif;
-    margin-top: 100px;  /* menos que antes, para acercar la tabla en la primera página */
+    margin-top: 160px;   /* deja espacio entre encabezado y tabla */
     margin-left: 20px;
     margin-right: 20px;
     margin-bottom: 20px;
@@ -11,34 +11,29 @@ body {
 }
 
 .section-title {
-    margin-top: 10%; /* eliminar márgenes grandes que empujan la tabla */
-    margin-bottom: 3%;
-}
-
-th, td {
-    font-size: 10pt; /* escalable */
-}
-
-.section-title, .section-title2 {
+    margin-top: 10px;
+    margin-bottom: 12px;
     font-size: 12pt;
 }
 
+th, td {
+    font-size: 10pt;
+}
 
-
-
+/* ===========================
+   TABLAS
+=========================== */
 
 table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: auto; /* fuerza columnas a tamaño fijo proporcional */
-    word-wrap: break-word; /* evita que texto largo desborde */
-}
-tr {
-    page-break-inside: avoid; /* evita cortar filas */
+    table-layout: auto;
+    word-wrap: break-word;
+    margin-bottom: 18px;
 }
 
-table {
-    page-break-inside: auto;
+tr {
+    page-break-inside: avoid;
 }
 
 th {
@@ -46,18 +41,8 @@ th {
     color: white;
     padding: 6px;
     border: 1px solid #444;
+}
 
-}
-.logo {
-    width: 80px;  /* ya usado */
-    max-width: 15%; /* opcional: escala proporcional */
-    height: auto;
-}
-.right{
-font-weight:bold;   
-font-size: 14px;
- text-align:center;
-}
 td {
     padding: 6px;
     border: 1px solid #444;
@@ -67,62 +52,83 @@ tr:nth-child(even) {
     background: #f2f2f2;
 }
 
-
-/* Ajuste de página */
-.page-break {
-    page-break-before: always;
+.right {
+    font-weight: bold;
+    font-size: 11px;
+    text-align: center;
 }
 
-.observaciones{
-     background-color: #c6d3e0;
-     padding: 3% 3%;
-}
-.observaciones-title{
-    margin-top: 0%;
-    font-size: 17px;
-    margin-bottom: 2%;
-}
-.total-box{
-    margin-top: 3%;
-     background-color: #b4e7c7;
-     padding: 3% 3%;
+.small {
+    text-align: center;
 }
 
-.total-dia{
-    background: #9cf1bb; 
-    color:white; 
-    font-weight:lighter;
-    
-}
-.small{
-text-align:center;
-
-}
-.obs{
-    font-size: 15px;
-    
+/* Para evitar que las filas se partan */
+tr, td, th {
+    page-break-inside: avoid;
 }
 
+/* ===========================
+   LOGO
+=========================== */
+.logo {
+    width: 80px;
+    max-width: 15%;
+    height: auto;
+}
 
-
+/* ===========================
+   PAGE BREAKS
+=========================== */
 .page-break {
     page-break-before: always;
 }
 
 .page-spacer {
-    height: 40px; /* ajusta la separación que quieras */
+    height: 40px;
 }
+
+/* ===========================
+   BLOQUES DE OBSERVACIONES Y TOTALES
+=========================== */
+.observaciones {
+    background-color: #c6d3e0;
+    padding: 12px;
+}
+
+.observaciones-title {
+    margin-top: 0;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.obs {
+    font-size: 12px;
+}
+
+.total-box {
+    margin-top: 14px;
+    background-color: #b4e7c7;
+    padding: 12px;
+}
+
+/* fila de totales de día (verde) */
+.total-dia {
+    background: #9cf1bb;
+    color: white;
+    font-weight: lighter;
+}
+
+/* para marcar filas "apagadas" si algún día lo necesitas */
 tr[style*="color:#999;"] {
     background-color: #f5f5f5;
 }
 
+/* ===========================
+   ESCALA AUTOMÁTICA 
+   SI HAY MUCHOS JUGADORES
+=========================== */
 
-
-
-/* ----- BASE NORMAL ----- */
 table {
-    width: 100%;
-    border-collapse: collapse;
     font-size: 12px;
 }
 
@@ -130,7 +136,7 @@ td, th {
     padding: 3px;
 }
 
-/* ----- SI HAY MUCHOS JUGADORES: REDUCE AUTOMÁTICO ----- */
+/* muchos jugadores */
 body.many-rows table {
     font-size: 10px;
     transform: scale(0.92);
@@ -142,18 +148,14 @@ body.many-rows th {
     padding: 2px;
 }
 
-/* Si aún hay demasiados registros */
+/* demasiados jugadores */
 body.too-many-rows table {
     font-size: 9px;
     transform: scale(0.85);
     transform-origin: top left;
 }
 
-/* Evitar filas partidas, siempre */
-tr, td, th {
-    page-break-inside: avoid;
-}
-/* SUBIR TABLA MÁS CERCA DEL ENCABEZADO */
+/* acercar la tabla al encabezado sin que lo tape */
 section, table {
     margin-top: 10px !important;
     padding-top: 0 !important;
@@ -163,6 +165,7 @@ body.many-rows table,
 body.too-many-rows table {
     margin-top: 5px !important;
 }
+
 section {
     margin-top: 0 !important;
 }
