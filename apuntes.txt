@@ -169,102 +169,28 @@ echo "Administrador creado correctamente"; -->
 
 
 
+ob_start();
+include realpath(__DIR__ . "/reporte_mes_publico.php");
+$html = ob_get_clean();
 
-function renderTablaPublic(datos) {
-    let html = `
-        <table class="tabla-aportes">
-            <thead>
-                <tr>
-                    <th>Nombres</th>
-    `;
+require_once realpath(__DIR__ . "/../../dompdf_2-0-3/dompdf/autoload.inc.php");
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
-    // Encabezados de días dinámicos
-    datos.dias.forEach(dia => {
-        html += `<th>${dia}</th>`;
-    });
+$cssPath =realpath(__DIR__ . "/../../backend/reportes/reporte_pdf.css");
+$css = file_get_contents($cssPath);
 
-    html += `
-        <th>Fecha Especial</th>
-        <th>Tipo</th>
-        <th>Valor</th>
-        <th>Total Mes</th>
-        <th>Saldo</th>        <!-- CORRECTO -->
-        <th>Acciones</th>     <!-- SIEMPRE AL FINAL -->
-                </tr>
-            </thead>
-            <tbody>
-    `;
+$canvas = $dompdf->get_canvas();
+$logoPath = realpath(__DIR__ . "/../../assets/img/reliquias_logo.jpg");
+$logoWidth = 80;
+$logoY = 105;
+$meses = [
+    1=>"Enero",2=>"Febrero",3=>"Marzo",4=>"Abril",5=>"Mayo",6=>"Junio",
+    7=>"Julio",8=>"Agosto",9=>"Septiembre",10=>"Octubre",11=>"Noviembre",12=>"Diciembre"
+];
+$mesName = $meses[$mes];
 
-    datos.jugadores.forEach(jug => {
-        html += `<tr>`;
 
-        html += `<td>${jug.nombre}</td>`;
-
-        // Días normales
-        datos.dias.forEach(dia => {
-            const aporteDia = jug.aportes_dias[dia] ?? "";
-            html += `
-                <td>
-                    <input type="text" class="valor-dia" data-id="${jug.id}" data-dia="${dia}" value="${aporteDia}">
-                </td>
-            `;
-        });
-
-        // Fecha especial
-        html += `
-            <td>
-                <input type="text" class="fecha-especial" data-id="${jug.id}" value="${jug.fecha_especial ?? ''}">
-            </td>
-        `;
-
-        // Tipo (otros aportes)
-        html += `<td>${jug.tipo_otro ?? ""}</td>`;
-
-        // Valor (otros aportes)
-        html += `<td>${formatMoney(jug.valor_otro ?? 0)}</td>`;
-
-        // Total Mes
-        html += `<td class="total-por-jugador"><strong>${formatMoney(jug.total_mes)}</strong></td>`;
-
-        // Saldo (NUEVA COLUMNA)
-        html += `<td class="saldo"><strong>${formatMoney(jug.saldo ?? 0)}</strong></td>`;
-
-        // Acciones siempre al final
-        html += `
-            <td class="acciones">
-                <button class="btn-borrar" data-id="${jug.id}">
-                    🗑️
-                </button>
-            </td>
-        `;
-
-        html += `</tr>`;
-    });
-
-    html += `
-        </tbody>
-        <tfoot>
-            <tr>
-                <td><strong>TOTAL DÍA</strong></td>
-    `;
-
-    datos.total_dias.forEach(total => {
-        html += `<td><strong>${formatMoney(total)}</strong></td>`;
-    });
-
-    html += `
-        <td></td>  <!-- Fecha especial -->
-        <td></td>  <!-- Tipo -->
-        <td><strong>${formatMoney(datos.total_otros)}</strong></td>
-
-        <td><strong>${formatMoney(datos.total_mes_general)}</strong></td>   <!-- Total Mes -->
-        <td><strong>${formatMoney(datos.total_saldo ?? 0)}</strong></td>    <!-- Total Saldo -->
-        <td></td>  <!-- Acciones (vacío) -->
-            </tr>
-        </tfoot>
-    </table>
-    `;
-
-    document.getElementById("contenedorTabla").innerHTML = html;
+if (!file_exists($logoPath)) {
+    $logoPath = realpath(__DIR__ . "/../../assets/img/reliquias_logo.jpg");
 }
-

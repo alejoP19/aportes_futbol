@@ -237,7 +237,7 @@ endforeach;
 
 <div class="section-title"><strong>Otros aportes (resumen)</strong></div>
 
-<table>
+<table class="table-otros">
 <thead>
 <tr>
     <th>Jugador</th>
@@ -279,14 +279,66 @@ while ($row = $res->fetch_assoc()):
 </tfoot>
 </table>
 
+
 <!-- ================== -->
-<!--   OBSERVACIONES     -->
+<!--   GASTOS DEL MES   -->
 <!-- ================== -->
 
-<div class="observaciones">
-    <div class="observaciones-title"><strong>Observaciones / Gastos del mes</strong></div>
-    <div class="obs"><?= nl2br(htmlspecialchars(get_obs($conexion,$mes,$anio))) ?></div>
-</div>
+<?php
+$stmtG = $conexion->prepare("
+    SELECT nombre AS concepto, valor
+    FROM gastos
+    WHERE mes = ? AND anio = ?
+    ORDER BY nombre ASC
+");
+$stmtG->bind_param("ii", $mes, $anio);
+$stmtG->execute();
+$resG = $stmtG->get_result();
+
+$gastosListado = [];
+$gastosTotal = 0;
+
+while ($g = $resG->fetch_assoc()) {
+    $gastosListado[] = $g;
+    $gastosTotal += intval($g['valor']);
+}
+
+if (!empty($gastosListado)):
+?>
+
+<div class="section-title"><strong>Gastos del mes</strong></div>
+
+<table class="gastos-table">
+<thead>
+<tr>
+    <th>Concepto</th>
+    <th class="right">Valor</th>
+</tr>
+</thead>
+
+<tbody>
+<?php foreach ($gastosListado as $g): ?>
+<tr>
+    <td><?= htmlspecialchars($g['concepto']) ?></td>
+    <td class="right"><?= number_format($g['valor'], 0, ',', '.') ?></td>
+</tr>
+<?php endforeach; ?>
+</tbody>
+
+<tfoot>
+<tr>
+    <td class="right"><strong>Total gastos:</strong></td>
+    <td class="right"><strong><?= number_format($gastosTotal, 0, ',', '.') ?></strong></td>
+</tr>
+</tfoot>
+</table>
+
+<?php else: ?>
+
+<div class="section-title"><strong>Gastos del mes</strong></div>
+<p style="font-size:14px;">No se registraron gastos en este mes.</p>
+
+<?php endif; ?>
 
 <!-- ================== -->
 <!--  TOTAL DEL MES     -->
@@ -337,6 +389,13 @@ for ($m = 1; $m <= $mes; $m++) {
     <strong>Total del año <?= $anio ?> hasta <?= date("d/m/Y") ?>:</strong>
     <span style="float:right;"><strong><?= number_format($totalAnual,0,',','.') ?></strong></span>
 </div>
+<!-- ================== -->
+<!--   OBSERVACIONES     -->
+<!-- ================== -->
 
+<div class="observaciones">
+    <div class="observaciones-title"><strong>Observaciones del Mes</strong></div>
+    <div class="obs"><?= nl2br(htmlspecialchars(get_obs($conexion,$mes,$anio))) ?></div>
+</div>
 </body>
 </html>

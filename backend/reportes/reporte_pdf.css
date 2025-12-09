@@ -29,9 +29,24 @@ table {
     border-collapse: collapse;
     table-layout: auto;
     word-wrap: break-word;
-    margin-bottom: 18px;
+    margin-bottom: 25px;
+      padding: 0px;
+    padding-right: 10px;
+    max-width: 110%;   /* antes ocupaba todo el ancho; ahora será más angosto */
+    min-width: 110%;
+    margin: auto; /* centrado */
+        margin-bottom: 25px;
+ 
 }
-
+.table-otros{
+    page-break-inside: auto;
+    padding: 0px;
+    padding-right: 10px;
+    max-width: 110%;   /* antes ocupaba todo el ancho; ahora será más angosto */
+    min-width: 110%;
+    margin: auto; /* centrado */
+        margin-bottom: 25px;
+}
 tr {
     page-break-inside: avoid;
 }
@@ -56,6 +71,12 @@ tr:nth-child(even) {
     font-weight: bold;
     font-size: 11px;
     text-align: center;
+    page-break-inside: auto;
+    padding: 0px;
+    padding-right: 10px;
+    max-width: 110%;   /* antes ocupaba todo el ancho; ahora será más angosto */
+    min-width: 110%;
+    margin: auto; /* centrado */
 }
 
 .small {
@@ -93,6 +114,9 @@ tr, td, th {
 .observaciones {
     background-color: #c6d3e0;
     padding: 12px;
+    max-width: 100%;   /* antes ocupaba todo el ancho; ahora será más angosto */
+    margin: 40px auto; /* centrado */
+    
 }
 
 .observaciones-title {
@@ -103,6 +127,7 @@ tr, td, th {
 
 .obs {
     font-size: 12px;
+    padding: 10px 20px;
 }
 
 .total-box {
@@ -168,4 +193,30 @@ body.too-many-rows table {
 
 section {
     margin-top: 0 !important;
+}
+
+
+/* Paginación automática para la tabla de gastos */
+table.gastos-table {
+    page-break-inside: auto;
+    padding: 0px;
+    padding-right: 10px;
+    max-width: 110%;   /* antes ocupaba todo el ancho; ahora será más angosto */
+    min-width: 110%;
+    margin: auto; /* centrado */
+        margin-bottom: 25px;
+
+}
+
+table.gastos-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+}
+
+table.gastos-table thead {
+    display: table-header-group;
+}
+
+table.gastos-table tfoot {
+    display: table-footer-group;
 }

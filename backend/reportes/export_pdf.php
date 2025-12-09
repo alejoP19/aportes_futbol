@@ -69,10 +69,12 @@ $canvas->page_script(function($pageNumber, $pageCount, $canvas, $fontMetrics)
     }
 
     // Título del reporte
-    $canvas->text($w / 2 - 140, $logoY + 25, "Reporte Mensual - {$mesName} {$anio}", null, 14);
+    $canvas->text($w / 2 - 140, $logoY +15, "Reporte Mensual - {$mesName} {$anio}", null, 14);
+
 
     // Fecha en esquina superior derecha
-    $canvas->text($w - 120, $logoY, date("Y-m-d"), null, 11);
+ $canvas->text($w - 120, $logoY -65, date("Y-m-d"), null, 11);
+
 
     // Pie de página
     $canvas->page_text(20,     $h - 30, "Aportes - Reliquias Del Fútbol", null, 9, [0,0,0]);

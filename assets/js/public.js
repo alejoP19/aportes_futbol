@@ -1,6 +1,6 @@
 // public/public.js
-const API_JSON = "../backend/public_data/listado_publico.php";
-const API_PDF = "../public/public_reportes/reporte_mes_publico.php";
+const API_JSON = "/APORTES_FUTBOL/backend/public_data/listado_publico.php";
+const API_PDF = "../public/public/public_reportes/reporte_mes_publico.php";
 document.addEventListener("DOMContentLoaded", () => {
     cargarSelects();
     document.getElementById("selectAnio").addEventListener("change", cargarDatos);
@@ -45,6 +45,7 @@ async function cargarDatos() {
     renderTablaPublic(data);
  renderTotales(data);  
     renderObservaciones(data.observaciones);
+    renderGastos(data)
 }
 
 function renderTablaPublic(data) {
@@ -59,6 +60,7 @@ function renderTablaPublic(data) {
     html += `<th colspan="${dias.length + 1}">Días de los juegos</th>`;
     html += `<th colspan="2">Otros aportes</th>`;
     html += `<th>Total Mes</th>`;
+    html += `<th>Saldo</th>`; 
     html += `</tr>`;
 
     html += `<tr><th></th>`;
@@ -68,6 +70,7 @@ function renderTablaPublic(data) {
     html += `<th>Fecha Especial (${fechaEspecial})</th>`;
     html += `<th>Tipo</th><th>Valor</th>`;
     html += `<th>Por Jugador</th>`;
+    html += `<th></th>`;
     html += `</tr>`;
     html += `</thead><tbody>`;
 
@@ -75,12 +78,45 @@ function renderTablaPublic(data) {
     data.rows.forEach(row => {
         html += `<tr data-player="${row.id}">`;
         html += `<td class="player-name">${escapeHtml(row.nombre)}</td>`;
+        
+    row.dias.forEach((v, idx) => {
+    const realArr = row.real_dias || [];
+    const real    = realArr[idx] !== undefined ? Number(realArr[idx]) : Number(v || 0);
+    const visible = Number(v || 0);
 
-        row.dias.forEach(v => {
-            html += `<td>${v ? formatMoney(v) : ""}</td>`;
-        });
+    const hayExcedente = real > visible && visible > 0;
 
-        html += `<td>${row.especial ? formatMoney(row.especial) : ""}</td>`;
+    if (hayExcedente) {
+        const title = `Aportó ${formatMoney(real)}`;
+       html += `
+<td class="celda-aporte aporte-excedente" title="${title}">
+    ⭐ ${formatMoney(visible)}
+</td>`;
+
+    } else {
+       html += `<td class="celda-aporte">${visible ? formatMoney(visible) : ""}</td>`;
+
+
+    }
+});
+
+const realEsp    = row.real_especial !== undefined ? Number(row.real_especial) : Number(row.especial || 0);
+const visibleEsp = Number(row.especial || 0);
+const hayExcEsp  = realEsp > visibleEsp && visibleEsp > 0;
+
+if (hayExcEsp) {
+    const titleEsp = `Aportó ${formatMoney(realEsp)}`;
+    html += `
+<td class="celda-aporte aporte-excedente" title="${titleEsp}">
+    ⭐ ${formatMoney(realEsp)}
+</td>`;
+} else {
+ html += `<td class="celda-aporte">${visibleEsp ? formatMoney(visibleEsp) : ""}</td>`;
+
+
+}
+
+
 
         let tiposHtml = "";
         let valorOtros = 0;
@@ -90,8 +126,14 @@ function renderTablaPublic(data) {
         }
 
         html += `<td class="otros-tipos">${tiposHtml}</td>`;
-        html += `<td class="otros-valor">${valorOtros ? formatMoney(valorOtros) : ""}</td>`;
-        html += `<td class="total-por-jugador"><strong>${row.total_mes ? formatMoney(row.total_mes) : ""}</strong></td>`;
+       html += `<td class="otros-valor">${valorOtros ? formatMoney(valorOtros) : ""}</td>`;
+
+       
+       // total del mes
+       html += `<td class="total-por-jugador"><strong>${row.total_mes ? formatMoney(row.total_mes) : ""}</strong></td>`;
+       // ← AGREGAR ESTA LÍNEA:
+       html += `<td class="total-por-jugador">${row.saldo ? formatMoney(row.saldo) : ""}</td>`;
+
         html += `</tr>`;
     });
 
@@ -102,6 +144,8 @@ function renderTablaPublic(data) {
     const totalsPorDia = Array(dias.length).fill(0);
     let totalEspecial = 0;
     let totalOtros = 0;
+    let totalVisibleMes = 0;
+    let totalSaldosMes  = 0;
 
     data.rows.forEach(r => {
         r.dias.forEach((v, i) => totalsPorDia[i] += Number(v || 0));
@@ -109,14 +153,19 @@ function renderTablaPublic(data) {
         if (r.otros && r.otros.length)
             totalOtros += r.otros.reduce((s, o) => s + Number(o.valor), 0);
     });
-
+data.rows.forEach(r => {
+    totalVisibleMes += Number(r.total_mes || 0);
+    totalSaldosMes  += Number(r.saldo || 0);
+});
     totalsPorDia.forEach(v => html += `<td class="total-footer-dias"><strong>${v ? formatMoney(v) : "0"}</strong></td>`);
 
     html += `<td><strong>${totalEspecial ? formatMoney(totalEspecial) : "0"}</strong></td>`;
     html += `<td><strong>TOTAL OTROS</strong></td>`;
     html += `<td class="otros-valor"><strong>${totalOtros ? formatMoney(totalOtros) : "0"}</strong></td>`;
-    html += `<td></td>`;
+      html += `<td class="otros-valor"><strong>${totalVisibleMes ? formatMoney(totalVisibleMes) : "0"}</strong></td>`;
+     html += `<td class="otros-valor"><strong>${totalSaldosMes ? formatMoney(totalSaldosMes) : "0"}</strong></td>`;
     html += `</tr></tfoot>`;
+// total de aportes visibles del mes por jugador
 
     html += `</table>`;
     cont.innerHTML = html;
@@ -143,9 +192,40 @@ function renderTablaPublic(data) {
 
 function renderObservaciones(text) {
     const el = document.getElementById("observaciones");
-    el.textContent = text && text.trim() ? text : "Sin observaciones para este mes.";
+    el.textContent = text && text.trim() ? text : "No hay Observaciones este mes...";
 }
 
+function renderGastos(data) {
+    const box = document.getElementById("gastosMesPublico");
+    if (!box) return;
+
+    const t = data.totales || {};
+    const detalle = data.gastos_detalle || [];
+
+    let html = "<h3>Gastos</h3>";
+
+    // 🔹 Detalle de gastos
+    if (detalle.length > 0) {
+        html += `<ul class="lista-gastos">`;
+        detalle.forEach(g => {
+            html += `
+                <li>
+                    ${escapeHtml(g.nombre)} — 
+                    <strong>${formatMoney(g.valor)}</strong>
+                </li>
+            `;
+        });
+        html += "</ul>";
+    } else {
+        html += "<p>No hay gastos registrados este mes.</p>";
+    }
+
+    // 🔹 Totales
+    html += `<p><strong>Total gastos del mes:</strong> ${formatMoney(t.gastos_mes || 0)}</p>`;
+    html += `<p><strong>Gastos año hasta este mes:</strong> ${formatMoney(t.gastos_anio || 0)}</p>`;
+
+    box.innerHTML = html;
+}
 
 
 // export PDF

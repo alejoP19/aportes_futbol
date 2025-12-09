@@ -61,9 +61,12 @@
 <div class="gastos-observaciones">
 
   <h2>Gastos y Observaciones:</h2>
-  <section id="observaciones" class="observaciones-box">
-  </section>
-
+  
+  <!-- Nueva sección para mostrar gastos del mes / año -->
+  <section id="gastosMesPublico" class="observaciones-box">
+    </section>
+    <section id="observaciones" class="observaciones-box">
+    </section>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

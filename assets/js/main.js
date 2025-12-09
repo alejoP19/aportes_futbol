@@ -448,9 +448,9 @@ document.getElementById("btnAddGasto").addEventListener("click", async () => {
 
     if (!nombre || valor <= 0) {
         Swal.fire({
-            icon: "warning",
-            title: "Datos incompletos",
-            text: "Debes ingresar el nombre del gasto y un valor mayor a cero."
+            icon: 'info',
+            title: "Datos Incompletos",
+            text: "Debes Ingresar el Nombre del Gasto y un Valor Mayor a Cero."
         });
         return;
     }
@@ -460,6 +460,7 @@ document.getElementById("btnAddGasto").addEventListener("click", async () => {
         title: "¿Registrar este gasto?",
         html: `<b>${nombre}</b><br>Valor: <b>${valor.toLocaleString()}</b>`,
         icon: "question",
+        iconColor:"#03d7fcff",
         showCancelButton: true,
         confirmButtonText: "Sí, registrar",
         cancelButtonText: "Cancelar",
@@ -487,8 +488,9 @@ document.getElementById("btnAddGasto").addEventListener("click", async () => {
         // 🟢 Mostrar mensaje de éxito
         Swal.fire({
             icon: "success",
+            iconColor:"#28a745",
             title: "Gasto registrado",
-            text: "El gasto fue agregado correctamente."
+            text: "Nuevo Gasto Agregado Correctamente."
         });
 
         // limpiar inputs
@@ -551,8 +553,11 @@ async function editarGasto(e) {
             <input id="editNombre" class="swal2-input" value="${nombre}">
             <input id="editValor" type="number" class="swal2-input" value="${valor}">
         `,
+        confirmButtonText: "Sí, Editar",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: "#28a745",
         showCancelButton: true,
-        confirmButtonText: "Guardar cambios"
+        cancelButtonColor: "#d33"
     });
 
     if (!result.isConfirmed) return;
@@ -573,7 +578,13 @@ async function editarGasto(e) {
     let j = await res.json();
 
     if (j.ok) {
-        Swal.fire("Gasto actualizado", "", "success");
+        Swal.fire({
+             icon: "success",
+            iconColor:"#28a745",
+            title: "Gasto Editado",
+            text: "El Gasto Fue Actualizado Correctamente."
+
+        });
         loadGastos();
         loadTotals(monthSelect.value, yearSelect.value);
     }
@@ -586,10 +597,13 @@ async function eliminarGasto(e) {
 
     const confirm = await Swal.fire({
         title: "¿Eliminar este gasto?",
-        icon: "warning",
+        icon: "question",
+        iconColor:"#03d7fcff",
+        confirmButtonText: "Sí, Eliminar",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: "#28a745",
         showCancelButton: true,
-        confirmButtonText: "Eliminar",
-        cancelButtonText: "Cancelar"
+        cancelButtonColor: "#d33"
     });
 
     if (!confirm.isConfirmed) return;
@@ -605,7 +619,12 @@ async function eliminarGasto(e) {
     let j = await res.json();
 
     if (j.ok) {
-        Swal.fire("Gasto eliminado", "", "success");
+        Swal.fire({
+            icon: "success",
+            iconColor:"#28a745",
+            title: "Gasto Eliminado",
+            text: "El Gasto Fue Eliminado Correctamente."
+        });
         loadGastos();
         loadTotals(monthSelect.value, yearSelect.value);
     }

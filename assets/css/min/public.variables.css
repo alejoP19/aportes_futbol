@@ -1,0 +1,21 @@
+/* =======================================================
+   🎨 VARIABLES GLOBALES (CSS Custom Properties)
+   ======================================================= */
+
+:root {
+  --verde-oscuro: #245a4b;
+  --verde-medio: #237a5a;
+  --verde-claro: #90d1a0;
+
+  --amarillo: #e7c505;
+  --amarillo-claro: #feffb1;
+
+  --gris-borde: rgba(223, 222, 222, 0.788);
+
+  --blanco: #ffffff;
+
+  --txt-shadow: -1px 1px 1px black;
+  --txt-shadow-light: -1px 1px 1px #fff;
+
+  --font-main: "Lucida Sans Unicode", sans-serif;
+}

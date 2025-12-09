@@ -1,0 +1,140 @@
+/* =======================================================
+   📊 TABLA (estructura, celdas, excedentes, responsive base)
+   ======================================================= */
+
+/* Contenedor scroll horizontal */
+#contenedorTabla {
+  width: 97%;
+  margin: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 10px;
+  box-shadow: -1px 1px 10px white;
+}
+
+/* Tabla */
+.planilla {
+  width: max-content;
+  min-width: 97%;
+  border-collapse: collapse;
+  background: #f1f1f1;
+  box-shadow: -1px 1px 10px white;
+  border-radius: 10px;
+  table-layout: auto;
+  overflow: hidden;
+}
+
+/* Celdas */
+.planilla th,
+.planilla td {
+  padding: 8px 10px;
+  border: 1px solid var(--gris-borde);
+  text-align: center;
+  font-size: 14px;
+  vertical-align: middle;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Celdas aporte */
+.celda-aporte {
+  background: rgba(255,255,255,0.6);
+  border-radius: 3px;
+  padding: 8px 6px;
+  text-align: center;
+}
+
+/* Excedentes */
+.aporte-excedente {
+  cursor: help;
+  background-color: rgba(255,215,0,0.12);
+  font-weight: 600;
+}
+
+/* Encabezados */
+.planilla thead th {
+  background: var(--verde-medio);
+  color: #fff;
+  text-shadow: var(--txt-shadow);
+}
+
+.planilla thead tr:nth-child(2) th {
+  background: var(--verde-medio);
+  opacity: 0.95;
+}
+
+/* Alternancia filas */
+.planilla tbody tr:nth-child(even) {
+  background: #fbfbf7;
+}
+
+/* Hover fila */
+.planilla tbody tr:hover {
+  background: rgba(0, 140, 255, 0.15);
+  cursor: pointer;
+}
+
+/* Fila seleccionada */
+.fila-seleccionada {
+  background: rgba(0,140,255,0.25) !important;
+}
+
+/* Nombre jugador */
+.player-name {
+  text-align: left !important;
+  padding-left: 10px !important;
+  font-size: medium !important;
+  font-style: italic;
+  color: #000;
+  text-shadow: var(--txt-shadow-light);
+}
+
+/* Otros aportes */
+.otros-tipos {
+  text-align: left;
+  padding-left: 10px;
+  white-space: pre-line;
+  font-weight: lighter;
+  font-size: medium;
+  color: #000;
+  text-shadow: var(--txt-shadow-light);
+}
+
+/* Totales */
+.otros-valor {
+  font-weight: bold;
+  color:#05e750 !important;
+  text-shadow:-2px 1px 1px #000;
+}
+
+.total-por-jugador,
+.total-otros {
+  font-weight:bold;
+  color:var(--amarillo);
+  text-shadow:-2px 1px 1px #000;
+}
+
+/* Footer */
+.total-footer-dias,
+table tfoot {
+  font-weight:bold;
+  color:var(--amarillo);
+  background-color: #8dccbe;
+  padding: 1% 0% !important;
+  text-shadow:-2px 1px 1px #000;
+}
+
+/* Eliminados */
+.fila-eliminado {
+  background: rgba(0,0,0,.06);
+}
+
+/* Animación */
+.tabla-animada {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: aparecerTabla 1s ease-out forwards;
+}
+@keyframes aparecerTabla {
+  to { opacity:1; transform: translateY(0); }
+}

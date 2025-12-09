@@ -1,0 +1,12 @@
+.planilla{width:max-content;min-width:97%;border-collapse:collapse;background:#f1f1f1;box-shadow:-1px 1px 10px white;border-radius:10px;table-layout:auto;overflow:hidden}.planilla td,.planilla th{padding:8px 10px;border:1px solid rgba(223,222,222,.788);text-align:center;font-size:14px;vertical-align:middle;white-space:normal;word-break:break-word}
+
+
+/* 
+Cómo enlazar en tu HTML (Opción 2 que elegiste) */
+
+/* <link rel="stylesheet" href="css/public.variables.css">
+<link rel="stylesheet" href="css/public.header.css">
+<link rel="stylesheet" href="css/public.table.css">
+<link rel="stylesheet" href="css/public.layout.css">
+<link rel="stylesheet" href="css/public.min.css"> */
+/* public.min.css debe ir de último, porque sobreescribe cosas del principal. */
