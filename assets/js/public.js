@@ -1,11 +1,13 @@
 // public/public.js
 const API_JSON = "/APORTES_FUTBOL/backend/public_data/listado_publico.php";
 const API_PDF = "../public/public/public_reportes/reporte_mes_publico.php";
+
 document.addEventListener("DOMContentLoaded", () => {
     cargarSelects();
-    document.getElementById("selectAnio").addEventListener("change", cargarDatos);
-    document.getElementById("selectMes").addEventListener("change", cargarDatos);
+   document.getElementById("selectAnio").addEventListener("change", cargarDatos);
+   document.getElementById("selectMes").addEventListener("change", cargarDatos);
     cargarDatos();
+    
 });
 
 function cargarSelects() {
@@ -29,6 +31,7 @@ function cargarSelects() {
         if (i+1 === actualM) op.selected = true;
         selM.appendChild(op);
     });
+
 }
 
 async function cargarDatos() {
@@ -45,7 +48,8 @@ async function cargarDatos() {
     renderTablaPublic(data);
  renderTotales(data);  
     renderObservaciones(data.observaciones);
-    renderGastos(data)
+    renderGastos(data,mes,anio)
+     
 }
 
 function renderTablaPublic(data) {
@@ -193,25 +197,26 @@ data.rows.forEach(r => {
 function renderObservaciones(text) {
     const el = document.getElementById("observaciones");
     el.textContent = text && text.trim() ? text : "No hay Observaciones este mes...";
+
 }
 
-function renderGastos(data) {
+function renderGastos(data, mes, anio) {
     const box = document.getElementById("gastosMesPublico");
     if (!box) return;
 
     const t = data.totales || {};
     const detalle = data.gastos_detalle || [];
 
-    let html = "<h3>Gastos</h3>";
+    let html = `<h3 class="titulo-gastos">Gastos</h3>`;
 
-    // 🔹 Detalle de gastos
+    // 🔹 Lista de gastos
     if (detalle.length > 0) {
         html += `<ul class="lista-gastos">`;
         detalle.forEach(g => {
             html += `
                 <li>
-                    ${escapeHtml(g.nombre)} — 
-                    <strong>${formatMoney(g.valor)}</strong>
+                    <label>* ${escapeHtml(g.nombre)}</label>
+                    <p>${formatMoney(g.valor)}</p>
                 </li>
             `;
         });
@@ -220,9 +225,29 @@ function renderGastos(data) {
         html += "<p>No hay gastos registrados este mes.</p>";
     }
 
+    // ------------------------------
+    // 🔹 NOMBRE DEL MES (CORREGIDO)
+    // ------------------------------
+    const fecha = new Date(anio, mes - 1, 1);  
+    let nombreMes = fecha.toLocaleString('es-ES', { month: 'long' });
+
+    // Capitalizar
+    nombreMes = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
+
+    // ------------------------------
     // 🔹 Totales
-    html += `<p><strong>Total gastos del mes:</strong> ${formatMoney(t.gastos_mes || 0)}</p>`;
-    html += `<p><strong>Gastos año hasta este mes:</strong> ${formatMoney(t.gastos_anio || 0)}</p>`;
+    // ------------------------------
+    html += `
+        <label class="gastos-valor-label">
+            Gastos Totales de ${nombreMes}
+        </label>
+        <p class="valor-gastos">${formatMoney(t.gastos_mes || 0)}</p>
+
+        <label class="gastos-valor-label">
+            Gastos Totales del ${anio}
+        </label>
+        <p class="valor-gastos">${formatMoney(t.gastos_anio || 0)}</p>
+    `;
 
     box.innerHTML = html;
 }

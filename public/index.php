@@ -60,12 +60,14 @@
 </section>
 <div class="gastos-observaciones">
 
-  <h2>Gastos y Observaciones:</h2>
+
   
   <!-- Nueva sección para mostrar gastos del mes / año -->
   <section id="gastosMesPublico" class="observaciones-box">
     </section>
+      <h2 id="title-observaciones">Observaciones</h2>
     <section id="observaciones" class="observaciones-box">
+
     </section>
 </div>
 
