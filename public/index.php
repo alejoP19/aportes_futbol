@@ -39,37 +39,37 @@
 
 <section id="contenedorTabla"></section>
 
-<section id="totales" class="totales-card">
-  <h2>Totales</h2>
-
-<div>
-  <label><strong>Total Aportes del Mes</strong></label>
-     <p id="tMes"></p>
-</div>
-
-<div>
-  <label><strong>Total Otros Aportes Del Mes: </strong></label>
-     <p id="tOtros"></p>
-</div>
-
-<div>
-  <label><strong>Total Aportes Del Año: </strong></label>
-     <p id="tAnio"></p>
-</div>
- 
-</section>
 <div class="gastos-observaciones">
-
-
-  
   <!-- Nueva sección para mostrar gastos del mes / año -->
   <section id="gastosMesPublico" class="observaciones-box">
+    
     </section>
-      <h2 id="title-observaciones">Observaciones</h2>
-    <section id="observaciones" class="observaciones-box">
+    <section id="totales" class="totales-card">
+      <h2>Totales</h2>
 
-    </section>
+    <div class="totals-items" >
+      <label><strong>Total Aportes del Mes</strong></label>
+        <p id="tMes"></p>
+    </div>
+
+    <div class="totals-items" >
+      <label><strong>Total Otros Aportes Del Mes </strong></label>
+        <p id="tOtros"></p>
+    </div>
+
+    <div class="totals-items" >
+      <label><strong>Total Aportes Del Año </strong></label>
+        <p id="tAnio"></p>
+    </div>
+</section>
+    <div class="box-container-observ" >
+         <h2 id="title-observaciones">Observaciones</h2>
+       <section id="observaciones" class="observaciones-box">
+   
+       </section>
+   </div>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>

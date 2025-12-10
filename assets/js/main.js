@@ -161,41 +161,78 @@ function loadObservaciones(mes, anio) {
         });
 }
 
-function saveObservaciones() {
+
+ function saveObservaciones() {
     const mes = monthSelect.value;
     const anio = yearSelect.value;
     const texto = document.getElementById("obsMes").value;
-    if (texto == '') {
+
+    // Si no escribió nada, mostrar advertencia pero permitir continuar
+    if (texto.trim() === '') {
         Swal.fire({
-  icon: "error",
-  title: "No Hay Observaciónes",
-  text: "Debe Ingresar una Observación!",
-  
-});
-    }else{
- fetch(`${API}/aportes/save_observaciones.php`, {
+            icon: "info",
+            title: "No Ingresó Una Nueva Observación",
+            text: "Se Mostrarán Solo Las Obsercaciones Guardadas Anteriormente.",
+            confirmButtonText: "OK, Continuar",
+            confirmButtonColor: "#28a745",
+            showCancelButton: true,
+            cancelButtonText: "Cancelar"
+        }).then(result => {
+
+            if (result.isConfirmed) {
+                enviarObservacion(mes, anio, texto);
+            }
+
+        });
+
+        return; // Salimos para que no siga la función
+    }
+
+    // Si sí escribió texto, guardar directo
+    enviarObservacion(mes, anio, texto);
+}
+
+
+//----------------------------------
+// FUNCIÓN QUE HACE EL FETCH REAL
+//----------------------------------
+function enviarObservacion(mes, anio, texto) {
+
+    fetch(`${API}/aportes/save_observaciones.php`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `mes=${mes}&anio=${anio}&texto=${encodeURIComponent(texto)}`
     })
-        .then(res => res.json())
-        .then(data => {
-            if (data.ok)  Swal.fire({
-  title: "Observación o Gasto Guardada Exitosamente!",
-  icon: "success",
-  draggable: true
-});
-else  
-Swal.fire({
-  icon: "error",
-  title: "Oops...",
-  text: "Error al Guardar la Observación o Gasto!",
-  footer: '<a href="#">Why do I have this issue?</a>'
-});;
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.ok) {
+            Swal.fire({
+                title: "¡Observación Guardada Exitosamente!",
+                 icon: "success",
+                 iconColor: "#0e9625ff",
+                 confirmButtonText: "OK"
+            });
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "Error al guardar la observación o gasto"
+            });
+        }
+
+    })
+    .catch(err => {
+        Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "No se pudo conectar con el servidor"
         });
-    }
-   
+    });
 }
+  
+
+
 
 // ----------- OTROS APORTES -----------------
 async function addOtroAporte() {

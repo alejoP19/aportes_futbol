@@ -71,7 +71,7 @@ function renderTablaPublic(data) {
     for (let i = 0; i < dias.length; i++) {
         html += `<th>${dias[i]}</th>`;
     }
-    html += `<th>Fecha Especial (${fechaEspecial})</th>`;
+    html += `<th>Otra Fecha (${fechaEspecial})</th>`;
     html += `<th>Tipo</th><th>Valor</th>`;
     html += `<th>Por Jugador</th>`;
     html += `<th></th>`;
@@ -144,7 +144,7 @@ if (hayExcEsp) {
     html += `</tbody>`;
 
     // Pie
-    html += `<tfoot ><tr><td><strong>TOTAL DÍA</strong></td>`;
+    html += `<tfoot><tr><td><h2 class="tfoot-totals-names">Totales Diarios</h2></td>`;
     const totalsPorDia = Array(dias.length).fill(0);
     let totalEspecial = 0;
     let totalOtros = 0;
@@ -163,11 +163,11 @@ data.rows.forEach(r => {
 });
     totalsPorDia.forEach(v => html += `<td class="total-footer-dias"><strong>${v ? formatMoney(v) : "0"}</strong></td>`);
 
-    html += `<td><strong>${totalEspecial ? formatMoney(totalEspecial) : "0"}</strong></td>`;
-    html += `<td><strong>TOTAL OTROS</strong></td>`;
+    html += `<td ><strong>${totalEspecial ? formatMoney(totalEspecial) : "0"}</strong></td>`;
+    html += `<td><h2 class="tfoot-totals-names">Total Otros</h2></td>`;
     html += `<td class="otros-valor"><strong>${totalOtros ? formatMoney(totalOtros) : "0"}</strong></td>`;
-      html += `<td class="otros-valor"><strong>${totalVisibleMes ? formatMoney(totalVisibleMes) : "0"}</strong></td>`;
-     html += `<td class="otros-valor"><strong>${totalSaldosMes ? formatMoney(totalSaldosMes) : "0"}</strong></td>`;
+      html += `<td><strong>${totalVisibleMes ? formatMoney(totalVisibleMes) : "0"}</strong></td>`;
+     html += `<td><strong>${totalSaldosMes ? formatMoney(totalSaldosMes) : "0"}</strong></td>`;
     html += `</tr></tfoot>`;
 // total de aportes visibles del mes por jugador
 
@@ -238,15 +238,16 @@ function renderGastos(data, mes, anio) {
     // 🔹 Totales
     // ------------------------------
     html += `
+    <div class="totales-gastos" >
         <label class="gastos-valor-label">
             Gastos Totales de ${nombreMes}
         </label>
-        <p class="valor-gastos">${formatMoney(t.gastos_mes || 0)}</p>
-
+        <p class="gastos-valor-valor">${formatMoney(t.gastos_mes || 0)}</p>
         <label class="gastos-valor-label">
             Gastos Totales del ${anio}
         </label>
-        <p class="valor-gastos">${formatMoney(t.gastos_anio || 0)}</p>
+        <p class="gastos-valor-valor">${formatMoney(t.gastos_anio || 0)}</p>
+    </div>
     `;
 
     box.innerHTML = html;
