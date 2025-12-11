@@ -666,3 +666,33 @@ async function eliminarGasto(e) {
         loadTotals(monthSelect.value, yearSelect.value);
     }
 }
+
+
+document.addEventListener("change", async (e) => {
+    if (!e.target.classList.contains("chk-deuda")) return;
+
+    const chk   = e.target;
+    const id    = chk.dataset.player;
+    const fecha = chk.dataset.fecha;
+
+    // Clase temporal SOLO para animar el clickeado
+    chk.classList.add("clicked-once");
+
+    const accion = chk.checked ? "agregar" : "borrar";
+
+    try {
+        const res = await fetch(`${API}/aportes/deudas.php`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ accion, id_jugador: id, fecha }),
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+            setTimeout(() => refreshSheet(), 150); 
+        }
+
+    } catch (err) {
+        console.error("Error:", err);
+    }
+});

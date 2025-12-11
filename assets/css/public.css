@@ -110,6 +110,7 @@ body {
   border: 1px solid black;
   font-size: 14px;
   transition: .3s;
+ 
 }
 
 /* Exportar PDF */
@@ -124,6 +125,7 @@ body {
   box-shadow:0 0 20px rgba(238, 238, 238, 0.938);
   border: none;
   padding: 5px 8px;
+  cursor: pointer;
 }
 
 /* Administrar */
@@ -315,7 +317,28 @@ table tfoot {
 .fila-eliminado {
   background: rgba(0,0,0,.06);
 }
+.columna-deuda {
+    font-weight: bold;
+    color: red;
+    text-shadow: -1px 1px 1px #000;
+}
 
+.columna-deuda.sin-deuda {
+    color: #008c2c;
+    text-shadow: -1px 1px 1px #000;
+}.x-deuda {
+    color: red;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.deuda-x-publica {
+    display: inline-block;
+    font-size: 18px;
+    font-weight: bold;
+    color: red;
+    margin-right: 4px;
+}
 /* =======================================================
    TOTALES CARD
    ======================================================= */

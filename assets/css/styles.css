@@ -114,6 +114,7 @@ box-shadow: 0 0 20px rgba(230,241,255,1);
 border-radius: 25px;
 padding: 8px 19px;
 border: none;
+cursor: pointer;
 }
 
 .logout-button {
@@ -143,6 +144,7 @@ box-shadow: 0 0 20px rgba(230,241,255,1);
 border-radius: 25px;
 padding: 7px 7px;
 border: none;
+cursor: pointer;
 }
 
 .date-selectors { 
@@ -270,7 +272,7 @@ padding:8px 40px;
 background-color:#2ebe76e7; 
 color:rgba(255, 255, 255, 0.888);
 text-shadow: -1px 1px 1px #000;
-
+cursor: pointer;
 border: 1px solid rgb(151, 151, 151); 
 outline:0; 
 font-size:16px; 
@@ -332,6 +334,7 @@ border-radius:25px;
 box-shadow:0 0 20px rgba(160, 255, 250, 0.938); 
 border: none;
 padding:7px 29px; 
+cursor: pointer;
 }
 
 /* right panel cards */
@@ -389,6 +392,62 @@ margin-bottom:5%;
 margin-top: 2%;
 }
 
+.aporte-wrapper {
+    position: relative;
+}
+
+
+/* Estrella animada dentro del input */
+.saldo-flag {
+    position: absolute;
+    top: 12px;
+    left: 6%;
+    transform: translateX(-50%);
+    font-size: 15px;
+    pointer-events: none;
+    font-weight: bold;
+    color: #ecc901;
+    opacity: 0;
+    transition: 
+        opacity 0.35s ease,
+        transform 0.35s cubic-bezier(0.25, 1.3, 0.5, 1);
+}
+
+/* Cuando la estrella debe mostrarse */
+.saldo-flag.show {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+
+/* Espacio dentro del input para que no tape el número */
+.aporte-wrapper input {
+    padding-left: 15px !important;
+}
+/* Bolitas Deuda*/
+/* * Contenedor de cada celda de aporte */ *
+.celda-aporte {
+    position: relative;
+    padding: 0;
+}
+
+/* Ajuste visual del input */
+.celda-aporte input {
+    width: 65px;
+    text-align: center;
+    padding-right: 14px; /* espacio para iconos */
+}
+
+.chk-deuda-global.con-deuda {
+    color: red;
+    font-weight: bold;
+}
+
+.chk-deuda-global input:checked {
+    accent-color: red;
+    transform: scale(1.2);
+}
+
+
 .otro-aporte{ 
 background:var(--primary-blue); 
 display:flex; 
@@ -415,6 +474,7 @@ border-radius:25px;
 box-shadow:0 0 20px rgba(160, 255, 250, 0.938); 
 border: none;
 padding:7px 29px; 
+cursor: pointer;
 }
 
 .notes-card{ 
@@ -451,6 +511,7 @@ border-radius:25px;
 box-shadow:0 0 20px rgba(238, 238, 238, 0.938); 
 border: none;
 padding:7px 29px;
+cursor: pointer;
 
 }
 
@@ -478,7 +539,7 @@ transition: all 1s;
 .middle-panel.expanded {
 display: block !important;
 position: absolute;
-top: 25%; /* debajo del header */
+top: 23%; /* debajo del header */
 left: 0;
 width: 100vw;
 max-width: 100%;
@@ -487,6 +548,9 @@ background: #f1f1f1f8;
 padding: 15px;
 border-radius: 0;
 box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+
+max-height: 100%; /* dejar espacio para header y botón */
+
 }
 .month-header{ 
 color: #f1c500;
@@ -550,51 +614,7 @@ overflow: hidden; /* redondea las esquinas reales */
     padding-left: 25px;
 }
 .planilla thead tr:first-child th:last-child {
-    padding-right: 25px;
-}
-.aporte-wrapper {
-    position: relative;
-}
-
-.saldo-flag {
-    position: absolute;
-    left: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 15px;
-    font-weight: bold;
-    color: #ffcc00;
-    pointer-events: none;
-}
-
-.aporte-wrapper input {
-    padding-left: 22px !important; /* deja espacio a la estrella */
-}
-/* Estrella animada dentro del input */
-.saldo-flag {
-    position: absolute;
-    left: 6px;
-    top: 50%;
-    transform: translateY(-50%) scale(0.3);
-    font-size: 16px;
-    font-weight: bold;
-    color: #ffcc00;
-    opacity: 0;
-    pointer-events: none;
-    transition: 
-        opacity 0.35s ease,
-        transform 0.35s cubic-bezier(0.25, 1.3, 0.5, 1);
-}
-
-/* Cuando la estrella debe mostrarse */
-.saldo-flag.show {
-    opacity: 1;
-    transform: translateY(-50%) scale(1);
-}
-
-/* Espacio dentro del input para que no tape el número */
-.aporte-wrapper input {
-    padding-left: 28px !important;
+    padding-right: 0px;
 }
 
 tbody tr{

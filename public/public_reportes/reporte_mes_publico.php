@@ -34,6 +34,26 @@ while ($r = $jug_res->fetch_assoc()) $jugadores[] = $r;
 $totalJugadores = count($jugadores);
 
 // =========================
+// MAPA DE DEUDAS (tabla deudas)
+// =========================
+$deudas_map = []; // $deudas_map[id_jugador][dia] = true
+
+$stmtDeu = $conexion->prepare("
+    SELECT id_jugador, fecha
+    FROM deudas_aportes
+    WHERE YEAR(fecha) = ? AND MONTH(fecha) = ?
+");
+$stmtDeu->bind_param("ii", $anio, $mes);
+$stmtDeu->execute();
+$resDeu = $stmtDeu->get_result();
+while ($row = $resDeu->fetch_assoc()) {
+    $pid = intval($row['id_jugador']);
+    $dia = intval(date('j', strtotime($row['fecha'])));
+    $deudas_map[$pid][$dia] = true;
+}
+$stmtDeu->close();
+
+// =========================
 // FUNCIONES
 // =========================
 
@@ -58,6 +78,27 @@ function get_otros($conexion, $id_jugador, $mes, $anio) {
     $out = [];
     while ($row = $r->fetch_assoc()) $out[] = $row;
     return $out;
+}
+
+// ======================================================
+// SALDO ACUMULADO HASTA ESTE MES / AÑO
+// ======================================================
+function get_saldo_acumulado($conexion, $id_jugador, $mes, $anio) {
+    $stmt = $conexion->prepare("
+        SELECT IFNULL(SUM(aporte_principal - LEAST(aporte_principal,2000)),0) AS excedente
+        FROM aportes
+        WHERE id_jugador = ?
+          AND (
+                YEAR(fecha) < ?
+             OR (YEAR(fecha) = ? AND MONTH(fecha) <= ?)
+          )
+    ");
+    $stmt->bind_param("iiii", $id_jugador, $anio, $anio, $mes);
+    $stmt->execute();
+    $res = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    return intval($res['excedente'] ?? 0);
 }
 
 function get_obs($conexion, $mes, $anio) {
@@ -117,6 +158,7 @@ if ($totalJugadores > 40) $clase = "too-many-rows";
     <th class="right">Otros (tipo / valor)</th>
     <th class="right">Total jugador</th>
     <th class="right">Saldo</th>
+    <th class="right">Tu Deuda</th>
 </tr>
 </thead>
 
@@ -145,34 +187,45 @@ foreach ($jugadores as $jug):
 
         $totalJugador += $tope;
         $totalSaldoJugador += $exceso;
+
+        $tieneDeudaDia = isset($deudas_map[$jug['id']][$d]);
     ?>
-        <td class="right"><?= $tope ? number_format($tope,0,',','.') : "" ?></td>
+        <td class="right">
+            <?= $tope ? number_format($tope,0,',','.') : "" ?>
+            <?php if ($tieneDeudaDia): ?>
+                <br><span style="color:#d00; font-size:9pt;">●</span>
+            <?php endif; ?>
+        </td>
     <?php endforeach; ?>
 
     <?php
     // FECHA ESPECIAL = cualquier día NO miércoles/sábado
     $fechaEspecialTotal = 0;
     $fechaEspecialSaldo = 0;
+    
+// FECHA ESPECIAL FIJA — igual que en la tabla pública
+$diaEspecial = 28;
+$tieneDeudaEspecial = isset($deudas_map[$jug['id']][$diaEspecial]);
 
-    for ($d = 1; $d <= $days_count; $d++) {
-        $w = date('N', strtotime("$anio-$mes-$d"));
-        if ($w != 3 && $w != 6) {
-            $fecha = sprintf("%04d-%02d-%02d", $anio, $mes, $d);
-            $real = get_aporte_real($conexion, $jug['id'], $fecha);
-            $tope = min($real, 2000);
-            $exceso = max(0, $real - 2000);
+$fechaEsp = sprintf("%04d-%02d-%02d", $anio, $mes, $diaEspecial);
+$realEsp  = get_aporte_real($conexion, $jug['id'], $fechaEsp);
+$topeEsp  = min($realEsp, 2000);
+$excesoEsp = max(0, $realEsp - 2000);
 
-            $fechaEspecialTotal += $tope;
-            $fechaEspecialSaldo += $exceso;
-        }
-    }
+$totalJugador += $topeEsp;
+$totalSaldoJugador += $excesoEsp;
+
 
     $totalJugador += $fechaEspecialTotal;
     $totalSaldoJugador += $fechaEspecialSaldo;
     ?>
 
-    <td class="right"><?= $fechaEspecialTotal ? number_format($fechaEspecialTotal,0,',','.') : "" ?></td>
-
+   <td class="right">
+    <?= $topeEsp ? number_format($topeEsp,0,',','.') : "" ?>
+    <?php if ($tieneDeudaEspecial): ?>
+        <br><span style="color:#d00; font-size:9pt;">●</span>
+    <?php endif; ?>
+</td>
     <?php
     // OTROS APORTES
     $otros = get_otros($conexion, $jug['id'], $mes, $anio);
@@ -186,20 +239,41 @@ foreach ($jugadores as $jug):
 
     $totalJugador += $otros_val;
     $total_otros_global += $otros_val;
-
     ?>
     <td class="small"><?= implode("<br>", $otros_html) ?></td>
-
     <td class="right"><strong><?= number_format($totalJugador,0,',','.') ?></strong></td>
-    <td class="right"><strong><?= number_format($totalSaldoJugador,0,',','.') ?></strong></td>
+
+    <?php
+    // SALDO ACUMULADO HASTA ESTE MES (NO SOLO EL MES)
+    $saldoAcumulado = get_saldo_acumulado($conexion, $jug['id'], $mes, $anio);
+    ?>
+    <td class="right"><strong><?= number_format($saldoAcumulado,0,',','.') ?></strong></td>
+    <?php
+// ==========================
+// COLUMNA TU DEUDA (PDF)
+// ==========================
+$diasDeuda = isset($deudas_map[$jug['id']]) ? count($deudas_map[$jug['id']]) : 0;
+
+if ($diasDeuda > 0) {
+    $textoDeuda = "Debe {$diasDeuda} día" . ($diasDeuda > 1 ? 's' : '');
+    echo '<td class="right" style="color:#b00;font-weight:bold;">' . $textoDeuda . '</td>';
+} else {
+    echo '<td class="right" style="color:green;font-weight:bold;">Sin deuda</td>';
+}
+?>
+
 
 </tr>
 
 <?php
-    $total_mes_global += $totalJugador + $totalSaldoJugador;
-    $total_saldo_global += $totalSaldoJugador;
+  // Para totales globales del PDF
+// Para totales globales del PDF
+$total_mes_global += ($totalJugador + $totalSaldoJugador);
+$total_saldo_global += $totalSaldoJugador;
+
 endforeach;
 ?>
+
 
 <tr style="background:#b4e7c7; font-weight:bold;">
     <td>Total por día</td>
@@ -225,6 +299,7 @@ endforeach;
     <td class="right"><?= number_format($total_mes_global,0,',','.') ?></td>
     <td class="right"><?= number_format($total_saldo_global,0,',','.') ?></td>
 </tr>
+
 
 </tbody>
 </table>

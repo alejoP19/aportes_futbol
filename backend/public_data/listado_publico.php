@@ -24,12 +24,10 @@ for ($d = 1; $d <= $daysInMonth; $d++) {
 $fecha_especial = 28;
 
 // -------------------------------------------
-// 2) Jugadores + SALDO calculado
-//    saldo = total_aportes_hasta_mes - (juegos_hasta_mes * 2000)
+// 2) Jugadores + SALDO calculado (acumulado)
 // -------------------------------------------
 $players = [];
 
-// sumamos SOLO aportes hasta el mes/año seleccionados
 $sqlPlayers = "
     SELECT 
         j.id,
@@ -56,7 +54,6 @@ $stmt->bind_param("iii", $anio, $anio, $mes);
 $stmt->execute();
 $res = $stmt->get_result();
 while ($r = $res->fetch_assoc()) {
-    // calculamos saldo acumulado hasta este mes
     $total_aportes = intval($r['total_aportes']);
     $total_juegos  = intval($r['total_juegos']);
     $saldo_calc    = $total_aportes - ($total_juegos * 2000);
@@ -67,7 +64,6 @@ while ($r = $res->fetch_assoc()) {
 }
 $stmt->close();
 
-// obtengo solo IDs para otros queries
 $playerIds = array_map(fn($p) => intval($p['id']), $players);
 
 // -------------------------------------------
@@ -113,6 +109,46 @@ if (!empty($playerIds)) {
 }
 
 // -------------------------------------------
+// (helper) saldo acumulado para JSON
+// -------------------------------------------
+function get_saldo_acumulado($conexion, $id_jugador, $mes, $anio) {
+    $stmt = $conexion->prepare("
+        SELECT IFNULL(SUM(aporte_principal - LEAST(aporte_principal,2000)),0) AS excedente
+        FROM aportes
+        WHERE id_jugador = ?
+          AND (
+                YEAR(fecha) < ?
+             OR (YEAR(fecha) = ? AND MONTH(fecha) <= ?)
+          )
+    ");
+    $stmt->bind_param("iiii", $id_jugador, $anio, $anio, $mes);
+    $stmt->execute();
+    $res = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    return intval($res['excedente'] ?? 0);
+}
+
+// -------------------------------------------
+// 2.1) Cargar deudas reales por jugador y día
+// -------------------------------------------
+// =====================================================
+// CARGAR TODAS LAS DEUDAS PARA MOSTRAR EN TABLA PUBLICA
+// =====================================================
+$deudas_map = [];
+
+$qDeu = $conexion->query("
+    SELECT id_jugador, fecha
+    FROM deudas_aportes
+");
+
+while ($d = $qDeu->fetch_assoc()) {
+    $pid = intval($d['id_jugador']);
+    $dia = intval(date("j", strtotime($d['fecha'])));
+    $deudas_map[$pid][$dia] = true;
+}
+
+// -------------------------------------------
 // 5) Construir filas (rows) para la tabla pública
 // -------------------------------------------
 $rows = [];
@@ -127,42 +163,38 @@ foreach ($players as $p) {
         "activo"        => intval($p['activo']),
         "eliminado"     => $p['eliminado'] ? 1 : 0,
         "dias"          => [],
-        "real_dias"     => [],   // <-- NUEVO
+        "real_dias"     => [],
         "especial"      => 0,
-        "real_especial" => 0,    // <-- NUEVO
+        "real_especial" => 0,
         "otros"         => $otros_map[$pid] ?? [],
         "saldo"         => 0,
-        "total_mes"     => 0
+        "total_mes"     => 0,
+        "deudas"        => $deudas_map[$pid] ?? []
     ];
 
     $total_jugador = 0;
-    $saldo_mes     = 0;
     $total_otros   = 0;
 
     // -------- DÍAS DEL MES --------
     foreach ($dias_validos as $d) {
         $f     = sprintf("%04d-%02d-%02d", $anio, $mes, $d);
-        $real  = $aportes_map[$pid][$f] ?? 0;       // lo que realmente dio
-        $vis   = min($real, 2000);                  // lo que se muestra
-        $exc   = max(0, $real - 2000);              // excedente -> saldo
+        $real  = $aportes_map[$pid][$f] ?? 0;
+        $vis   = min($real, 2000);
 
         $fila['dias'][]      = $vis;
-        $fila['real_dias'][] = $real;               // <-- guardamos aporte real
+        $fila['real_dias'][] = $real;
 
         $total_jugador += $vis;
-        $saldo_mes     += $exc;
     }
 
     // -------- FECHA ESPECIAL --------
-    $fEsp   = sprintf("%04d-%02d-%02d", $anio, $mes, $fecha_especial);
+    $fEsp    = sprintf("%04d-%02d-%02d", $anio, $mes, $fecha_especial);
     $realEsp = $aportes_map[$pid][$fEsp] ?? 0;
     $visEsp  = min($realEsp, 2000);
-    $excEsp  = max(0, $realEsp - 2000);
 
     $fila['especial']      = $visEsp;
-    $fila['real_especial'] = $realEsp;             // <-- aporte real
+    $fila['real_especial'] = $realEsp;
     $total_jugador        += $visEsp;
-    $saldo_mes            += $excEsp;
 
     // -------- OTROS APORTES --------
     if (!empty($fila['otros'])) {
@@ -173,24 +205,21 @@ foreach ($players as $p) {
     }
 
     $fila['total_mes'] = $total_jugador + $total_otros;
-    $fila['saldo']     = $saldo_mes;
+    $fila['saldo']     = get_saldo_acumulado($conexion, $pid, $mes, $anio);
 
     $rows[] = $fila;
 }
 
-
 // -------------------------------------------
-// 6) Totales generales + gastos (como get_total.php)
+// 6) Totales generales + gastos
 // -------------------------------------------
 
-// aportes del día
 $today = $conexion->query("
     SELECT IFNULL(SUM(aporte_principal),0) AS s 
     FROM aportes 
     WHERE fecha = CURDATE()
 ")->fetch_assoc()['s'];
 
-// aportes del mes seleccionado
 $month_total = $conexion->query("
     SELECT IFNULL(SUM(aporte_principal),0) AS s 
     FROM aportes 
@@ -198,7 +227,6 @@ $month_total = $conexion->query("
       AND YEAR(fecha)  = $anio
 ")->fetch_assoc()['s'];
 
-// aportes del año HASTA ESE MES
 $year_total = $conexion->query("
     SELECT IFNULL(SUM(aporte_principal),0) AS s 
     FROM aportes 
@@ -206,7 +234,6 @@ $year_total = $conexion->query("
       AND MONTH(fecha) <= $mes
 ")->fetch_assoc()['s'];
 
-// otros aportes del mes
 $otros_mes = $conexion->query("
     SELECT IFNULL(SUM(valor),0) AS s 
     FROM otros_aportes 
@@ -214,7 +241,6 @@ $otros_mes = $conexion->query("
       AND anio = $anio
 ")->fetch_assoc()['s'];
 
-// otros aportes del año HASTA ESE MES
 $otros_year = $conexion->query("
     SELECT IFNULL(SUM(valor),0) AS s 
     FROM otros_aportes 
@@ -222,7 +248,6 @@ $otros_year = $conexion->query("
       AND mes <= $mes
 ")->fetch_assoc()['s'];
 
-// gastos
 $gastos_mes = $conexion->query("
     SELECT IFNULL(SUM(valor),0) s 
     FROM gastos 
@@ -235,7 +260,6 @@ $gastos_anio = $conexion->query("
     WHERE anio = $anio AND mes <= $mes
 ")->fetch_assoc()['s'];
 
-// aplicar restas al total final mostrado
 $month_total_final = $month_total + $otros_mes - $gastos_mes;
 $year_total_final  = $year_total + $otros_year - $gastos_anio;
 
@@ -247,11 +271,9 @@ $totales = [
     "gastos_mes"      => intval($gastos_mes),
     "gastos_anio"     => intval($gastos_anio)
 ];
-// -------------------------------------------
-// 6.1) DETALLE DE GASTOS DEL MES (nombre + valor)
-// -------------------------------------------
-$gastos_detalle = [];
 
+// detalle de gastos
+$gastos_detalle = [];
 $qDet = $conexion->prepare("
     SELECT nombre, valor 
     FROM gastos 
@@ -261,7 +283,6 @@ $qDet = $conexion->prepare("
 $qDet->bind_param("ii", $mes, $anio);
 $qDet->execute();
 $resDet = $qDet->get_result();
-
 while ($g = $resDet->fetch_assoc()) {
     $gastos_detalle[] = [
         "nombre" => $g["nombre"],
@@ -270,9 +291,7 @@ while ($g = $resDet->fetch_assoc()) {
 }
 $qDet->close();
 
-// -------------------------------------------
-// 7) Observaciones
-// -------------------------------------------
+// observaciones
 $qObs = $conexion->prepare("
     SELECT texto 
     FROM gastos_observaciones 
@@ -281,27 +300,20 @@ $qObs = $conexion->prepare("
 ");
 $qObs->bind_param("ii", $mes, $anio);
 $qObs->execute();
-$resObs       = $qObs->get_result()->fetch_assoc();
+$resObs        = $qObs->get_result()->fetch_assoc();
 $observaciones = $resObs['texto'] ?? "";
 $qObs->close();
 
-// -------------------------------------------
-// 8) Respuesta final JSON
-// -------------------------------------------
-// file_put_contents("debug_saldos.txt", print_r($players, true));
-
-
 echo json_encode([
-    "mes"           => $mes,
-    "anio"          => $anio,
-    "dias_validos"  => $dias_validos,
-    "fecha_especial"=> $fecha_especial,
-    "jugadores"     => $players,
-    "rows"          => $rows,
-    "totales"       => $totales,
-    "observaciones" => $observaciones,
+    "mes"            => $mes,
+    "anio"           => $anio,
+    "dias_validos"   => $dias_validos,
+    "fecha_especial" => $fecha_especial,
+    "jugadores"      => $players,
+    "rows"           => $rows,
+    "totales"        => $totales,
+    "observaciones"  => $observaciones,
     "gastos_detalle" => $gastos_detalle
-
 ], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
 
 exit;
