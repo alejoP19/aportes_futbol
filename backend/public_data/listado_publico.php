@@ -135,7 +135,10 @@ function get_saldo_acumulado($conexion, $id_jugador, $mes, $anio) {
 // =====================================================
 // CARGAR TODAS LAS DEUDAS PARA MOSTRAR EN TABLA PUBLICA
 // =====================================================
-$deudas_map = [];
+// =====================================================
+// DEUDAS EN TODA LA BD (para totales acumulados)
+// =====================================================
+$deudas_all = [];
 
 $qDeu = $conexion->query("
     SELECT id_jugador, fecha
@@ -145,7 +148,40 @@ $qDeu = $conexion->query("
 while ($d = $qDeu->fetch_assoc()) {
     $pid = intval($d['id_jugador']);
     $dia = intval(date("j", strtotime($d['fecha'])));
-    $deudas_map[$pid][$dia] = true;
+    $mesDeuda = intval(date("n", strtotime($d['fecha'])));
+    $anioDeuda = intval(date("Y", strtotime($d['fecha'])));
+
+    $deudas_all[$pid][] = [
+        "dia"  => $dia,
+        "mes"  => $mesDeuda,
+        "anio" => $anioDeuda
+    ];
+}
+// =====================================================
+// DEUDAS DEL MES ACTUAL (solo para mostrar X en tabla)
+// =====================================================
+$deudas_mes = [];
+
+foreach ($deudas_all as $pid => $lista) {
+    foreach ($lista as $d) {
+        if ($d["mes"] == $mes && $d["anio"] == $anio) {
+            $deudas_mes[$pid][$d["dia"]] = true;
+        }
+    }
+}
+// =====================================================
+// TOTAL DE DEUDAS ACUMULADAS HASTA ESTE MES
+// =====================================================
+$deudas_acum_cnt = [];
+
+foreach ($deudas_all as $pid => $lista) {
+    $count = 0;
+    foreach ($lista as $d) {
+        if ($d["anio"] < $anio || ($d["anio"] == $anio && $d["mes"] <= $mes)) {
+            $count++;
+        }
+    }
+    $deudas_acum_cnt[$pid] = $count;
 }
 
 // -------------------------------------------
@@ -169,7 +205,8 @@ foreach ($players as $p) {
         "otros"         => $otros_map[$pid] ?? [],
         "saldo"         => 0,
         "total_mes"     => 0,
-        "deudas"        => $deudas_map[$pid] ?? []
+        "deudas"        => $deudas_mes[$pid] ?? [],      // SOLO del mes actual (para mostrar X)
+        "total_deudas"  => $deudas_acum_cnt[$pid] ?? 0   // TOTAL acumulado hasta este mes
     ];
 
     $total_jugador = 0;

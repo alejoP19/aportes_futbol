@@ -205,7 +205,7 @@ foreach ($jugadores as $jug) {
            data-player='{$jugId}'
            data-fecha='{$fecha}'
            ".($hayDeuda?"checked":"").">
-    Deuda
+  
 </label>
 
     </div>
@@ -241,7 +241,7 @@ foreach ($jugadores as $jug) {
                    data-player='{$jugId}'
                    data-fecha='{$fechaEspecial}'
                    ".($hayDeudaEsp?"checked":"").">
-            Deuda
+            
         </label>
     </div>
 </td>";
@@ -274,11 +274,8 @@ foreach ($jugadores as $jug) {
 
           echo "<td class='estado-deuda'>
         <label class='chk-deuda-global ".($tieneDeuda ? "con-deuda" : "")."'>
-            <input type='checkbox'
-                   class='chk-deuda-jugador'
-                   data-player='{$jugId}'
-                   ".($tieneDeuda ? "checked" : "").">
-            ".($tieneDeuda ? "Debe: {$deudaDias} días" : "Sin deuda")."
+           
+            ".($tieneDeuda ? "Debe: {$deudaDias} días" : "")."
         </label>
       </td>";
 

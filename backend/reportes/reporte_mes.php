@@ -279,7 +279,7 @@ foreach ($jugadores as $jug):
     $diasDeuda = $deudas_totales[$jug['id']] ?? 0;
     $textoDeuda = $diasDeuda > 0 
         ? "Debe {$diasDeuda} día".($diasDeuda>1?"s":"")
-        : "Sin deuda";
+        : "";
     ?>
 
     <td class="right"><?= $textoDeuda ?></td>

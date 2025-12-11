@@ -45,7 +45,7 @@ $logoPath = realpath(__DIR__ . "/../../assets/img/reliquias_logo.jpg");
 
 if (!file_exists($logoPath)) {
     // fallback opcional
-    $logoPath = realpath(__DIR__ . "/../../assets/img/reliquias_logo.jpg");
+   $logoPath = realpath(__DIR__ . "/../../assets/img/reliquias_logo.jpg");
 }
 
 $logoWidth = 80;

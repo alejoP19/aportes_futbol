@@ -60,69 +60,66 @@ function renderTablaPublic(data) {
     const fechaEspecial = data.fecha_especial;
     let html = `<table class="planilla"><thead>`;
 
+    // ---------------- CABECERA 1 ----------------
     html += `<tr>`;
     html += `<th>Nombres</th>`;
     html += `<th colspan="${dias.length + 1}">Días de los juegos</th>`;
     html += `<th colspan="2">Otros aportes</th>`;
     html += `<th>Total Mes</th>`;
     html += `<th>Saldo</th>`;
-    html += `<th>Saldo</th>`;
+    html += `<th>Deudas</th>`; // ← AQUÍ ANTES TENÍAS OTRO "Saldo"
     html += `</tr>`;
 
+    // ---------------- CABECERA 2 ----------------
     html += `<tr><th></th>`;
     dias.forEach(d => html += `<th>${d}</th>`);
     html += `<th>Otra Fecha (${fechaEspecial})</th>`;
     html += `<th>Tipo</th><th>Valor</th>`;
-    html += `<th>Por Jugador</th>`;
-    html += `<th></th>`;
-      html += `<th>Tu Deuda</th>`;
+    html += `<th>Por Jugador</th>`; // debajo de "Total Mes"
+    html += `<th></th>`;            // debajo de "Saldo"
+    html += `<th>Tu Deuda</th>`;    // debajo de "Tu Deuda"
     html += `</tr></thead><tbody>`;
-
 
     /* ==========================================================
         FILAS POR JUGADOR
     ========================================================== */
-data.rows.forEach(row => {
+    data.rows.forEach(row => {
 
-    const deudas = row.deudas || {}; // ← AGREGADO AQUÍ
+        const deudas = row.deudas || {}; // deudas SOLO del mes actual
 
-    html += `<tr data-player="${row.id}">`;
-    html += `<td class="player-name">${escapeHtml(row.nombre)}</td>`;
+        html += `<tr data-player="${row.id}">`;
+        html += `<td class="player-name">${escapeHtml(row.nombre)}</td>`;
 
-    // DÍAS NORMALES
-row.dias.forEach((v, idx) => {
+        // DÍAS NORMALES
+        row.dias.forEach((v, idx) => {
 
-    const realArr = row.real_dias || [];
-    const real    = realArr[idx] !== undefined ? Number(realArr[idx]) : Number(v || 0);
-    const visible = Number(v || 0);
+            const realArr = row.real_dias || [];
+            const real    = realArr[idx] !== undefined ? Number(realArr[idx]) : Number(v || 0);
+            const visible = Number(v || 0);
 
-    const hayExcedente = real > visible && visible > 0;
-    const diaNumero = dias[idx];
-    const hayDeuda = deudas[diaNumero] === true;
+            const hayExcedente = real > visible && visible > 0;
+            const diaNumero    = dias[idx];
+            const hayDeuda     = deudas[diaNumero] === true;
 
-    // --- CORRECCIÓN ---
-    let prefix = "";
-    if (hayDeuda) {
-        prefix = `<span class="deuda-x-publica" title="Día no pagado">✖</span>`;
-    }
-    // ------------------
+            let prefix = "";
+            if (hayDeuda) {
+                prefix = `<span class="deuda-x-publica" title="Día no pagado">✖</span>`;
+            }
 
-    if (hayExcedente) {
-        const title = `Aportó ${formatMoney(real)}`;
-        html += `
+            if (hayExcedente) {
+                const title = `Aportó ${formatMoney(real)}`;
+                html += `
 <td class="celda-aporte aporte-excedente" title="${title}">
     ${prefix} ⭐ ${formatMoney(visible)}
 </td>`;
-    } else {
-        html += `
+            } else {
+                html += `
 <td class="celda-aporte">
     ${visible ? formatMoney(visible) : ""}
     ${prefix}
 </td>`;
-    }
-});
-
-
+            }
+        });
 
         // ---------- FECHA ESPECIAL ----------
         const realEsp    = Number(row.real_especial ?? row.especial ?? 0);
@@ -131,7 +128,9 @@ row.dias.forEach((v, idx) => {
         const hayDeudaEsp = deudas[fechaEspecial] === true;
 
         let prefixEsp = "";
-        if (hayDeudaEsp) prefixEsp = `<div class="deuda-publica" title="Día no pagado" style="color:red;font-size:15px;">●</div>`;
+        if (hayDeudaEsp) {
+            prefixEsp = `<div class="deuda-publica" title="Día no pagado" style="color:red;font-size:15px;">●</div>`;
+        }
 
         if (hayExcEsp) {
             const titleEsp = `Aportó ${formatMoney(realEsp)}`;
@@ -148,7 +147,9 @@ row.dias.forEach((v, idx) => {
         let valorOtros = 0;
 
         if (row.otros?.length) {
-            tiposHtml = row.otros.map(o => `${escapeHtml(o.tipo)} (${formatMoney(o.valor)})`).join("<br>");
+            tiposHtml = row.otros
+                .map(o => `${escapeHtml(o.tipo)} (${formatMoney(o.valor)})`)
+                .join("<br>");
             valorOtros = row.otros.reduce((s, o) => s + Number(o.valor), 0);
         }
 
@@ -158,22 +159,20 @@ row.dias.forEach((v, idx) => {
         // ---------- TOTAL MES Y SALDO ----------
         html += `<td class="total-por-jugador"><strong>${row.total_mes ? formatMoney(row.total_mes) : ""}</strong></td>`;
         html += `<td class="total-por-jugador">${row.saldo ? formatMoney(row.saldo) : ""}</td>`;
-// -------------------------------------------------------------------
-// NUEVA COLUMNA — TOTAL DE DÍAS ADEUDADOS
-// -------------------------------------------------------------------
-let diasDeuda = 0;
-if (row.deudas) {
-    diasDeuda = Object.keys(row.deudas).length;
-}
 
-let colDeudaHtml = "";
-if (diasDeuda > 0) {
-    colDeudaHtml = `<td class="columna-deuda">Debe ${diasDeuda} día${diasDeuda > 1 ? "s" : ""}</td>`;
-} else {
-    colDeudaHtml = `<td class="columna-deuda sin-deuda"></td>`;
-}
+        // -------------------------------------------------------------------
+        // NUEVA COLUMNA — TOTAL DE DÍAS ADEUDADOS (ACUMULADO HASTA ESTE MES)
+        // -------------------------------------------------------------------
+        const diasDeuda = Number(row.total_deudas ?? 0);
 
-html += colDeudaHtml;
+        let colDeudaHtml = "";
+        if (diasDeuda > 0) {
+            colDeudaHtml = `<td class="columna-deuda">Debe ${diasDeuda} día${diasDeuda > 1 ? "s" : ""}</td>`;
+        } else {
+            colDeudaHtml = `<td class="columna-deuda sin-deuda"></td>`;
+        }
+
+        html += colDeudaHtml;
 
         html += `</tr>`;
     });
@@ -214,7 +213,7 @@ html += colDeudaHtml;
     html += `<td class="otros-valor"><strong>${totalOtros ? formatMoney(totalOtros) : "0"}</strong></td>`;
     html += `<td><strong>${totalVisibleMes ? formatMoney(totalVisibleMes) : "0"}</strong></td>`;
     html += `<td><strong>${totalSaldosMes ? formatMoney(totalSaldosMes) : "0"}</strong></td>`;
-    html += `<td><strong></strong></td>`;
+     html += `<td><strong></strong></td>`;
     html += `</tr></tfoot></table>`;
 
     cont.innerHTML = html;
@@ -230,7 +229,6 @@ html += colDeudaHtml;
             tr.classList.add("fila-seleccionada");
         });
     });
-    
 }
 
 
