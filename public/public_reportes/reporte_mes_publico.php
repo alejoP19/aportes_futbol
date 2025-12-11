@@ -36,22 +36,24 @@ $totalJugadores = count($jugadores);
 // =========================
 // MAPA DE DEUDAS (tabla deudas)
 // =========================
-$deudas_map = []; // $deudas_map[id_jugador][dia] = true
+$deudas_mes_actual = [];
 
-$stmtDeu = $conexion->prepare("
+$stmtDeu2 = $conexion->prepare("
     SELECT id_jugador, fecha
     FROM deudas_aportes
     WHERE YEAR(fecha) = ? AND MONTH(fecha) = ?
 ");
-$stmtDeu->bind_param("ii", $anio, $mes);
-$stmtDeu->execute();
-$resDeu = $stmtDeu->get_result();
-while ($row = $resDeu->fetch_assoc()) {
+$stmtDeu2->bind_param("ii", $anio, $mes);
+$stmtDeu2->execute();
+$resDeu2 = $stmtDeu2->get_result();
+
+while ($row = $resDeu2->fetch_assoc()) {
     $pid = intval($row['id_jugador']);
     $dia = intval(date('j', strtotime($row['fecha'])));
-    $deudas_map[$pid][$dia] = true;
+    $deudas_mes_actual[$pid][$dia] = true;
 }
-$stmtDeu->close();
+$stmtDeu2->close();
+
 
 // =========================
 // FUNCIONES
@@ -158,7 +160,8 @@ if ($totalJugadores > 40) $clase = "too-many-rows";
     <th class="right">Otros (tipo / valor)</th>
     <th class="right">Total jugador</th>
     <th class="right">Saldo</th>
-    <th class="right">Tu Deuda</th>
+    <th class="right">Deuda</th>
+
 </tr>
 </thead>
 
@@ -188,7 +191,7 @@ foreach ($jugadores as $jug):
         $totalJugador += $tope;
         $totalSaldoJugador += $exceso;
 
-        $tieneDeudaDia = isset($deudas_map[$jug['id']][$d]);
+  $tieneDeudaDia = isset($deudas_mes_actual[$jug['id']][$d]);
     ?>
         <td class="right">
             <?= $tope ? number_format($tope,0,',','.') : "" ?>
@@ -202,30 +205,47 @@ foreach ($jugadores as $jug):
     // FECHA ESPECIAL = cualquier día NO miércoles/sábado
     $fechaEspecialTotal = 0;
     $fechaEspecialSaldo = 0;
-    
-// FECHA ESPECIAL FIJA — igual que en la tabla pública
-$diaEspecial = 28;
-$tieneDeudaEspecial = isset($deudas_map[$jug['id']][$diaEspecial]);
+    $tieneDeudaEspecial = false;
 
-$fechaEsp = sprintf("%04d-%02d-%02d", $anio, $mes, $diaEspecial);
-$realEsp  = get_aporte_real($conexion, $jug['id'], $fechaEsp);
-$topeEsp  = min($realEsp, 2000);
-$excesoEsp = max(0, $realEsp - 2000);
+    for ($d = 1; $d <= $days_count; $d++) {
+        $w = date('N', strtotime("$anio-$mes-$d"));
+        if ($w != 3 && $w != 6) {
+            $fecha = sprintf("%04d-%02d-%02d", $anio, $mes, $d);
+            $real = get_aporte_real($conexion, $jug['id'], $fecha);
+            $tope = min($real, 2000);
+            $exceso = max(0, $real - 2000);
 
-$totalJugador += $topeEsp;
-$totalSaldoJugador += $excesoEsp;
+            $fechaEspecialTotal += $tope;
+            $fechaEspecialSaldo += $exceso;
 
+          // FECHA ESPECIAL TIENE DEUDA SI EXISTE ALGÚN DÍA NO MIÉRCOLES / SÁBADO
+$tieneDeudaEspecial = false;
+
+foreach ($deudas_mes_actual[$jug['id']] ?? [] as $diaDeuda => $v) {
+
+    $w = date('N', strtotime("$anio-$mes-$diaDeuda"));
+
+    // Día especial = NO miércoles (3) ni sábado (6)
+    if ($w != 3 && $w != 6) {
+        $tieneDeudaEspecial = true;
+        break;
+    }
+}
+
+        }
+    }
 
     $totalJugador += $fechaEspecialTotal;
     $totalSaldoJugador += $fechaEspecialSaldo;
     ?>
 
-   <td class="right">
-    <?= $topeEsp ? number_format($topeEsp,0,',','.') : "" ?>
-    <?php if ($tieneDeudaEspecial): ?>
-        <br><span style="color:#d00; font-size:9pt;">●</span>
-    <?php endif; ?>
-</td>
+    <td class="right">
+        <?= $fechaEspecialTotal ? number_format($fechaEspecialTotal,0,',','.') : "" ?>
+        <?php if ($tieneDeudaEspecial): ?>
+            <br><span style="color:#d00; font-size:9pt;">●</span>
+        <?php endif; ?>
+    </td>
+
     <?php
     // OTROS APORTES
     $otros = get_otros($conexion, $jug['id'], $mes, $anio);
@@ -249,18 +269,20 @@ $totalSaldoJugador += $excesoEsp;
     ?>
     <td class="right"><strong><?= number_format($saldoAcumulado,0,',','.') ?></strong></td>
     <?php
-// ==========================
-// COLUMNA TU DEUDA (PDF)
-// ==========================
-$diasDeuda = isset($deudas_map[$jug['id']]) ? count($deudas_map[$jug['id']]) : 0;
+// CALCULAR DÍAS ADEUDADOS DEL JUGADOR
+$diasDeuda = isset($deudas_map[$jug['id']]) 
+             ? count($deudas_map[$jug['id']]) 
+             : 0;
 
 if ($diasDeuda > 0) {
-    $textoDeuda = "Debe {$diasDeuda} día" . ($diasDeuda > 1 ? 's' : '');
-    echo '<td class="right" style="color:#b00;font-weight:bold;">' . $textoDeuda . '</td>';
+    $textoDeuda = "Debe {$diasDeuda} día" . ($diasDeuda > 1 ? "s" : "");
 } else {
-    echo '<td class="right" style="color:green;font-weight:bold;">Sin deuda</td>';
+    $textoDeuda = "Sin deuda";
 }
 ?>
+<td class="right">
+    <?= $textoDeuda ?>
+</td>
 
 
 </tr>

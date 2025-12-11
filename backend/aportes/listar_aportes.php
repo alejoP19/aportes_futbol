@@ -83,7 +83,9 @@ $deudas_map = [];
 $deudas_res = $conexion->query("
     SELECT id_jugador, fecha
     FROM deudas_aportes
+    WHERE MONTH(fecha) = $mes AND YEAR(fecha) = $anio
 ");
+
 
 while ($row = $deudas_res->fetch_assoc()) {
     $dia = intval(date("j", strtotime($row['fecha'])));
@@ -136,11 +138,33 @@ echo "<tbody>";
 
 $totales_por_dia = array_fill(0, count($days), 0);
 $total_otros_global = 0;
+// B) CARGAR TOTAL DE DEUDAS HASTA EL MES MOSTRADO
+$deudas_totales = [];
+
+$resTot = $conexion->query("
+    SELECT id_jugador, COUNT(*) AS total
+    FROM deudas_aportes
+    WHERE 
+        (YEAR(fecha) < $anio)
+        OR (YEAR(fecha) = $anio AND MONTH(fecha) <= $mes)
+    GROUP BY id_jugador
+");
+
+while ($row = $resTot->fetch_assoc()) {
+    $deudas_totales[$row['id_jugador']] = intval($row['total']);
+}
+
+
+
+while ($row = $resTot->fetch_assoc()) {
+    $deudas_totales[$row['id_jugador']] = $row['total'];
+}
 
 foreach ($jugadores as $jug) {
 
     $jugId = intval($jug['id']);
-    $deudaDias = isset($deudas_map[$jugId]) ? count($deudas_map[$jugId]) : 0;
+   $deudaDias = $deudas_totales[$jugId] ?? 0;
+
     $tieneDeuda = $deudaDias > 0;
     $total_jugador_mes = 0;
 
