@@ -696,3 +696,44 @@ document.addEventListener("change", async (e) => {
         console.error("Error:", err);
     }
 });
+
+
+
+
+/* ==========================================================
+   TOOLTIP APORTE EXCEDENTE – ADMIN (MÓVIL + DESKTOP)
+========================================================== */
+
+document.addEventListener("pointerup", function (e) {
+
+    // buscamos la celda que tenga aporte excedente
+    const cell = e.target.closest(".aporte-excedente");
+    if (!cell) return;
+
+    const real = Number(cell.dataset.real || 0);
+    if (!real) return;
+
+    // eliminar tooltip previo
+    document.querySelectorAll(".tooltip-aporte").forEach(t => t.remove());
+
+    const tip = document.createElement("div");
+    tip.className = "tooltip-aporte";
+    tip.textContent = `Aportó ${real.toLocaleString("es-CO", {
+        style: "currency",
+        currency: "COP",
+        maximumFractionDigits: 0
+    })}`;
+
+    document.body.appendChild(tip);
+
+    const rect = cell.getBoundingClientRect();
+
+    tip.style.position = "absolute";
+    tip.style.left = (window.scrollX + rect.left + rect.width / 2) + "px";
+    tip.style.top  = (window.scrollY + rect.top - 8) + "px";
+    tip.style.transform = "translate(-50%, -100%)";
+
+    // autocerrar
+    setTimeout(() => tip.remove(), 2000);
+
+});

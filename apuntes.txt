@@ -371,3 +371,12 @@ Si quieres, en el siguiente mensaje hacemos lo mismo con el PDF público (es cas
 
 
 
+🚨 Reglas de oro (guárdalas)
+
+❌ No confíes en title para móviles
+❌ No mezcles lógica de UI en PHP
+❌ No uses touchstart suelto (es inconsistente)
+
+✅ Usa pointerup
+✅ Usa data-* para pasar datos
+✅ JS decide cómo mostrar

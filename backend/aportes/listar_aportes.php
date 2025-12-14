@@ -200,21 +200,23 @@ foreach ($jugadores as $jug) {
 
         $hayDeuda = isset($deudas_map[$jugId][$d]);
 
-        $total_jugador_mes += $aporte;
-        $totales_por_dia[$idx] += $aporte;
-        $flag = ($aporteReal > 2000) ? "★" : "";
-        echo "
-<td class='celda-dia'>
+      $total_jugador_mes += $aporte;
+$totales_por_dia[$idx] += $aporte;
+$flag = ($aporteReal > 2000) ? "★" : "";
+
+echo "
+<td class='celda-dia ".($aporteReal > 2000 ? "aporte-excedente" : "")."'
+    ".($aporteReal > 2000 ? "data-real='{$aporteReal}' title='Aportó ".number_format($aporteReal,0,',','.')."'" : "").">
     <div class='aporte-wrapper'>
        <input class='cell-aporte'
-       data-player='{$jugId}'
-       data-fecha='{$fecha}'
-       type='number'
-       placeholder='$'
-       value='".($aporte>0?$aporte:"")."'
-       title='Aportó: " . number_format($aporteReal,0,',','.') . " COP'>
+              data-player='{$jugId}'
+              data-fecha='{$fecha}'
+              type='number'
+              placeholder='$'
+              value='".($aporte>0?$aporte:"")."'>
 
-<span class='saldo-flag ".($flag ? "show" : "")."'>★</span>
+       <span class='saldo-flag ".($flag ? "show" : "")."'>★</span>
+
 
 <label class='chk-deuda-label ".($hayDeuda?"con-deuda":"")."'>
     <input type='checkbox'
@@ -242,27 +244,31 @@ foreach ($jugadores as $jug) {
 
     $total_jugador_mes += $aporteEsp;
 
-    echo "
-<td class='celda-dia'>
+  echo "
+<td class='celda-dia ".($aporteEspReal > 2000 ? "aporte-excedente" : "")."'
+    ".($aporteEspReal > 2000
+        ? "data-real='{$aporteEspReal}' title='Aportó ".number_format($aporteEspReal,0,',','.')."'"
+        : ""
+    ).">
     <div class='aporte-wrapper'>
         <input class='cell-aporte'
                data-player='{$jugId}'
                data-fecha='{$fechaEspecial}'
                type='number'
                placeholder='$'
-               value='".($aporteEsp>0?$aporteEsp:"")."'>
+               value='".($aporteEsp>0 ? $aporteEsp : "")."'>
 
-        <label class='chk-deuda-label ".($hayDeudaEsp?"con-deuda":"")."'>
+        <span class='saldo-flag ".(($aporteEspReal > 2000) ? "show" : "")."'>★</span>
+
+        <label class='chk-deuda-label ".($hayDeudaEsp ? "con-deuda" : "")."'>
             <input type='checkbox'
                    class='chk-deuda'
                    data-player='{$jugId}'
                    data-fecha='{$fechaEspecial}'
-                   ".($hayDeudaEsp?"checked":"").">
-            
+                   ".($hayDeudaEsp ? "checked" : "").">
         </label>
     </div>
 </td>";
-
     // =====================
     // OTROS APORTES
     // =====================

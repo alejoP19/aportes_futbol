@@ -231,8 +231,8 @@ body {
 /* Encabezados */
 .planilla thead th {
   background: var(--verde-medio);
-  color: #fff;
-  font-weight: lighter;
+  color: #ffffff;
+  font-weight: bold;
   font-size: medium;
   text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
 }
@@ -263,7 +263,7 @@ body {
   font-size: medium !important;
   font-style: italic;
   color: #000000;
-  font-weight: lighter;
+  font-weight: bold;
   text-shadow: -1px 1px 1px #ffffff,
   -1px 1px 1px #ffffff,
   -1px 1px 1px #ffffff,-1px 1px 1px #f1f1f1;
@@ -350,6 +350,28 @@ table tfoot {
     color: red;
     margin-right: 4px;
 }
+
+/* =======================================================
+   TOOOL TIP APORTE
+   ======================================================= */
+
+.celda-aporte {
+    cursor: pointer;
+}
+
+.tooltip-aporte{
+    position: absolute;
+    background: rgba(0,0,0,.85);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    z-index: 9999;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+
 /* =======================================================
    TOTALES CARD
    ======================================================= */

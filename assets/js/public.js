@@ -106,42 +106,51 @@ function renderTablaPublic(data) {
             if (hayDeuda) {
                 prefix = `<span class="deuda-x-publica" title="Día no pagado">✖</span>`;
             }
+   if (hayExcedente) {
+    const title = `Aportó ${formatMoney(real)}`; // ✅ mantiene hover en desktop
 
-            if (hayExcedente) {
-                const title = `Aportó ${formatMoney(real)}`;
-                html += `
-<td class="celda-aporte aporte-excedente" title="${title}">
+    html += `
+<td class="celda-aporte aporte-excedente"
+    title="Aportó ${formatMoney(real)}"
+    data-real="${real}">
     ${prefix} ⭐ ${formatMoney(visible)}
-</td>`;
-            } else {
-                html += `
+</td>
+`;
+} else {
+    html += `
 <td class="celda-aporte">
     ${visible ? formatMoney(visible) : ""}
     ${prefix}
 </td>`;
-            }
+}
+    
         });
+     // ---------- FECHA ESPECIAL ----------
+const realEsp    = Number(row.real_especial ?? row.especial ?? 0);
+const visibleEsp = Number(row.especial ?? 0);
+const hayExcEsp  = realEsp > visibleEsp && visibleEsp > 0;
+const hayDeudaEsp = deudas[fechaEspecial] === true;
 
-        // ---------- FECHA ESPECIAL ----------
-        const realEsp    = Number(row.real_especial ?? row.especial ?? 0);
-        const visibleEsp = Number(row.especial ?? 0);
-        const hayExcEsp  = realEsp > visibleEsp && visibleEsp > 0;
-        const hayDeudaEsp = deudas[fechaEspecial] === true;
+let prefixEsp = "";
+if (hayDeudaEsp) {
+    prefixEsp = `<div class="deuda-publica" title="Día no pagado" style="color:red;font-size:15px;">●</div>`;
+}
 
-        let prefixEsp = "";
-        if (hayDeudaEsp) {
-            prefixEsp = `<div class="deuda-publica" title="Día no pagado" style="color:red;font-size:15px;">●</div>`;
-        }
-
-        if (hayExcEsp) {
-            const titleEsp = `Aportó ${formatMoney(realEsp)}`;
-            html += `
-<td class="celda-aporte aporte-excedente" title="${titleEsp}">
+if (hayExcEsp) {
+    html += `
+<td class="celda-aporte aporte-excedente"
+    title="Aportó ${formatMoney(realEsp)}"
+    data-real="${realEsp}">
     ${prefixEsp} ⭐ ${formatMoney(visibleEsp)}
-</td>`;
-        } else {
-            html += `<td class="celda-aporte">${prefixEsp}${visibleEsp ? formatMoney(visibleEsp) : ""}</td>`;
-        }
+</td>
+`;
+} else {
+    html += `
+<td class="celda-aporte">
+    ${prefixEsp}${visibleEsp ? formatMoney(visibleEsp) : ""}
+</td>
+`;
+}
 
         // ---------- OTROS ----------
         let tiposHtml = "";
@@ -351,3 +360,47 @@ function renderTotales(data) {
     if (elOtros) elOtros.textContent = t.otros_mes_total ? formatMoney(t.otros_mes_total) : "0";
     if (elAnio)  elAnio.textContent  = t.year_total      ? formatMoney(t.year_total)      : "0";
 }
+
+
+
+// ==========================================================
+// Tooltip universal (DESKTOP + ANDROID + iOS)
+// ==========================================================
+let tooltipActivo = null;
+
+document.addEventListener("click", function (e) {
+    const cell = e.target.closest(".aporte-excedente");
+    if (!cell) return;
+
+    const real = Number(cell.dataset.real || 0);
+    if (!real) return;
+
+    // eliminar tooltip previo
+    if (tooltipActivo) {
+        tooltipActivo.remove();
+        tooltipActivo = null;
+    }
+
+    const tip = document.createElement("div");
+    tip.className = "tooltip-aporte";
+    tip.textContent = `Aportó ${formatMoney(real)}`;
+
+    document.body.appendChild(tip);
+    tooltipActivo = tip;
+
+    const rect = cell.getBoundingClientRect();
+
+    tip.style.left =
+        (window.scrollX + rect.left + rect.width / 2) + "px";
+    tip.style.top =
+        (window.scrollY + rect.top - 8) + "px";
+    tip.style.transform = "translate(-50%, -100%)";
+
+    // auto cerrar
+    setTimeout(() => {
+        if (tooltipActivo) {
+            tooltipActivo.remove();
+            tooltipActivo = null;
+        }
+    }, 1800);
+});

@@ -391,7 +391,17 @@ border:1px solid #bbb;
 margin-bottom:5%;
 margin-top: 2%;
 }
-
+.tooltip-aporte{
+  position:absolute;
+  background:#222;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:13px;
+  z-index:999999;
+  white-space:nowrap;
+  box-shadow:0 6px 18px rgba(0,0,0,.25);
+}
 .aporte-wrapper {
     position: relative;
 }
