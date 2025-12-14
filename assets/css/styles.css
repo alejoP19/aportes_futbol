@@ -222,7 +222,7 @@ margin-bottom: 0% !important;
   transform: translateY(0);
   pointer-events: auto; /* habilita interacción */
   max-height: calc(100vh - 140px); /* dejar espacio para header y botón */
-  margin-top: -134%;
+  margin-top: -116%;
 
 }
 
@@ -539,7 +539,7 @@ transition: all 1s;
 .middle-panel.expanded {
 display: block !important;
 position: absolute;
-top: 23%; /* debajo del header */
+top: 26%; /* debajo del header */
 left: 0;
 width: 100vw;
 max-width: 100%;

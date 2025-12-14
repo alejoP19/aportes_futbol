@@ -106,21 +106,39 @@ function get_otros($conexion, $id_jugador, $mes, $anio) {
     return $out;
 }
 
-function get_saldo_acumulado($conexion, $id_jugador, $mes, $anio) {
-    $stmt = $conexion->prepare("
-        SELECT IFNULL(SUM(aporte_principal - LEAST(aporte_principal,2000)),0) AS excedente
+function get_saldo_hasta_mes($conexion, $id_jugador, $mes, $anio) {
+
+    // último día del mes del reporte
+    $fechaCorte = date('Y-m-t', strtotime("$anio-$mes-01"));
+
+    // 1️⃣ EXCEDENTES GENERADOS hasta ese mes
+    $stmt1 = $conexion->prepare("
+        SELECT IFNULL(SUM(aporte_principal - 2000),0) AS excedente
         FROM aportes
         WHERE id_jugador = ?
-          AND (
-                YEAR(fecha) < ?
-             OR (YEAR(fecha) = ? AND MONTH(fecha) <= ?)
-          )
+          AND aporte_principal > 2000
+          AND fecha <= ?
     ");
-    $stmt->bind_param("iiii", $id_jugador, $anio, $anio, $mes);
-    $stmt->execute();
-    $res = $stmt->get_result()->fetch_assoc();
-    return intval($res['excedente'] ?? 0);
+    $stmt1->bind_param("is", $id_jugador, $fechaCorte);
+    $stmt1->execute();
+    $excedente = (int)$stmt1->get_result()->fetch_assoc()['excedente'];
+    $stmt1->close();
+
+    // 2️⃣ CONSUMOS DEL SALDO hasta ese mes
+    $stmt2 = $conexion->prepare("
+        SELECT IFNULL(SUM(amount),0) AS consumido
+        FROM aportes_saldo_moves
+        WHERE id_jugador = ?
+          AND fecha_consumo <= ?
+    ");
+    $stmt2->bind_param("is", $id_jugador, $fechaCorte);
+    $stmt2->execute();
+    $consumido = (int)$stmt2->get_result()->fetch_assoc()['consumido'];
+    $stmt2->close();
+
+    return max(0, $excedente - $consumido);
 }
+
 
 function get_obs($conexion, $mes, $anio) {
     $stmt = $conexion->prepare("SELECT texto FROM gastos_observaciones WHERE mes=? AND anio=? LIMIT 1");
@@ -129,7 +147,96 @@ function get_obs($conexion, $mes, $anio) {
     $r = $stmt->get_result()->fetch_assoc();
     return $r["texto"] ?? "";
 }
+// =========================
+// GASTOS DEL MES
+// =========================
+$stmtGm = $conexion->prepare("
+    SELECT IFNULL(SUM(valor),0) AS total
+    FROM gastos
+    WHERE mes=? AND anio=?
+");
+$stmtGm->bind_param("ii", $mes, $anio);
+$stmtGm->execute();
+$gasto_mes = intval($stmtGm->get_result()->fetch_assoc()['total']);
+$stmtGm->close();
 
+// =========================
+// GASTOS DEL AÑO (hasta el mes del reporte)
+// =========================
+$stmtGa = $conexion->prepare("
+    SELECT IFNULL(SUM(valor),0) AS total
+    FROM gastos
+    WHERE anio=? AND mes <= ?
+");
+$stmtGa->bind_param("ii", $anio, $mes);
+$stmtGa->execute();
+$gasto_anio = intval($stmtGa->get_result()->fetch_assoc()['total']);
+$stmtGa->close();
+
+// =========================
+// TOTAL APORTES DEL MES (BRUTO, SIN TOPE)
+// =========================
+$stmtTm = $conexion->prepare("
+    SELECT IFNULL(SUM(aporte_principal),0) AS total
+    FROM aportes
+    WHERE YEAR(fecha)=? AND MONTH(fecha)=?
+");
+$stmtTm->bind_param("ii", $anio, $mes);
+$stmtTm->execute();
+$total_mes = intval($stmtTm->get_result()->fetch_assoc()['total']);
+$stmtTm->close();
+
+// =========================
+// TOTAL APORTES DEL AÑO (BRUTO, SIN TOPE)
+// =========================
+$stmtTa = $conexion->prepare("
+    SELECT IFNULL(SUM(aporte_principal),0) AS total
+    FROM aportes
+    WHERE YEAR(fecha)=?
+      AND MONTH(fecha)<=?
+");
+$stmtTa->bind_param("ii", $anio, $mes);
+$stmtTa->execute();
+$total_anio = intval($stmtTa->get_result()->fetch_assoc()['total']);
+$stmtTa->close();
+
+// =========================
+// OTROS APORTES DEL MES
+// =========================
+$stmtOm = $conexion->prepare("
+    SELECT IFNULL(SUM(valor),0) AS total
+    FROM otros_aportes
+    WHERE mes=? AND anio=?
+");
+$stmtOm->bind_param("ii", $mes, $anio);
+$stmtOm->execute();
+$otros_mes = intval($stmtOm->get_result()->fetch_assoc()['total']);
+$stmtOm->close();
+
+// =========================
+// OTROS APORTES DEL AÑO (hasta mes)
+// =========================
+$stmtOa = $conexion->prepare("
+    SELECT IFNULL(SUM(valor),0) AS total
+    FROM otros_aportes
+    WHERE anio=? AND mes <= ?
+");
+$stmtOa->bind_param("ii", $anio, $mes);
+$stmtOa->execute();
+$otros_anio = intval($stmtOa->get_result()->fetch_assoc()['total']);
+$stmtOa->close();
+
+// =========================
+// TOTALES REALES (INGRESOS)
+// =========================
+$total_mes_real  = $total_mes  + $otros_mes;
+$total_anio_real = $total_anio + $otros_anio;
+
+// =========================
+// SALDOS NETOS
+// =========================
+$saldo_mes  = $total_mes_real  - $gasto_mes;
+$saldo_anio = $total_anio_real - $gasto_anio;
 
 // =========================
 // TOTALES POR DÍA
@@ -269,7 +376,8 @@ foreach ($jugadores as $jug):
     <td class="right"><strong><?= number_format($totalJugador,0,',','.') ?></strong></td>
 
     <?php
-    $saldoAcumulado = get_saldo_acumulado($conexion, $jug['id'], $mes, $anio);
+    $saldoAcumulado = get_saldo_hasta_mes($conexion, $jug['id'], $mes, $anio);
+
     ?>
 
     <td class="right"><strong><?= number_format($saldoAcumulado,0,',','.') ?></strong></td>
@@ -291,6 +399,63 @@ foreach ($jugadores as $jug):
 
 </tbody>
 </table>
+<br><br>
 
+<div class="section-title">
+    <strong>Resumen General</strong>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Concepto</th>
+            <th class="right">Valor</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+    <td>Total aportes del mes</td>
+    <td class="right">
+        <strong>$ <?= number_format($total_mes_real,0,',','.') ?></strong>
+    </td>
+</tr>
+<tr>
+    <td>Otros aportes del mes</td>
+    <td class="right">$ <?= number_format($otros_mes,0,',','.') ?></td>
+</tr>
+<tr>
+    <td>Total aportes del año (hasta <?= $mesName ?>)</td>
+    <td class="right">
+        <strong>$ <?= number_format($total_anio_real,0,',','.') ?></strong>
+    </td>
+</tr>
+        <tr>
+            <td>Total gastos del mes</td>
+            <td class="right" style="color:#c00;">
+                <strong>$ <?= number_format($gasto_mes,0,',','.') ?></strong>
+            </td>
+        </tr>
+        <tr>
+            <td>Total gastos del año</td>
+            <td class="right" style="color:#c00;">
+                <strong>$ <?= number_format($gasto_anio,0,',','.') ?></strong>
+            </td>
+        </tr>
+
+        <tr>
+    <td><strong>Saldo neto del mes</strong></td>
+    <td class="right" style="color:#006400;">
+        <strong>$ <?= number_format($saldo_mes,0,',','.') ?></strong>
+    </td>
+</tr>
+
+<tr>
+    <td><strong>Saldo neto del año</strong></td>
+    <td class="right" style="color:#006400;">
+        <strong>$ <?= number_format($saldo_anio,0,',','.') ?></strong>
+    </td>
+</tr>
+    </tbody>
+</table>
 </body>
 </html>

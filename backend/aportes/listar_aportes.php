@@ -59,20 +59,36 @@ function get_aporte_real($conexion, $id_jugador, $fecha) {
 }
 
 function get_saldo_acumulado($conexion, $id_jugador, $mes, $anio) {
-    $stmt = $conexion->prepare("
-        SELECT IFNULL(SUM(aporte_principal - LEAST(aporte_principal,2000)),0) AS excedente
+
+    // Fecha de corte = último día del mes que estoy viendo
+    $fechaCorte = date('Y-m-t', strtotime("$anio-$mes-01"));
+
+    // 1️⃣ Excedente generado hasta esa fecha
+    $q1 = $conexion->prepare("
+        SELECT IFNULL(SUM(GREATEST(aporte_principal - 2000, 0)), 0) AS excedente
         FROM aportes
         WHERE id_jugador = ?
-          AND (
-                YEAR(fecha) < ?
-             OR (YEAR(fecha) = ? AND MONTH(fecha) <= ?)
-          )
+          AND fecha <= ?
     ");
-    $stmt->bind_param("iiii", $id_jugador, $anio, $anio, $mes);
-    $stmt->execute();
-    $res = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
-    return intval($res['excedente'] ?? 0);
+    $q1->bind_param("is", $id_jugador, $fechaCorte);
+    $q1->execute();
+    $excedente = (int)($q1->get_result()->fetch_assoc()['excedente'] ?? 0);
+    $q1->close();
+
+    // 2️⃣ Consumo del saldo hasta esa fecha (CLAVE)
+    $q2 = $conexion->prepare("
+        SELECT IFNULL(SUM(amount), 0) AS consumido
+        FROM aportes_saldo_moves
+        WHERE id_jugador = ?
+          AND fecha_consumo <= ?
+    ");
+    $q2->bind_param("is", $id_jugador, $fechaCorte);
+    $q2->execute();
+    $consumido = (int)($q2->get_result()->fetch_assoc()['consumido'] ?? 0);
+    $q2->close();
+
+    $saldo = $excedente - $consumido;
+    return ($saldo > 0) ? $saldo : 0;
 }
 
 // ===========================
@@ -168,8 +184,9 @@ foreach ($jugadores as $jug) {
     $tieneDeuda = $deudaDias > 0;
     $total_jugador_mes = 0;
 
-    echo "<tr data-player='{$jugId}'>";
-    echo "<td>".htmlspecialchars($jug['nombre'])."</td>";
+   $claseEliminado = ($jug['activo'] == 0) ? "eliminado" : "";
+   echo "<tr data-player='{$jugId}' class='{$claseEliminado}'>";
+   echo "<td>".htmlspecialchars($jug['nombre'])."</td>";
 
     // ======================
     // DÍAS NORMALES

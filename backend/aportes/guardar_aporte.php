@@ -4,129 +4,155 @@ include "../auth/auth.php";
 protegerAdmin();
 include "../../conexion.php";
 
-$input = file_get_contents("php://input");
-$data = json_decode($input, true);
+/* ======================================================
+   SALDO HASTA UN MES/AÑO (corte al último día del mes)
+   saldo = (excedente generado hasta corte) - (consumo hasta corte)
+   excedente = SUM(max(aporte_principal - 2000, 0))
+   consumo   = SUM(amount) en aportes_saldo_moves con fecha_consumo <= corte
+   ====================================================== */
+function get_saldo_acumulado_hasta_mes($conexion, $id_jugador, $mes, $anio) {
+    $fechaCorte = date('Y-m-t', strtotime("$anio-$mes-01"));
 
-$id_jugador = intval($data['id_jugador'] ?? 0);
-$fecha = $data['fecha'] ?? '';
-$valor = array_key_exists('valor', $data) ? $data['valor'] : null;
+    // Excedente generado hasta la fecha de corte
+    $q1 = $conexion->prepare("
+        SELECT IFNULL(SUM(GREATEST(aporte_principal - 2000, 0)), 0) AS excedente
+        FROM aportes
+        WHERE id_jugador = ?
+          AND fecha <= ?
+    ");
+    $q1->bind_param("is", $id_jugador, $fechaCorte);
+    $q1->execute();
+    $excedente = (int)($q1->get_result()->fetch_assoc()['excedente'] ?? 0);
+    $q1->close();
+
+    // Consumo de saldo hasta la fecha de corte (por fecha_consumo real)
+    $q2 = $conexion->prepare("
+        SELECT IFNULL(SUM(amount), 0) AS consumido
+        FROM aportes_saldo_moves
+        WHERE id_jugador = ?
+          AND fecha_consumo <= ?
+    ");
+    $q2->bind_param("is", $id_jugador, $fechaCorte);
+    $q2->execute();
+    $consumido = (int)($q2->get_result()->fetch_assoc()['consumido'] ?? 0);
+    $q2->close();
+
+    $saldo = $excedente - $consumido;
+    return ($saldo > 0) ? $saldo : 0;
+}
+
+/* ======================================================
+   DISPONIBLE DE UNA FILA "SOURCE" (EXCEDENTE NO CONSUMIDO)
+   disponible_source = (aporte_principal - 2000) - sum(moves.amount de ese source)
+   ====================================================== */
+function get_disponible_source($conexion, $source_id) {
+    $q = $conexion->prepare("
+        SELECT
+          GREATEST(a.aporte_principal - 2000, 0) - IFNULL(SUM(m.amount), 0) AS disponible
+        FROM aportes a
+        LEFT JOIN aportes_saldo_moves m ON m.source_aporte_id = a.id
+        WHERE a.id = ?
+        GROUP BY a.id
+        LIMIT 1
+    ");
+    $q->bind_param("i", $source_id);
+    $q->execute();
+    $row = $q->get_result()->fetch_assoc();
+    $q->close();
+    return (int)($row['disponible'] ?? 0);
+}
+
+$input = file_get_contents("php://input");
+$data  = json_decode($input, true);
+
+$id_jugador = (int)($data['id_jugador'] ?? 0);
+$fecha      = (string)($data['fecha'] ?? '');
+$valor      = array_key_exists('valor', $data) ? $data['valor'] : null;
 
 if (!$id_jugador || !$fecha) {
     echo json_encode(['ok' => false, 'msg' => 'datos invalidos']);
     exit;
 }
 
-// convertir valor nulo/ vacío a null real
-if ($valor === "" ) $valor = null;
+// Normalizar valor
+if ($valor === "" || $valor === null) $valor = null;
 
-// iniciamos transacción para mantener consistencia en operaciones compuestas
+// Validar fecha
+$dt = strtotime($fecha);
+if ($dt === false) {
+    echo json_encode(['ok' => false, 'msg' => 'fecha_invalida']);
+    exit;
+}
+
+$mes  = (int)date('n', $dt);
+$anio = (int)date('Y', $dt);
+
 $conexion->begin_transaction();
 
 try {
 
-    // ---------------------------
-    // BORRAR APORTE (valor === null)
-    // ---------------------------
+    /* ======================================================
+       1) Si valor es null => BORRAR aporte + borrar movimientos destino
+       ====================================================== */
     if ($valor === null) {
-        // buscar id de la fila a borrar (si existe)
-        $sel = $conexion->prepare("SELECT id FROM aportes WHERE id_jugador = ? AND fecha = ? LIMIT 1");
+
+        // Buscar id del aporte (si existe)
+        $sel = $conexion->prepare("SELECT id FROM aportes WHERE id_jugador=? AND fecha=? LIMIT 1");
         $sel->bind_param("is", $id_jugador, $fecha);
         $sel->execute();
-        $res = $sel->get_result()->fetch_assoc();
+        $row = $sel->get_result()->fetch_assoc();
         $sel->close();
 
-        if (!$res) {
-            // nada que borrar: commit y OK (idempotente)
+        if (!$row) {
             $conexion->commit();
-            echo json_encode(['ok'=>true, 'action'=>'deleted', 'msg'=>'no_row']);
+            echo json_encode(['ok' => true, 'action' => 'deleted', 'msg' => 'no_row']);
             exit;
         }
 
-        $target_id = intval($res['id']);
+        $target_id = (int)$row['id'];
 
-        // 1) Revertir movimientos registrados donde target_aporte_id = $target_id
-        $q = $conexion->prepare("SELECT id, source_aporte_id, amount FROM aportes_saldo_moves WHERE target_aporte_id = ?");
-        $q->bind_param("i", $target_id);
-        $q->execute();
-        $moves_res = $q->get_result();
-        $moves = $moves_res->fetch_all(MYSQLI_ASSOC);
-        $q->close();
-
-        foreach ($moves as $m) {
-            $source_id = intval($m['source_aporte_id']);
-            $amt = intval($m['amount']);
-            if ($amt <= 0) continue;
-
-            // devolver el valor a la fila source (sumarle lo que le habíamos quitado)
-            $upd = $conexion->prepare("UPDATE aportes SET aporte_principal = aporte_principal + ? WHERE id = ?");
-            $upd->bind_param("ii", $amt, $source_id);
-            if (!$upd->execute()) {
-                $err = $conexion->error;
-                $upd->close();
-                throw new Exception("error_restore_source: " . $err);
-            }
-            $upd->close();
-        }
-
-        // 2) Borrar los registros de moves relacionados
-        $delMoves = $conexion->prepare("DELETE FROM aportes_saldo_moves WHERE target_aporte_id = ?");
+        // Borrar movimientos que consumieron saldo para este día
+        $delMoves = $conexion->prepare("DELETE FROM aportes_saldo_moves WHERE target_aporte_id=?");
         $delMoves->bind_param("i", $target_id);
-        if (!$delMoves->execute()) {
-            $err = $conexion->error;
-            $delMoves->close();
-            throw new Exception("error_deleting_moves: " . $err);
-        }
+        $delMoves->execute();
         $delMoves->close();
 
-        // 3) Eliminar la fila objetivo
-        $del = $conexion->prepare("DELETE FROM aportes WHERE id = ?");
+        // Borrar el aporte
+        $del = $conexion->prepare("DELETE FROM aportes WHERE id=?");
         $del->bind_param("i", $target_id);
-        if (!$del->execute()) {
-            $err = $conexion->error;
-            $del->close();
-            throw new Exception("delete_error: " . $err);
-        }
+        $del->execute();
         $del->close();
 
         $conexion->commit();
-        echo json_encode(['ok' => true, 'action' => 'deleted', 'reverted_moves' => count($moves)]);
+
+        $saldo_actual = get_saldo_acumulado_hasta_mes($conexion, $id_jugador, $mes, $anio);
+
+        echo json_encode([
+            'ok' => true,
+            'action' => 'deleted',
+            'saldo' => $saldo_actual
+        ]);
         exit;
     }
 
-    // ---------------------------
-    // INSERT / UPDATE (valor numérico)
-    // ---------------------------
-    $valor = intval($valor);
+    /* ======================================================
+       2) INSERT/UPDATE del aporte (guardar el valor real escrito)
+       ====================================================== */
+    $valor = (int)$valor;
+    if ($valor < 0) $valor = 0;
 
-    // validar fecha
-    $dt = strtotime($fecha);
-    if ($dt === false) {
-        $conexion->rollback();
-        echo json_encode(['ok' => false, 'msg' => 'fecha_invalida']);
-        exit;
-    }
-    $mes = intval(date('n', $dt));
-    $anio = intval(date('Y', $dt));
-
-    // 1) Upsert la fila objetivo (id_jugador, fecha) -> para obtener su id
+    // UPSERT
     $stmtIns = $conexion->prepare("
         INSERT INTO aportes (id_jugador, fecha, aporte_principal)
         VALUES (?, ?, ?)
         ON DUPLICATE KEY UPDATE aporte_principal = VALUES(aporte_principal)
     ");
-    if (!$stmtIns) {
-        throw new Exception("prepare_error_insert: " . $conexion->error);
-    }
     $stmtIns->bind_param("isi", $id_jugador, $fecha, $valor);
-    if (!$stmtIns->execute()) {
-        $err = $stmtIns->error;
-        $stmtIns->close();
-        throw new Exception("execute_error_insert: " . $err);
-    }
+    $stmtIns->execute();
     $stmtIns->close();
 
-    // obtener el id de la fila objetivo (garantizado por la clave unica id_jugador+fecha)
-    $selId = $conexion->prepare("SELECT id FROM aportes WHERE id_jugador = ? AND fecha = ? LIMIT 1");
+    // Obtener target_id
+    $selId = $conexion->prepare("SELECT id FROM aportes WHERE id_jugador=? AND fecha=? LIMIT 1");
     $selId->bind_param("is", $id_jugador, $fecha);
     $selId->execute();
     $rowId = $selId->get_result()->fetch_assoc();
@@ -135,55 +161,55 @@ try {
     if (!$rowId || !isset($rowId['id'])) {
         throw new Exception("no_target_id_after_upsert");
     }
-    $target_id = intval($rowId['id']);
+    $target_id = (int)$rowId['id'];
 
-    // 2) Consumir excedentes previos (aportes > 2000) del mismo mes/año (order FIFO por fecha)
-    $to_consume = $valor;
+    /* ======================================================
+       3) Si este día se re-edita, primero borramos sus moves previos
+          (para recalcular consumo correctamente)
+       ====================================================== */
+    $delMoves = $conexion->prepare("DELETE FROM aportes_saldo_moves WHERE target_aporte_id=?");
+    $delMoves->bind_param("i", $target_id);
+    $delMoves->execute();
+    $delMoves->close();
 
+    /* ======================================================
+       4) Consumir saldo (máximo 2000) SOLO de excedentes anteriores a esta fecha
+          SIN modificar aportes viejos: solo insertamos moves
+       ====================================================== */
+    $to_consume = min($valor, 2000);
     if ($to_consume > 0) {
+
+        // Candidatos source: aportes anteriores con excedente (>2000)
         $q = $conexion->prepare("
-            SELECT id, aporte_principal
+            SELECT id
             FROM aportes
-            WHERE id_jugador = ? AND MONTH(fecha) = ? AND YEAR(fecha) = ? AND aporte_principal > 2000 AND id <> ?
+            WHERE id_jugador = ?
+              AND fecha < ?
+              AND aporte_principal > 2000
             ORDER BY fecha ASC, id ASC
         ");
-        $q->bind_param("iiii", $id_jugador, $mes, $anio, $target_id);
+        $q->bind_param("is", $id_jugador, $fecha);
         $q->execute();
-        $res = $q->get_result();
-        $rows = $res->fetch_all(MYSQLI_ASSOC);
+        $sources = $q->get_result()->fetch_all(MYSQLI_ASSOC);
         $q->close();
 
-        foreach ($rows as $r) {
+        foreach ($sources as $s) {
             if ($to_consume <= 0) break;
-            $id_row = intval($r['id']);
-            $current = intval($r['aporte_principal']);
-            $excedente = $current - 2000;
-            if ($excedente <= 0) continue;
 
-            $dec = min($excedente, $to_consume); // cuánto reducimos en esta fila
-            $new_val = $current - $dec;
+            $source_id = (int)$s['id'];
+            $disp = get_disponible_source($conexion, $source_id);
+            if ($disp <= 0) continue;
 
-            // actualizar esa fila
-            $upd = $conexion->prepare("UPDATE aportes SET aporte_principal = ? WHERE id = ?");
-            $upd->bind_param("ii", $new_val, $id_row);
-            if (!$upd->execute()) {
-                $err = $conexion->error;
-                $upd->close();
-                throw new Exception("error_updating_row: " . $err);
-            }
-            $upd->close();
+            $dec = min($disp, $to_consume);
 
-            // registrar el movimiento para poder revertirlo si borran la fila target
             $insMove = $conexion->prepare("
-                INSERT INTO aportes_saldo_moves (id_jugador, source_aporte_id, target_aporte_id, mes, anio, amount)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO aportes_saldo_moves
+                  (id_jugador, source_aporte_id, target_aporte_id, amount, fecha_consumo)
+                VALUES
+                  (?, ?, ?, ?, ?)
             ");
-            $insMove->bind_param("iiiiii", $id_jugador, $id_row, $target_id, $mes, $anio, $dec);
-            if (!$insMove->execute()) {
-                $err = $insMove->error;
-                $insMove->close();
-                throw new Exception("error_insert_move: " . $err);
-            }
+            $insMove->bind_param("iiiis", $id_jugador, $source_id, $target_id, $dec, $fecha);
+            $insMove->execute();
             $insMove->close();
 
             $to_consume -= $dec;
@@ -192,12 +218,23 @@ try {
 
     $conexion->commit();
 
-    $consumed = max(0, $valor - $to_consume);
-    echo json_encode(['ok' => true, 'action' => 'upsert', 'target_id' => $target_id, 'consumed_from_saldo' => intval($consumed), 'remaining_unapplied' => intval($to_consume)]);
+    $saldo_actual = get_saldo_acumulado_hasta_mes($conexion, $id_jugador, $mes, $anio);
+
+    echo json_encode([
+        'ok' => true,
+        'action' => 'upsert',
+        'target_id' => $target_id,
+        'tope' => min($valor, 2000),
+        'saldo' => $saldo_actual
+    ]);
     exit;
 
 } catch (Exception $ex) {
     $conexion->rollback();
-    echo json_encode(['ok' => false, 'msg' => 'exception', 'error' => $ex->getMessage()]);
+    echo json_encode([
+        'ok' => false,
+        'msg' => 'exception',
+        'error' => $ex->getMessage()
+    ]);
     exit;
 }

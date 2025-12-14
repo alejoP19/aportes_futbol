@@ -288,3 +288,86 @@ $canvas->page_script(function($pageNumber, $pageCount, $canvas, $fontMetrics)
 $fileName = "Reporte_{$mesName}_{$anio}.pdf";
 $dompdf->stream($fileName, ["Attachment" => true]);
 exit;
+
+
+👉 Sí, con estas 3 reglas de oro:
+🟢 REGLA 1
+
+Nunca vuelvas a calcular saldo con:
+
+$total_aportes - ($total_juegos * 2000)
+
+
+Ese cálculo quedó obsoleto para siempre en tu sistema.
+
+🟢 REGLA 2
+
+Todo saldo debe salir SIEMPRE de una función como esta:
+
+get_saldo_hasta_mes($conexion, $id, $mes, $anio)
+
+
+Si mañana haces:
+
+otro PDF
+
+un reporte anual
+
+un resumen por jugador
+
+👉 usas esa función o la replicas igual, nada más.
+
+🟢 REGLA 3
+
+El JS no toca saldos
+
+No suma
+
+No resta
+
+No interpreta
+
+Solo muestra lo que viene del backend.
+
+🚨 ¿CUÁNDO SE ROMPERÍA EN EL FUTURO?
+
+Solo en estos casos (para que los evites):
+
+❌ alguien:
+
+copia código viejo
+
+vuelve a usar COUNT(aportes) * 2000
+
+calcula saldo “rápido” en el frontend
+
+ignora fecha_consumo
+
+Mientras no pase eso → tu sistema es estable.
+
+
+
+
+
+
+REGLA DE ORO (para PDFs también)
+
+Desde ahora:
+
+❌ Nunca calcules saldo en PDFs con
+
+SUM(aporte_principal) - COUNT(*) * 2000
+
+
+❌ Nunca ignores aportes_saldo_moves
+
+✅ Todo saldo (UI, público, PDF, exportes)
+debe usar esta misma lógica.
+
+Si quieres, en el siguiente mensaje hacemos lo mismo con el PDF público (es casi idéntico el cambio y será rápido).
+
+
+
+
+
+

@@ -107,27 +107,42 @@ if (!empty($playerIds)) {
         ];
     }
 }
+// -------------------------------------------
+// (helper) saldo hasta el mes consultado (CORRECTO)
+// -------------------------------------------
+function get_saldo_hasta_mes($conexion, $id_jugador, $mes, $anio) {
 
-// -------------------------------------------
-// (helper) saldo acumulado para JSON
-// -------------------------------------------
-function get_saldo_acumulado($conexion, $id_jugador, $mes, $anio) {
-    $stmt = $conexion->prepare("
-        SELECT IFNULL(SUM(aporte_principal - LEAST(aporte_principal,2000)),0) AS excedente
+    $fechaCorte = date('Y-m-t', strtotime("$anio-$mes-01"));
+
+    // 1️⃣ Excedentes generados hasta la fecha
+    $q1 = $conexion->prepare("
+        SELECT IFNULL(SUM(aporte_principal - 2000),0) AS excedente
         FROM aportes
         WHERE id_jugador = ?
-          AND (
-                YEAR(fecha) < ?
-             OR (YEAR(fecha) = ? AND MONTH(fecha) <= ?)
-          )
+          AND aporte_principal > 2000
+          AND fecha <= ?
     ");
-    $stmt->bind_param("iiii", $id_jugador, $anio, $anio, $mes);
-    $stmt->execute();
-    $res = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
+    $q1->bind_param("is", $id_jugador, $fechaCorte);
+    $q1->execute();
+    $excedente = (int)$q1->get_result()->fetch_assoc()['excedente'];
+    $q1->close();
 
-    return intval($res['excedente'] ?? 0);
+    // 2️⃣ Consumo de saldo hasta la fecha
+    $q2 = $conexion->prepare("
+        SELECT IFNULL(SUM(amount),0) AS consumido
+        FROM aportes_saldo_moves
+        WHERE id_jugador = ?
+          AND fecha_consumo <= ?
+    ");
+    $q2->bind_param("is", $id_jugador, $fechaCorte);
+    $q2->execute();
+    $consumido = (int)$q2->get_result()->fetch_assoc()['consumido'];
+    $q2->close();
+
+    return max(0, $excedente - $consumido);
 }
+
+
 
 // -------------------------------------------
 // 2.1) Cargar deudas reales por jugador y día
@@ -242,7 +257,8 @@ foreach ($players as $p) {
     }
 
     $fila['total_mes'] = $total_jugador + $total_otros;
-    $fila['saldo']     = get_saldo_acumulado($conexion, $pid, $mes, $anio);
+  $fila['saldo'] = get_saldo_hasta_mes($conexion, $pid, $mes, $anio);
+
 
     $rows[] = $fila;
 }

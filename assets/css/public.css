@@ -313,9 +313,20 @@ table tfoot {
   font-size: large;
   text-shadow:-1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
 }
-/* Eliminados */
-.fila-eliminado {
-  background: rgba(0,0,0,.06);
+/* Jugadores eliminados en tabla pública */
+.planilla tbody tr.eliminado {
+    background-color: #fc8e97 !important; /* rosado suave */
+    color: #000000 !important;
+}
+
+.planilla tbody tr.eliminado:nth-child(odd),
+.planilla tbody tr.eliminado:nth-child(even) {
+    background-color: #f7a6ad !important;
+}
+
+.planilla tbody tr.eliminado:hover {
+    background-color: #ff8993 !important;
+    cursor: default;
 }
 .columna-deuda {
     font-weight: bold;

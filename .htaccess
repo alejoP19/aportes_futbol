@@ -1,0 +1,4 @@
+RewriteEngine On
+
+# Cuando se entra solo al dominio, mostrar el público
+DirectoryIndex public/index.php

@@ -86,8 +86,9 @@ function renderTablaPublic(data) {
     data.rows.forEach(row => {
 
         const deudas = row.deudas || {}; // deudas SOLO del mes actual
+        const claseEliminado = row.activo === 0 ? "eliminado" : "";
+        html += `<tr data-player="${row.id}" class="${claseEliminado}">`;
 
-        html += `<tr data-player="${row.id}">`;
         html += `<td class="player-name">${escapeHtml(row.nombre)}</td>`;
 
         // DÍAS NORMALES
