@@ -59,6 +59,8 @@ function renderTablaPublic(data) {
     const dias = data.dias_validos;
     const fechaEspecial = data.fecha_especial;
     let html = `<table class="planilla"><thead>`;
+   
+   
 
     // ---------------- CABECERA 1 ----------------
     html += `<tr>`;
