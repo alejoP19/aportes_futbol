@@ -78,7 +78,7 @@ function renderTablaPublic(data) {
     html += `<th>Otra Fecha (${fechaEspecial})</th>`;
     html += `<th>Tipo</th><th>Valor</th>`;
     html += `<th>Por Jugador</th>`; // debajo de "Total Mes"
-    html += `<th></th>`;            // debajo de "Saldo"
+    html += `<th>Tu Saldo</th>`;            // debajo de "Saldo"
     html += `<th>Tu Deuda</th>`;    // debajo de "Tu Deuda"
     html += `</tr></thead><tbody>`;
 
@@ -231,8 +231,10 @@ if (hayExcEsp) {
     cont.innerHTML = html;
 
     // animación
-    const tabla = cont.querySelector("table");
-    if (tabla) tabla.classList.add("tabla-animada");
+const tabla = cont.querySelector("table.planilla");
+if (tabla) setupHeaderColumnHighlight(tabla);
+
+  
 
     const filas = cont.querySelectorAll("tbody tr");
     filas.forEach(tr => {
@@ -243,8 +245,68 @@ if (hayExcEsp) {
     });
 }
 
+/* ==========================================================
+  Sombreado De Columnas
+========================================================== */
+function setupHeaderColumnHighlight(table) {
+  if (!table || !table.tHead) return;
 
+  const headRows = table.tHead.rows;
+  const groupRow = headRows[0];                              // fila 1 (con colspan)
+  const colRow   = headRows[headRows.length - 1];           // fila 2 (días/tipo/valor...)
 
+  function clear() {
+    table.querySelectorAll(".col-activa").forEach(el => el.classList.remove("col-activa", "col-especial"));
+  }
+
+  function paintCol(colIndex) {
+    clear();
+    Array.from(table.rows).forEach(row => {
+      const cell = row.cells[colIndex];
+      if (cell) cell.classList.add("col-activa");
+    });
+
+    // opcional: si es la columna "Otra Fecha (28)" darle estilo distinto
+    const h = colRow.cells[colIndex];
+    if (h && /\(28\)|otra\s*fecha|fecha\s*especial/i.test(h.textContent || "")) {
+      Array.from(table.rows).forEach(row => {
+        const cell = row.cells[colIndex];
+        if (cell) cell.classList.add("col-especial");
+      });
+    }
+  }
+
+  function startIndexFromColspan(th) {
+    let start = 0;
+    for (const cell of th.parentElement.cells) {
+      if (cell === th) break;
+      start += cell.colSpan || 1;
+    }
+    return start;
+  }
+
+  // ✅ SOLO HEADER: si clic en fila 1 -> marcar PRIMERA columna del grupo
+  // si clic en fila 2 -> marcar esa columna exacta
+  table.tHead.addEventListener("click", (e) => {
+    const th = e.target.closest("th");
+    if (!th) return;
+
+    const row = th.parentElement;
+    if (row === groupRow) {
+      const start = startIndexFromColspan(th);
+      paintCol(start);                 // 👈 aquí está tu regla: “primera columna del grupo”
+    } else {
+      paintCol(th.cellIndex);          // clic en fila 2: columna exacta (día 6, tipo, valor, etc.)
+    }
+
+    e.stopPropagation();
+  });
+
+  // ✅ click fuera desactiva
+  document.addEventListener("click", (e) => {
+    if (!table.contains(e.target)) clear();
+  });
+}
 
 /* ==========================================================
    OBSERVACIONES

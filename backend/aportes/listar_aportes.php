@@ -120,31 +120,64 @@ $mesesEsp = [
   1=>"Enero",2=>"Febrero",3=>"Marzo",4=>"Abril",5=>"Mayo",6=>"Junio",
   7=>"Julio",8=>"Agosto",9=>"Septiembre",10=>"Octubre",11=>"Noviembre",12=>"Diciembre"
 ];
+/* =========================
+   TOOLBAR SUPERIOR DE TABLA
+   ========================= */
+echo "
+<div class='tabla-toolbar'>
+  <div class='month-header'>
+    Mes: <strong>{$mesesEsp[$mes]} $anio</strong>
+  </div>
 
-echo "<div class='month-header'>Mes: <strong>{$mesesEsp[$mes]} $anio</strong></div>";
+  <div class='buscador-jugadores'>
+    <span class='icono-buscar'>🔍</span>
+    <input
+      type='text'
+      id='searchJugador'
+      placeholder='Buscar aportante…'
+      autocomplete='off'
+    >
+    <button type='button' id='clearSearch' title='Limpiar'>✕</button>
+  </div>
+</div>
+";
+
+
+
 
 echo "<table class='planilla'>";
 
 echo "<thead>";
 echo "<tr>";
 echo "<th>Nombres</th>";
-echo "<th colspan='".(count($days)+1)."'>Días de los juegos</th>";
-echo "<th colspan='2'>Otros aportes</th>";
-echo "<th>Total Mes</th>";
-echo "<th>Saldo</th>";
+// echo "<th colspan='".(count($days)+1)."'>Días de los juegos</th>";
+// echo "<th colspan='2'>Otros aportes</th>";
+// echo "<th>Total Mes</th>";
+// echo "<th>Saldo</th>";
+echo "<th colspan='".(count($days)+1)."' data-group='dias'>Días de los juegos</th>";
+echo "<th colspan='2' data-group='otros'>Otros aportes</th>";
+echo "<th data-group='total'>Total Mes</th>";
+echo "<th data-group='saldo'>Saldo</th>";
 echo "<th>Acciones</th>";
 echo "<th>Deudas</th>";
 echo "</tr>";
 
 echo "<tr>";
 echo "<th></th>";
-foreach ($days as $d) echo "<th>{$d}</th>";
-echo "<th>Fecha Especial</th>";
-echo "<th>Tipo</th>";
-echo "<th>Valor</th>";
-echo "<th>Por Jugador</th>";
-echo "<th></th>";
-echo "<th></th>";
+// foreach ($days as $d) echo "<th>{$d}</th>";
+// echo "<th>Fecha Especial</th>";
+// echo "<th>Tipo</th>";
+// echo "<th>Valor</th>";
+// echo "<th>Por Jugador</th>";
+// echo "<th>Tu Saldo</th>";
+
+foreach ($days as $d) echo "<th data-group='dias'>{$d}</th>";
+echo "<th data-group='especial'>Fecha Especial</th>";
+echo "<th data-group='otros'>Tipo</th>";
+echo "<th data-group='otros'>Valor</th>";
+echo "<th data-group='total'>Por Jugador</th>";
+echo "<th data-group='saldo'>Tu Saldo</th>";
+echo "<th>Eliminar</th>";
 echo "<th>Tu Deuda</th>";
 
 echo "</tr>";

@@ -76,6 +76,15 @@ async function loadSheet(mes, anio) {
     const container = document.getElementById('monthlyTableContainer');
     container.innerHTML = html;
 
+
+const tablaAdmin = container.querySelector("table.planilla");
+if (tablaAdmin) {
+  setupHeaderColumnHighlight(tablaAdmin);
+}
+activarBusquedaJugadores();
+
+
+
     // Mantener fila seleccionada
     if (selectedPlayerId) {
         const row = container.querySelector(`tr[data-player='${selectedPlayerId}']`);
@@ -150,7 +159,105 @@ container.querySelectorAll(".btn-del-player").forEach(btn => {
         eliminarJugador(btn.dataset.id);
     });
 });
+
+
 }
+/* ==========================================================
+  Sombreado De Columnas
+========================================================== */
+function setupHeaderColumnHighlight(table) {
+  if (!table || !table.tHead) return;
+
+  const headRows = table.tHead.rows;
+  const groupRow = headRows[0];                     // fila 1 (colspan)
+  const realRow  = headRows[headRows.length - 1];   // fila real
+
+  function clear() {
+    table.querySelectorAll(".col-activa, .col-especial")
+      .forEach(el => el.classList.remove("col-activa", "col-especial"));
+  }
+
+  function paint(colIndex) {
+    clear();
+    Array.from(table.rows).forEach(row => {
+      if (row.cells[colIndex]) {
+        row.cells[colIndex].classList.add("col-activa");
+      }
+    });
+
+    const h = realRow.cells[colIndex];
+    if (h && /\(28\)|otra\s*fecha|fecha\s*especial/i.test(h.textContent || "")) {
+      Array.from(table.rows).forEach(row => {
+        if (row.cells[colIndex]) row.cells[colIndex].classList.add("col-especial");
+      });
+    }
+  }
+
+  function getStartIndex(th) {
+    let idx = 0;
+    for (const cell of th.parentElement.cells) {
+      if (cell === th) break;
+      idx += cell.colSpan || 1;
+    }
+    return idx;
+  }
+
+  table.tHead.addEventListener("click", (e) => {
+    const th = e.target.closest("th");
+    if (!th) return;
+
+    // CLICK EN FILA 1 (Días / Otros / Total / Saldo)
+    if (th.parentElement === groupRow) {
+      paint(getStartIndex(th));
+    }
+    // CLICK EN FILA 2 (día 6, 10, Tipo, Valor, etc.)
+    else {
+      paint(th.cellIndex);
+    }
+
+    e.stopPropagation();
+  });
+
+  // Click fuera limpia
+  document.addEventListener("click", (e) => {
+    if (!table.contains(e.target)) clear();
+  });
+}
+
+// ----------- BARRA DE BUSQUEDA -----------------//
+
+function activarBusquedaJugadores() {
+  const input = document.getElementById("searchJugador");
+  if (!input) return;
+
+  input.oninput = () => {
+    const texto = input.value.trim().toLowerCase();
+
+    const tabla = document.querySelector(".monthly-sheet table.planilla");
+    if (!tabla) return;
+
+    const filas = tabla.querySelectorAll("tbody tr");
+
+    filas.forEach(tr => {
+      const celdaNombre = tr.querySelector("td:first-child");
+      if (!celdaNombre) return;
+
+      const nombre = celdaNombre.textContent.toLowerCase();
+      tr.style.display = nombre.includes(texto) ? "" : "none";
+    });
+  };
+}
+
+document.addEventListener("click", (e) => {
+  if (e.target.id === "clearSearch") {
+    const input = document.getElementById("searchJugador");
+    if (!input) return;
+    input.value = "";
+    input.dispatchEvent(new Event("input"));
+    input.focus();
+  }
+});
+
 
 // ----------- OBSERVACIONES -----------------
 function loadObservaciones(mes, anio) {

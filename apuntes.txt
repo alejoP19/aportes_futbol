@@ -380,3 +380,106 @@ Si quieres, en el siguiente mensaje hacemos lo mismo con el PDF público (es cas
 ✅ Usa pointerup
 ✅ Usa data-* para pasar datos
 ✅ JS decide cómo mostrar
+
+
+
+
+
+
+
+
+
+
+/* ===============================
+   BUSCADOR DE JUGADORES – ADMIN
+   =============================== */
+
+.buscador-jugadores {
+  display: flex;
+  align-items: center;align-self: flex-end;
+  gap: 8px;
+  padding: 5px 10px;
+  margin-top: 0%;
+  margin-bottom: -11%;
+  background: linear-gradient(135deg, #00694f, #028f6b);
+  border-radius: 10px;
+  width: 340px;
+  max-width: 98%;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+  cursor: pointer;
+  z-index: 90;
+
+}
+.buscador-jugadores input::placeholder {
+  color: rgb(255, 255, 255); /* O un código hexadecimal como #FF0000 */
+  font-size: large;
+  font-weight: lighter;
+  text-shadow:
+-1px 1px 1px #000000;
+
+  
+}
+
+/* icono */
+.buscador-jugadores .icono-buscar {
+  font-size: 18px;
+  color: #ffffff;
+  opacity: 0.9;
+}
+
+/* input */
+.buscador-jugadores input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 14px;
+  padding: 6px 4px;
+}
+
+/* botón limpiar */
+.buscador-jugadores button {
+  background: rgba(255, 106, 131, 0.712);
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  transition: background 0.80s ease, transform 0.90s ease;
+}
+
+.buscador-jugadores button:hover {
+  background: rgba(92, 173, 140, 0.863);
+  transform: scale(1.1);
+}
+
+.buscador-jugadores button:active {
+  transform: scale(0.97);
+}
+
+/* enfoque */
+.buscador-jugadores:focus-within {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.76),
+              0 6px 20px rgba(255, 255, 255, 0.2);
+           
+           
+}
+
+
+/* Al hacer clic o tabular (recibir foco) */
+input[type="text"]:focus {
+    background-color: #016b51; /* Fondo blanco al recibir foco */
+    border-radius: 18px;
+    width: 98%;
+    color: #ffffff; 
+   font-size: large;
+  font-weight: lighter;
+  text-shadow:
+-1px 1px 1px #000000;
+
+    outline: none; /* Quita el borde por defecto del navegador */
+}
