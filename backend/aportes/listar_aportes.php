@@ -115,8 +115,9 @@ while ($row = $deudas_res->fetch_assoc()) {
 // HTML
 // ===========================
 echo "<div class='monthly-sheet'>";
-
-$mesesEsp = [
+echo "<div class='tabla-scroll-sync'>";
+ echo "<div class='table-scroll'>";   // 👈 nuevo
+ $mesesEsp = [
   1=>"Enero",2=>"Febrero",3=>"Marzo",4=>"Abril",5=>"Mayo",6=>"Junio",
   7=>"Julio",8=>"Agosto",9=>"Septiembre",10=>"Octubre",11=>"Noviembre",12=>"Diciembre"
 ];
@@ -203,11 +204,6 @@ while ($row = $resTot->fetch_assoc()) {
     $deudas_totales[$row['id_jugador']] = intval($row['total']);
 }
 
-
-
-while ($row = $resTot->fetch_assoc()) {
-    $deudas_totales[$row['id_jugador']] = $row['total'];
-}
 
 foreach ($jugadores as $jug) {
 
@@ -374,7 +370,11 @@ $totSaldo = intval($totSaldoRes->fetch_assoc()['t'] ?? 0);
 echo "<td><strong>".number_format($totSaldo,0,',','.')."</strong></td>";
 
 echo "<td></td>";
-echo "</tr></tfoot>";
 
-echo "</table></div>";
+echo "<td></td>";
+echo "</tr></tfoot>";
+echo "</table>";
+echo "</div>";
+echo "</div>";
+echo "</div>";
 ?>

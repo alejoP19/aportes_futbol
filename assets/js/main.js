@@ -75,6 +75,7 @@ async function loadSheet(mes, anio) {
     const html = await fetchText(`${API}/aportes/listar_aportes.php?mes=${mes}&anio=${anio}`);
     const container = document.getElementById('monthlyTableContainer');
     container.innerHTML = html;
+    
 
 
 const tablaAdmin = container.querySelector("table.planilla");

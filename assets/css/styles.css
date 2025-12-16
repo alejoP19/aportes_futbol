@@ -2,7 +2,7 @@
 VARIABLES
 ===================================================== */
 :root {
---aside-width: 260px;
+--aside-width: 100px;
 --aside-narrow: 200px;
 --topbar-bg: #5d616b;
 --primary-blue: #1c6e9e;
@@ -126,11 +126,11 @@ width: 38%;
 margin-bottom:10%;
 justify-content: center;
 padding: 8px 8px;
-border: 1px solid rgb(184, 184, 184);
-background-color: #757575f6;
-color: rgba(255, 255, 255, 0.888);
-text-shadow: -1px 1px 1px #000000;
-font-weight: lighter;
+border: 1px solid rgb(255, 255, 255);
+background-color: #cfcfcff6;
+font-weight: bold;
+color: rgba(0, 0, 0, 0.888);
+text-shadow: -1px 1px 1px #ffffff;
 border-radius: 10px;
 outline: 0;
 transition: background-color 0.5s, border-radius 0.5s, outline 0.5s;
@@ -252,12 +252,12 @@ margin-top:10px;
 margin-top:10%; 
 font-size:18px;
 margin-bottom:15%; 
-font-weight:lighter;
-color:rgb(0, 0, 0);
 font-style:italic; 
-text-shadow: -1px 1px 1px #ffffff,
--1px 1px 1px #ffffff,
--1px 1px 1px #ffffff;
+color: #000000;
+font-weight:bold; 
+text-shadow: -1px 1px 1px rgb(255, 255, 255),
+-1px 1px 1px rgb(255, 255, 255),
+-1px 1px 1px rgb(255, 255, 255);
 justify-self: center;
 }
 
@@ -357,13 +357,15 @@ border:1px solid var(--border);
 border-radius:8px;
 padding:12px;
 margin-bottom:15px;
-font-weight:lighter; }
-.totals-card h3{ 
-color: #ffffff;
 font-weight:lighter; 
-text-shadow: -1px 1px 1px black,
--1px 1px 1px black,
--1px 1px 1px black;
+
+}
+.totals-card h3{ 
+color: #000000;
+font-weight:bold; 
+text-shadow: -1px 1px 1px rgb(255, 255, 255),
+-1px 1px 1px rgb(255, 255, 255),
+-1px 1px 1px rgb(255, 255, 255);
 font-style:italic;
 justify-self: center;
 }
@@ -380,8 +382,8 @@ min-width: 100%;
 .add-player-box  label, .otros-aportes-card label, .gastos-card label{
 font-weight:lighter; 
 font-style:italic;
-color: #ffffff;
-text-shadow: -1px 1px 1px black,-1px 1px 1px black;
+color: #00aa63;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
 }
 .add-player-box input,.otros-aportes-card input, .otros-aportes-card,.otros-aportes-card select { 
 width:100%;
@@ -563,26 +565,6 @@ max-height: 100%; /* dejar espacio para header y botón */
 
 }
 
-/* ===============================
-   TOOLBAR SOBRE LA TABLA
-   =============================== */
- .tabla-toolbar { 
-position: sticky;
-display: flex;
-width: 100%;
-flex-direction: column;
-align-items: stretch;
-align-items: center;
-justify-content: space-between;
-gap: 12px;
-padding: 0px 12px;
-background: #ffffff;
-border-radius: 10px;
-margin-bottom: 8px;
-top: -12%;
-z-index: 80;
-
-}
 .month-header{ 
 color: #f1c500;
 font-weight:bold; 
@@ -591,7 +573,8 @@ text-shadow: -1px 1px 1px black,
 -1px 1px 1px black,
 -1px 1px 1px black;
 font-style:italic;
-text-align: center;
+text-align: left;
+margin-left: 76px;
 padding: 20px 0px;
   white-space: nowrap;
 
@@ -599,21 +582,43 @@ padding: 20px 0px;
 }
 
 /* ===============================
+   TOOLBAR SOBRE LA TABLA (MÓVIL)
+  =============================== */
+
+  .tabla-scroll-sync {
+  width: max-content;      /* 👈 se estira al ancho real de la tabla */
+  min-width: 100%;         /* 👈 nunca más angosto que la pantalla */
+}
+.tabla-toolbar {
+  width: 100%;
+  position: relative;
+  top: 0;
+  z-index: 100;
+padding: 10px 0px 30px 0px;
+background: #ffffff;
+
+}
+
+
+/* ===============================
    BUSCADOR
    =============================== */
 
 .buscador-jugadores {
   display: flex;
-  align-items: center;
+   width: 310px;
+  min-width: 310px;
+  max-width: none;
+  margin-left: 10px;
+justify-self: flex-start;
+
   gap: 8px;
   padding: 6px 12px;
   background: linear-gradient(135deg, #00694f, #028f6b);
   border-radius: 10px;
-  width: 98%;
-  max-width: 100%;
   box-shadow: 0 6px 16px rgba(0,0,0,0.15);
   z-index: 90;
-  margin-bottom: 5%;
+
 }
 
 .buscador-jugadores input::placeholder {
@@ -682,7 +687,7 @@ text-shadow: -1px 1px 1px black,
 -1px 1px 1px black;
 font-style:italic;
     background-color: #00a77d; 
-    width: 120%;
+     width: 100%;
     border-color: #000000; 
     outline: none;
 }
@@ -693,19 +698,19 @@ font-style:italic;
 
 /* Fila 1 del thead */
 .planilla thead tr:nth-child(1) th {
-  position: sticky;
-   padding: 0px;
-  top: 16%;
-  z-index: 90;
+   position: sticky;
+  top: 0;                 /* 👈 ahora sí */
+  z-index: 20;
+padding: 6px;
 background-color: #237a6b !important;
 }
 
 /* Fila 2 del thead */
 .planilla thead tr:nth-child(2) th {
-  position: sticky;
-  top: 28%;
-  padding: 1px ;
-  z-index: 89;
+ position: sticky;
+  top: 39px;              /* altura real fila 1 */
+  z-index: 19;
+  padding: 4px;
     background-color: #01926e !important;
   
 }
@@ -752,17 +757,7 @@ text-align:center;
 
 
 /* Contenedor con scroll vertical + horizontal (clave para sticky) */
-.table-scroll {
-  overflow: auto;
-  max-height: 70vh;      /* ajusta a tu gusto */
-  -webkit-overflow-scrolling: touch;
-}
 
-.monthly-sheet .planilla thead th {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-}
 
 
 /* Columna activa */
@@ -783,9 +778,8 @@ text-align:center;
 }
 /* ===== ADMIN: contenedor que hace scroll ===== */
 .monthly-sheet {
-  overflow: auto;
-  max-height: 70vh;
-  -webkit-overflow-scrolling: touch;
+ overflow: auto;
+ max-height: calc(100vh - 240px);
   position: relative;
 }
 
@@ -893,21 +887,13 @@ input[type="number"] {
     -moz-appearance: textfield; /* Firefox */
 }
 
-/* Móvil scroll horizontal */
 
-.table-wrap {
-overflow-x: auto;
+.middle-panel,
+.middle-panel.expanded {
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
 }
-.middle-panel {
-overflow-x: hidden;
-}
-
-.right-panel, .left-panel, .notes-card {
-max-width: 100vw; overflow-x: hidden;
-}
-
-
-
 /* Hover */
 #monthlyTableContainer table tr:hover { background-color: #f0f8ff; cursor: pointer; }
 #monthlyTableContainer table tr.selected-row { background-color: #c0e0ff; }
@@ -978,7 +964,8 @@ border: none;
 padding:7px 39px; 
 }
 
-
+/* // ----------------->>> DESKTOP QUERIES <<<--------------------//
+// --------------------------------------------------------------// */
 
 /* Desktop layout */
 @media (min-width: 992px) {
@@ -1059,21 +1046,70 @@ font-size: 40px;
 margin-top: 1%;
 font-size: 20px; 
 }
-.container { 
-grid-template-columns: 300px 1fr var(--aside-width); 
-padding: 15px;
+
+
+  /* El contenedor principal YA ES GRID, solo lo respetamos */
+  .container:not(.tabla-abierta) {
+    display: flex;
+  }
+
+  .container:not(.tabla-abierta) .left-panel {
+    width: 20%;
+    flex: 0 0 auto;
+  }
+
+  .container:not(.tabla-abierta) .right-panel {
+    width: 35%;
+    flex: 1 1 auto;
+  }
+
+
+
+ .container.tabla-abierta {
+    display: flex;
+  }
+
+  .container.tabla-abierta .left-panel {
+    flex: 0 0 300px;
+  }
+
+  .container.tabla-abierta .right-panel {
+    flex: 0 0 var(--aside-width);
+  }
+
+.container.tabla-abierta .right-panel{
+margin-top:9%; 
+margin-bottom: 4%;
+font-size:16px;
+color: #d80f0f;
+border-color: #464646;
 }
+
+  .container.tabla-abierta .middle-panel.expanded {
+    flex: 1 1 auto;
+    width: auto;
+    max-width: none;
+
+  }
 
 
 /* ===============================
    TOOLBAR SOBRE LA TABLA
    =============================== */
 
-.month-header{ 
-font-size: large;
-align-self: flex-start;
-padding: 20px 0px 10px 0px;
+  .tabla-toolbar {
+  width: 100%;
+  position: relative;
+  top: 0;
+  z-index: 100;
+  padding: 10px 0px 30px 0px;
+  }
 
+.month-header{ 
+font-size: larger;
+align-self: center;
+text-align: center;
+padding: 20px 0px;
 }
 
 /* ===============================
@@ -1082,45 +1118,34 @@ padding: 20px 0px 10px 0px;
 
 .buscador-jugadores {
  
-  padding: 7px 20px;
-  background: linear-gradient(135deg, #00694f, #028f6b);
-  border-radius: 10px;
-  width: 35%;
-  max-width: 100%;
-  margin-bottom: 2%;
+padding: 7px 10px;
+margin-bottom: 0%;
+width: 410px;
+min-width: 410px;
+margin-left: 0px;
+justify-self: center;
 }
 
-
-/* ===============================
-   STICKY HEADERS CORRECTOS
-   =============================== */
-
-/* Fila 1 del thead */
-.planilla thead tr:nth-child(1) th {
-  position: sticky;
-   padding: 0px;
-  top: 16%;
-  z-index: 90;
-background-color: #237a6b !important;
-}
-
-/* Fila 2 del thead */
-.planilla thead tr:nth-child(2) th {
-  position: sticky;
-  top: 28%;
-  padding: 1px ;
-  z-index: 89;
-    background-color: #01926e !important;
-  
-}
-
-   
 /* ===== ADMIN: contenedor que hace scroll ===== */
 .monthly-sheet {
-  overflow: auto;
-  max-height: 70vh;
-  -webkit-overflow-scrolling: touch;
+
+  overflow-x: auto;
+  overflow-y: auto;
+  max-width: 100%;
+  max-height: 100vh;
   position: relative;
+    max-height: calc(100vh - 220px);
+    overflow: auto;
+}
+
+/* La tabla usa TODO el ancho disponible */
+.planilla {
+  width: 100%;
+  table-layout: fixed; /* CLAVE */
+  font-size: 14px;
+  max-width: 100%;
+  border-collapse: collapse;
+
 }
 
 /* ===== MUY IMPORTANTE ===== */
@@ -1128,7 +1153,21 @@ background-color: #237a6b !important;
 .monthly-sheet .planilla {
   overflow: visible !important;
 }
+  /* Estado normal (tabla oculta) */
+  .middle-panel {
+    display: none;
+  }
 
+  /* Estado visible */
+  .middle-panel.expanded {
+    position: relative;          /* 🔥 CLAVE */
+    width: 100%;
+    max-width: 100%;
+    margin: 0 !important;
+    padding: 0;
+    overflow: hidden;            /* ok aquí */
+    border-radius: 10px;
+  }
   .middle-panel:not(.expanded) {
      
       height: 100dvh;
@@ -1137,22 +1176,7 @@ background-color: #237a6b !important;
   }
 /* CLASE NUEVA: tabla expandida al presionar boton */
 
-.middle-panel.expanded {
- 
-width: 99%;
-max-width: 100%;
-padding: 8px;
-height: 100% !important; /* dejar espacio para header y botón */
-overflow: none !important;
 
-}
-
-.container.panel-collapsed { 
-grid-template-columns: 1fr var(--aside-width) !important;
-padding-left: 0 !important; 
-padding-right: 0 !important; 
-gap: 10px; 
-}
 
 /* zebra desktop */
 .planilla tbody tr:nth-child(odd) {
@@ -1167,44 +1191,51 @@ background-color: #e5dfc3;
 .planilla tbody tr.selected-row {
 background-color: #c0e0ff !important;
 }
-.left-panel{
-    width: 105%;
-    margin-top: -4% !important;
 
+/* =====================================================
+   FIX TÍTULOS – ESTABLES AL ABRIR / CERRAR TABLA
+===================================================== */
+
+.left-panel{
+width: 45%;
+margin:0 !important;
 }
 .right-panel {
-justify-self: end;
-width: 72dvw; 
-margin-top:-1.3% !important;
+align-self: center;
+width: 100%;
+flex-grow: 1;
+margin: 0% !important; 
+
 }
 
-.otros-aportes-card h4, .notes-card h4 {
-margin-top:5%; 
-font-size:20px;
-margin-bottom:8%; 
+
+.add-player-title, .otros-aportes-card h4, .gastos-card h4, .notes-card h4 {
+margin-top:3%; 
+margin-bottom: 4%;
+font-size:16px;
+border-color: #d80f0f;
+}
+
+.add-player-box  label, .otros-aportes-card label, .gastos-card label{
+font-size: 14px;
+
 }
 
 .save-player-btn { 
-
 width:80%; 
-
 }
 
 
 .totals-card{
-
-padding:19px;
-margin-bottom:-9px;
+padding:30px;
+margin-bottom:9px;
 }
 
-.add-player-box  label, .otros-aportes-card label{
-text-shadow: -1px 1px 1px black,
--1px 1px 1px black,
--1px 1px 1px black;
-padding: 13%;
+.otros-aportes-card label{
+padding: 0% 0% 0% 20% ;
 }
 .otros-aportes-card input,.otros-aportes-card select { 
-width:75%;
+width:60%;
 display: flex;
 justify-self: center;
 margin-bottom:4%;
@@ -1215,7 +1246,9 @@ margin-top: 1%;
 .otro-aporte{ 
 width:30%;
 }
-
+textarea{
+margin-top: -1%;
+}
 
 .notes-card{ 
 background:#c4d7d8; 
@@ -1224,24 +1257,57 @@ border-radius:8px;
 padding:2px; 
 margin-top: -4%;
 }
+  /* =====================================================
+   FIX BOTONES – ANCHO ESTABLE AL ABRIR / CERRAR TABLA
+===================================================== */
 
-.export-pdf-butt{ 
-width:30%; 
+/* Botones principales */
+.save-player-btn,
+.save-gasto,
+.otro-aporte,
+.export-pdf-butt,
+.guardar-observaciones {
+  width: 100%;
+  max-width: 260px;   /* 🔥 ancho estable */
+  margin-left: auto;
+  margin-right: auto;
 }
+
+
+.otro-aporte{
+width:85% !important;  
+margin-top:8%; 
+margin-bottom: 5%;
+padding:7px 11px; 
+font-size:14px; 
+  }
+
+.otro-aporte:hover{
+padding:7px 11px; 
+}
+
+.export-pdf-butt{
+width:80% !important;  
+margin-top:8%; 
+margin-bottom: 5%;
+padding:5px 10px; 
+font-size:14px; 
+  }
+
+.export-pdf-butt:hover{
+padding:5px 10px; 
+}
+
 .gastos-block h3{
 background-color: #e2e2e2;
 padding: 2%;
 font-size: 23px;
 
 }
-textarea{
-margin-top: -1%;
-}
-.guardar-observaciones { 
-width:25%; 
-font-size:17px; 
 
-}
+
+
+
 }
 @media (min-width: 1200px) {
 .container {
