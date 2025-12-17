@@ -1,80 +1,112 @@
-
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8">
   <title>Aportes – Público</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/public.css">
-<link rel="stylesheet" href="../assets/css/login_admin.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/public.css">
+  <link rel="stylesheet" href="../assets/css/login_admin.css">
 </head>
+
 <body>
 
-<header class="topbar">
-  <div class="brand">
-    <img src="../assets/img/reliquias_logo.jpg" class="logo" alt="logo">
-  </div>
+  <header class="topbar">
+    <div class="brand">
+      <img src="../assets/img/reliquias_logo.jpg" class="logo" alt="logo">
+    </div>
 
-  <div class="titles">
-    <h1>Aportes</h1>
-    <h3>Las Reliquias del Fútbol</h3>
-  </div>
+    <div class="titles">
+      <h1>Aportes</h1>
+      <h3>Las Reliquias del Fútbol</h3>
+    </div>
 
-  <div class="actions-butt-right">
-    <a href="index.php" class="volver-butt">Regresar</a>
+    <div class="actions-butt-right">
+      <a href="index.php" class="volver-butt">Regresar</a>
 
-  </div>
-</header>
+    </div>
+  </header>
 
-<section  class="admin-card">
-  <h2 class="title-admin-form">Ingreso a Panel de Administración</h2>
-
-
-
-  <label class="subtitle-form">Ingresa Tus Credenciales</label>
-    <form id="loginForm" class="admin-form">
-        <label for="email" class="title-labels-form">Correo</label>
-    <input type="email" name="email" class="form-control"  placeholder="yourmail@example.com" autocomplete="username" required>
-    <label for="password" class="title-labels-form">Contraseña</label>
-    <input type="password" name="password" class="form-control"  placeholder="yourpass123@W.."  autocomplete="current-password" required>
-    <button type="submit" class="ingresar-butt">Ingresar</button>
-      <h3  class="warning-title-admin">Solo Para Administrador</h3>
-     </form>
+  <section class="admin-card">
+    <h2 class="title-admin-form">Ingreso a Panel de Administración</h2>
 
 
- 
-</section>
+
+    <label class="subtitle-form">Ingresa Tus Credenciales</label>
+   <form id="loginForm" class="admin-form">
+  <label class="title-labels-form">Correo</label>
+  <input type="email" name="email" class="form-control" required>
+
+  <label class="title-labels-form">Contraseña</label>
+<div class="password-wrapper">
+  <input type="password" id="loginPass" name="password" class="form-control" required>
+  <span class="toggle-pass" data-target="loginPass">👁️</span>
+</div>
+
+  <a class="recover__password__btn"
+     href="/aportes_futbol/backend/auth/send_recover_email.html">
+    Recuperar Contraseña
+  </a>
+
+  <button type="submit" class="ingresar-butt">Ingresar</button>
+</form>
 
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
-</body>
-</html>
+  </section>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
 
 <script>
-document.getElementById("loginForm").addEventListener("submit", async e => {
+(function () {
+  const form = document.getElementById("loginForm");
+  if (!form) return;
+
+  // OJITO
+  document.querySelectorAll(".toggle-pass").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const input = document.getElementById(btn.dataset.target);
+      if (!input) return;
+      input.type = (input.type === "password") ? "text" : "password";
+    });
+  });
+
+  // LOGIN
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    let data = new FormData(e.target);
+    try {
+      const data = new FormData(form);
 
-    let r = await fetch("../backend/auth/login.php", {
+      const r = await fetch("/aportes_futbol/backend/auth/login.php", {
         method: "POST",
         body: data
-    });
+      });
 
-    let txt = await r.text();
+      const txt = (await r.text()).trim();
 
-    if (txt === "OK") {
-        window.location = "../index.php";
-    } else {
+      if (txt === "OK") {
+        window.location.href = "/aportes_futbol/index.php"
+      } else {
         Swal.fire({
-  icon: "error",
-  title: "¡Error en Credenciales!",
-  text: "Correo o Contraseña Incorrectos",
-  
-});
+          icon: "error",
+          title: "¡Error en Credenciales!",
+          text: "Correo o Contraseña Incorrectos"
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "Falló la petición al servidor", "error");
     }
-});
+  });
+})();
 </script>
+</body>
+
+</html>
+
