@@ -1,4 +1,4 @@
-console.log("MAIN.JS SE CARGÓ CORRECTAMENTE");
+
 
 // assets/js/main.js
 const API = "backend";
@@ -75,17 +75,13 @@ async function loadSheet(mes, anio) {
     const html = await fetchText(`${API}/aportes/listar_aportes.php?mes=${mes}&anio=${anio}`);
     const container = document.getElementById('monthlyTableContainer');
     container.innerHTML = html;
-    
-
 
 const tablaAdmin = container.querySelector("table.planilla");
 if (tablaAdmin) {
   setupHeaderColumnHighlight(tablaAdmin);
 }
+
 activarBusquedaJugadores();
-
-
-
     // Mantener fila seleccionada
     if (selectedPlayerId) {
         const row = container.querySelector(`tr[data-player='${selectedPlayerId}']`);
@@ -103,7 +99,7 @@ activarBusquedaJugadores();
 
    // Inputs de aporte
 container.querySelectorAll('.cell-aporte').forEach(input => {
-    input.addEventListener('change', async ev => {
+     input.addEventListener('blur', async ev => {
     const id = ev.target.dataset.player;
     const fecha = ev.target.dataset.fecha;
     const raw = (ev.target.value || "").toString().trim();
@@ -148,8 +144,7 @@ if (wrapper) {
     ev.target.classList.add('saved');
     setTimeout(() => ev.target.classList.remove('saved'), 400);
 
-    // Ahora sí refrescamos todo
-    await refreshSheet();
+    await loadTotals(monthSelect.value, yearSelect.value);
 });
 
 });
@@ -160,9 +155,8 @@ container.querySelectorAll(".btn-del-player").forEach(btn => {
         eliminarJugador(btn.dataset.id);
     });
 });
-
-
 }
+
 /* ==========================================================
   Sombreado De Columnas
 ========================================================== */
@@ -225,6 +219,7 @@ function setupHeaderColumnHighlight(table) {
   });
 }
 
+
 // ----------- BARRA DE BUSQUEDA -----------------//
 
 function activarBusquedaJugadores() {
@@ -248,15 +243,13 @@ function activarBusquedaJugadores() {
     });
   };
 }
-
-document.addEventListener("click", (e) => {
-  if (e.target.id === "clearSearch") {
-    const input = document.getElementById("searchJugador");
-    if (!input) return;
-    input.value = "";
-    input.dispatchEvent(new Event("input"));
-    input.focus();
-  }
+// LIMPIADOR DE BARRA DE BUSQUEDA
+document.getElementById("clearSearch")?.addEventListener("click", () => {
+  const input = document.getElementById("searchJugador");
+  if (!input) return;
+  input.value = "";
+  input.dispatchEvent(new Event("input"));
+  input.focus();
 });
 
 
@@ -402,6 +395,15 @@ document.getElementById('tOtros').innerText = j.otros_mes
 
     document.getElementById("tGastosAnio").innerText =
         j.gastos_anio ? j.gastos_anio.toLocaleString('es-CO') : "0";
+      
+
+document.getElementById('tSaldoMes').innerText = j.saldo_mes
+  ? j.saldo_mes.toLocaleString('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      maximumFractionDigits: 0
+    })
+  : '';;
 
 
         
@@ -487,7 +489,7 @@ if (btnVer && tabla) {
 }
 
 
-
+// ----------- CERRAR SESION ----------------- //
     
 btnLogout.addEventListener("click", function (e) {
     e.preventDefault();
@@ -523,16 +525,16 @@ btnLogout.addEventListener("click", function (e) {
         }).then(() => {
 
             // 🔥 Llamada real al logout.php
-            fetch('/aportes_futbol/backend/auth/logout.php', {
+            fetch("/backend/auth/logout.php", {
                 method: 'POST',
                 credentials: 'same-origin'
             })
-            .then(() => {
-                // 🔁 Redirigir a la página pública
-                window.location.href = "/aportes_futbol/public/index.php";
-            })
-            .catch(() => {
-                window.location.href = "/apportes_futbol/public/index.php";
+           .then(() => {
+    window.location.href = "/";
+})
+.catch(() => {
+    window.location.href = "/";
+
             });
 
         });
@@ -806,7 +808,15 @@ document.addEventListener("change", async (e) => {
 });
 
 
-
+function mostrarDetalleAporte(e, texto) {
+    e.stopPropagation();
+    Swal.fire({
+        icon: 'info',
+        title: 'Detalle del aporte',
+        text: texto,
+        confirmButtonText: 'OK'
+    });
+}
 
 /* ==========================================================
    TOOLTIP APORTE EXCEDENTE – ADMIN (MÓVIL + DESKTOP)

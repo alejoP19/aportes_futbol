@@ -5,80 +5,103 @@ include "../../conexion.php";
 $mes  = intval($_GET['mes']  ?? date('n'));
 $anio = intval($_GET['anio'] ?? date('Y'));
 
-// ========================
-// APORTES PRINCIPALES
-// ========================
+$fechaCorte = date('Y-m-t', strtotime("$anio-$mes-01"));
 
-// total del día (solo hoy)
+// ========================
+// APORTES BASE
+// ========================
 $today = $conexion->query("
-    SELECT IFNULL(SUM(aporte_principal),0) AS s 
-    FROM aportes 
+    SELECT IFNULL(SUM(aporte_principal),0)
+    FROM aportes
     WHERE fecha = CURDATE()
-")->fetch_assoc()['s'];
+")->fetch_row()[0];
 
-// total del MES seleccionado
 $month_total = $conexion->query("
-    SELECT IFNULL(SUM(aporte_principal),0) AS s 
-    FROM aportes 
-    WHERE MONTH(fecha) = $mes 
-      AND YEAR(fecha)  = $anio
-")->fetch_assoc()['s'];
+    SELECT IFNULL(SUM(
+        CASE WHEN aporte_principal > 2000 THEN 2000 ELSE aporte_principal END
+    ),0)
+    FROM aportes
+    WHERE MONTH(fecha) = $mes AND YEAR(fecha) = $anio
+")->fetch_row()[0];
 
-// total del AÑO HASTA ESE MES (enero..mes)
 $year_total = $conexion->query("
-    SELECT IFNULL(SUM(aporte_principal),0) AS s 
-    FROM aportes 
-    WHERE YEAR(fecha)  = $anio
-      AND MONTH(fecha) <= $mes
-")->fetch_assoc()['s'];
+    SELECT IFNULL(SUM(
+        CASE WHEN aporte_principal > 2000 THEN 2000 ELSE aporte_principal END
+    ),0)
+    FROM aportes
+    WHERE (YEAR(fecha) < $anio OR (YEAR(fecha) = $anio AND MONTH(fecha) <= $mes))
+")->fetch_row()[0];
 
 // ========================
 // OTROS APORTES
 // ========================
 $otros_total = $conexion->query("
-    SELECT IFNULL(SUM(valor),0) AS s 
-    FROM otros_aportes 
-    WHERE mes  = $mes 
-      AND anio = $anio
-")->fetch_assoc()['s'];
+    SELECT IFNULL(SUM(valor),0)
+    FROM otros_aportes
+    WHERE mes = $mes AND anio = $anio
+")->fetch_row()[0];
 
-// total del año en OTROS aportes HASTA ESE MES
 $otros_year = $conexion->query("
-    SELECT IFNULL(SUM(valor),0) AS s 
-    FROM otros_aportes 
-    WHERE anio = $anio
-      AND mes <= $mes
-")->fetch_assoc()['s'];
+    SELECT IFNULL(SUM(valor),0)
+    FROM otros_aportes
+    WHERE (anio < $anio OR (anio = $anio AND mes <= $mes))
+")->fetch_row()[0];
+
+$fechaCorte = date('Y-m-t', strtotime("$anio-$mes-01"));
+
+$saldo_total = $conexion->query("
+    SELECT IFNULL(SUM(
+        GREATEST(IFNULL(ex.excedente,0) - IFNULL(co.consumido,0), 0)
+    ),0) AS saldo
+    FROM jugadores j
+    LEFT JOIN (
+        SELECT id_jugador, SUM(GREATEST(aporte_principal - 2000, 0)) AS excedente
+        FROM aportes
+        WHERE fecha <= '$fechaCorte'
+        GROUP BY id_jugador
+    ) ex ON ex.id_jugador = j.id
+    LEFT JOIN (
+        SELECT id_jugador, SUM(amount) AS consumido
+        FROM aportes_saldo_moves
+        WHERE fecha_consumo <= '$fechaCorte'
+        GROUP BY id_jugador
+    ) co ON co.id_jugador = j.id
+")->fetch_assoc()['saldo'];
 
 // ========================
 // GASTOS
 // ========================
 $gastos_mes = $conexion->query("
-    SELECT IFNULL(SUM(valor),0) AS s 
-    FROM gastos 
-    WHERE mes  = $mes 
-      AND anio = $anio
-")->fetch_assoc()['s'];
+    SELECT IFNULL(SUM(valor),0)
+    FROM gastos
+    WHERE mes = $mes AND anio = $anio
+")->fetch_row()[0];
 
 $gastos_anio = $conexion->query("
-    SELECT IFNULL(SUM(valor),0) AS s 
-    FROM gastos 
-    WHERE anio = $anio 
-      AND mes <= $mes
-")->fetch_assoc()['s'];
+    SELECT IFNULL(SUM(valor),0)
+    FROM gastos
+    WHERE (anio < $anio OR (anio = $anio AND mes <= $mes))
+")->fetch_row()[0];
 
 // ========================
-// APLICAR RESTAS
+// TOTALES CORRECTOS
 // ========================
+
+// Total del mes (sin sumar saldo como ingreso)
 $month_total_final = $month_total + $otros_total - $gastos_mes;
-$year_total_final  = $year_total  + $otros_year  - $gastos_anio;
+
+// Total del año (acumulado real)
+$year_total_final  = $year_total + $otros_year - $gastos_anio;
+
+// $year_total_final  = $year_total  + $otros_year  - $gastos_anio;
 
 echo json_encode([
     'ok'          => true,
-    'today'       => intval($today),
-    'month_total' => intval($month_total_final),
-    'otros_mes'   => intval($otros_total),
-    'year_total'  => intval($year_total_final),
-    'gastos_mes'  => intval($gastos_mes),
-    'gastos_anio' => intval($gastos_anio)
+    'today'       => (int)$today,
+    'month_total' => (int)$month_total_final,
+    'year_total'  => (int)$year_total_final,
+    'otros_mes'   => (int)$otros_total,
+    'gastos_mes'  => (int)$gastos_mes,
+    'gastos_anio' => (int)$gastos_anio,
+    'saldo_mes'   => (int)$saldo_total   // 👈 OBLIGATORIO
 ]);

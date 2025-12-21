@@ -110,7 +110,6 @@ while ($row = $deudas_res->fetch_assoc()) {
 }
 
 
-
 // ===========================
 // HTML
 // ===========================
@@ -204,6 +203,7 @@ while ($row = $resTot->fetch_assoc()) {
     $deudas_totales[$row['id_jugador']] = intval($row['total']);
 }
 
+$total_saldo_global = 0;
 
 foreach ($jugadores as $jug) {
 
@@ -319,6 +319,7 @@ echo "
 
     $saldoAcumulado = get_saldo_acumulado($conexion, $jugId, $mes, $anio);
     echo "<td><strong>".number_format($saldoAcumulado,0,',','.')."</strong></td>";
+     $total_saldo_global += $saldoAcumulado;
 
     echo "<td class='acciones'>
           <button class='btn-del-player' data-id='{$jugId}'>🗑️</button>
@@ -360,14 +361,10 @@ echo "<td><strong>".number_format($total_otros_global,0,',','.')."</strong></td>
 $totales_mes_actualizado = array_sum($totales_por_dia) + $totEspecial + $total_otros_global;
 echo "<td><strong>".number_format($totales_mes_actualizado,0,',','.')."</strong></td>";
 
-$totSaldoRes = $conexion->query("
-    SELECT IFNULL(SUM(aporte_principal - LEAST(aporte_principal,2000)),0) AS t 
-    FROM aportes 
-    WHERE (YEAR(fecha) < $anio OR (YEAR(fecha) = $anio AND MONTH(fecha) <= $mes))
-");
-$totSaldo = intval($totSaldoRes->fetch_assoc()['t'] ?? 0);
+echo "<td><strong>".number_format($total_saldo_global,0,',','.')."</strong></td>";
 
-echo "<td><strong>".number_format($totSaldo,0,',','.')."</strong></td>";
+
+
 
 echo "<td></td>";
 

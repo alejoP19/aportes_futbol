@@ -416,13 +416,16 @@ function renderTotales(data) {
     if (!data) return;
 
     const t = data.totales ?? {};
-    const elMes   = document.getElementById("tMes");
-    const elOtros = document.getElementById("tOtros");
-    const elAnio  = document.getElementById("tAnio");
+
+    const elMes    = document.getElementById("tMes");
+    const elOtros  = document.getElementById("tOtros");
+    const elAnio   = document.getElementById("tAnio");
+    const elSaldo  = document.getElementById("tSaldoMes"); // 👈 NUEVO
 
     if (elMes)   elMes.textContent   = t.month_total     ? formatMoney(t.month_total)     : "0";
     if (elOtros) elOtros.textContent = t.otros_mes_total ? formatMoney(t.otros_mes_total) : "0";
     if (elAnio)  elAnio.textContent  = t.year_total      ? formatMoney(t.year_total)      : "0";
+    if (elSaldo) elSaldo.textContent = t.saldo_mes       ? formatMoney(t.saldo_mes)       : "0"; // 👈 CLAVE
 }
 
 

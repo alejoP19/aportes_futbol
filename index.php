@@ -133,6 +133,7 @@ include "conexion.php";
       <div>Otros Aportes: <strong id="tOtros">0</strong></div>
       <div>Gastos del Mes: <strong id="tGastosMes">0</strong></div>
       <div>Gastos del Año: <strong id="tGastosAnio">0</strong></div>
+      <div>Total Saldo Mes: <strong id="tSaldoMes">0</strong></div>
 
       <div > <strong id="tDia">0</strong></div>
     </div>

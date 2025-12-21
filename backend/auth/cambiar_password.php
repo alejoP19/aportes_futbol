@@ -1,5 +1,7 @@
+
+
 <?php
-include "../../conexion.php";
+include __DIR__ . "/../../conexion.php";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
@@ -20,13 +22,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $hash = password_hash($pass1, PASSWORD_DEFAULT);
 
-    $u = $conexion->prepare("
-        UPDATE usuarios
-        SET password = ?, reset_token = NULL, reset_expira = NULL
-        WHERE reset_token = ?
-    ");
+  $u = $conexion->prepare("
+    UPDATE usuarios
+    SET password = ?, reset_token = NULL, reset_expira = NULL
+    WHERE reset_token = ? AND reset_expira > NOW()
+");
     $u->bind_param("ss", $hash, $token);
     $u->execute();
+    if ($u->affected_rows === 0) {
+    echo json_encode(["ok" => false, "msg" => "Token inválido o vencido"]);
+    exit;
+}
 
     echo json_encode(["ok" => true]);
     exit;
@@ -78,7 +84,7 @@ if ($r->num_rows === 0) {
   </div>
 
   <div class="actions-butt-right">
-    <a href="../../public/login.html" class="volver-butt">Volver al login</a>
+    <a href="../../public/login.html" class="volver-butt">Volver</a>
   </div>
 </header>
 
@@ -105,6 +111,7 @@ if ($r->num_rows === 0) {
 </form>
   <h3 class="warning-title-admin">Solo para administradores</h3>
 </section>
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

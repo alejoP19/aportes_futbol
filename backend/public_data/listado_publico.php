@@ -107,6 +107,7 @@ if (!empty($playerIds)) {
         ];
     }
 }
+
 // -------------------------------------------
 // (helper) saldo hasta el mes consultado (CORRECTO)
 // -------------------------------------------
@@ -141,7 +142,6 @@ function get_saldo_hasta_mes($conexion, $id_jugador, $mes, $anio) {
 
     return max(0, $excedente - $consumido);
 }
-
 
 
 // -------------------------------------------
@@ -257,10 +257,17 @@ foreach ($players as $p) {
     }
 
     $fila['total_mes'] = $total_jugador + $total_otros;
-  $fila['saldo'] = get_saldo_hasta_mes($conexion, $pid, $mes, $anio);
-
+   $fila['saldo'] = get_saldo_hasta_mes($conexion, $pid, $mes, $anio);
 
     $rows[] = $fila;
+}
+
+
+
+$saldo_total_mes = 0;
+
+foreach ($rows as $r) {
+    $saldo_total_mes += intval($r['saldo'] ?? 0);
 }
 
 // -------------------------------------------
@@ -274,18 +281,23 @@ $today = $conexion->query("
 ")->fetch_assoc()['s'];
 
 $month_total = $conexion->query("
-    SELECT IFNULL(SUM(aporte_principal),0) AS s 
-    FROM aportes 
+    SELECT IFNULL(SUM(
+        CASE WHEN aporte_principal > 2000 THEN 2000 ELSE aporte_principal END
+    ),0) AS s
+    FROM aportes
     WHERE MONTH(fecha) = $mes
       AND YEAR(fecha)  = $anio
 ")->fetch_assoc()['s'];
 
 $year_total = $conexion->query("
-    SELECT IFNULL(SUM(aporte_principal),0) AS s 
-    FROM aportes 
-    WHERE YEAR(fecha)  = $anio
-      AND MONTH(fecha) <= $mes
+    SELECT IFNULL(SUM(
+        CASE WHEN aporte_principal > 2000 THEN 2000 ELSE aporte_principal END
+    ),0) AS s
+    FROM aportes
+    WHERE (YEAR(fecha) < $anio OR (YEAR(fecha) = $anio AND MONTH(fecha) <= $mes))
 ")->fetch_assoc()['s'];
+
+
 
 $otros_mes = $conexion->query("
     SELECT IFNULL(SUM(valor),0) AS s 
@@ -313,17 +325,22 @@ $gastos_anio = $conexion->query("
     WHERE anio = $anio AND mes <= $mes
 ")->fetch_assoc()['s'];
 
-$month_total_final = $month_total + $otros_mes - $gastos_mes;
-$year_total_final  = $year_total + $otros_year - $gastos_anio;
+// $month_total_final = $month_total + $otros_mes - $gastos_mes;
+// $year_total_final  = $year_total + $otros_year - $gastos_anio;
 
-$totales = [
-    "today"           => intval($today),
-    "month_total"     => intval($month_total_final),
-    "year_total"      => intval($year_total_final),
-    "otros_mes_total" => intval($otros_mes),
-    "gastos_mes"      => intval($gastos_mes),
-    "gastos_anio"     => intval($gastos_anio)
-];
+
+$month_total_final =
+    $month_total
+  + $otros_mes
+  - $gastos_mes;
+
+$year_total_final  =
+    $year_total
+  + $otros_year
+  - $gastos_anio;
+
+
+
 
 // detalle de gastos
 $gastos_detalle = [];
@@ -357,16 +374,31 @@ $resObs        = $qObs->get_result()->fetch_assoc();
 $observaciones = $resObs['texto'] ?? "";
 $qObs->close();
 
+
 echo json_encode([
-    "mes"            => $mes,
-    "anio"           => $anio,
-    "dias_validos"   => $dias_validos,
+    "mes" => $mes,
+    "anio" => $anio,
+    "dias_validos" => $dias_validos,
     "fecha_especial" => $fecha_especial,
-    "jugadores"      => $players,
-    "rows"           => $rows,
-    "totales"        => $totales,
-    "observaciones"  => $observaciones,
-    "gastos_detalle" => $gastos_detalle
-], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+
+    "rows" => $rows,
+
+    // ✅ OBSERVACIONES CORRECTAS
+    "observaciones" => $observaciones,
+
+    // ✅ GASTOS
+    "gastos_detalle" => $gastos_detalle,
+
+    // ✅ TOTALES (NOMBRES CORRECTOS)
+   "totales" => [
+    "month_total"       => intval($month_total_final),
+    "year_total"        => intval($year_total_final),
+    "otros_mes_total"   => intval($otros_mes),
+    "gastos_mes"        => intval($gastos_mes),
+    "gastos_anio"       => intval($gastos_anio),
+    "saldo_mes"         => intval($saldo_total_mes),
+
+]
+]);
 
 exit;

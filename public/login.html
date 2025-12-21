@@ -28,8 +28,8 @@
     </div>
   </header>
 
-  <section class="admin-card">
-    <h2 class="title-admin-form">Ingreso a Panel de Administración</h2>
+<section  class="admin-card">
+  <h2 class="title-admin-form">Ingreso a Panel de Administración</h2>
 
 
 
@@ -40,7 +40,7 @@
 
   <label class="title-labels-form">Contraseña</label>
 <div class="password-wrapper">
-  <input type="password" id="loginPass" name="password" class="form-control" required>
+ <input type="password" id="loginPass" name="password" class="form-control" required>
   <span class="toggle-pass" data-target="loginPass">👁️</span>
 </div>
 
@@ -53,60 +53,76 @@
 </form>
 
 
+ 
+</section>
 
-  </section>
 
-
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
-    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+crossorigin="anonymous"></script>
 
 <script>
-(function () {
-  const form = document.getElementById("loginForm");
-  if (!form) return;
 
-  // OJITO
-  document.querySelectorAll(".toggle-pass").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const input = document.getElementById(btn.dataset.target);
-      if (!input) return;
-      input.type = (input.type === "password") ? "text" : "password";
-    });
-  });
 
-  // LOGIN
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("loginForm");
 
-    try {
-      const data = new FormData(form);
-
-      const r = await fetch("/aportes_futbol/backend/auth/login.php", {
-        method: "POST",
-        body: data
-      });
-
-      const txt = (await r.text()).trim();
-
-      if (txt === "OK") {
-        window.location.href = "/aportes_futbol/index.php"
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "¡Error en Credenciales!",
-          text: "Correo o Contraseña Incorrectos"
-        });
-      }
-    } catch (err) {
-      console.error(err);
-      Swal.fire("Error", "Falló la petición al servidor", "error");
+    if (!form) {
+        console.error("NO SE ENCONTRÓ loginForm");
+        return;
     }
-  });
-})();
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        console.log("FORMULARIO ENVIADO");
+
+        const data = new FormData(form);
+
+        try {
+            const r = await fetch("/aportes_futbol/backend/auth/login.php", {
+                method: "POST",
+                body: data
+            });
+
+            const txt = await r.text();
+       
+
+            if (txt.trim() === "OK") {
+                window.location.href = "/aportes_futbol/index.php";
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "¡Error en Credenciales!",
+                    text: "Correo o Contraseña Incorrectos",
+                });
+            }
+
+        } catch (err) {
+            console.error("ERROR FETCH:", err);
+        }
+    });
+});
 </script>
+<script>
+document.querySelectorAll(".toggle-pass").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const inputId = btn.getAttribute("data-target");
+    const input = document.getElementById(inputId);
+
+    if (!input) return;
+
+    input.type = (input.type === "password") ? "text" : "password";
+  });
+});
+</script>
+
+
 </body>
 
 </html>
 
+
+<!-- href="/aportes_futbol/backend/auth/send_recover_email.html"> -->
+
+       <!-- window.location.href = "/aportes_futbol/index.php" -->

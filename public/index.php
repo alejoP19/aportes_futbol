@@ -61,6 +61,13 @@
       <label><strong>Total Aportes Del Año </strong></label>
         <p id="tAnio"></p>
     </div>
+<div class="totals-items saldo-box">
+  <label><strong>Total Saldo del Mes</strong></label>
+  <p id="tSaldoMes"></p>
+</div>
+
+
+
 </section>
     <div class="box-container-observ" >
          <h2 id="title-observaciones">Observaciones</h2>

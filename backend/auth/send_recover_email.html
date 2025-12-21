@@ -28,14 +28,21 @@
 </header>
 
 <section class="admin-card">
-  <h2 class="title-recover-form">Recuperar Contraseña</h2>
+  <h2 class="title-admin-form">Recuperar Contraseña</h2>
 
-  <form id="recoverForm" class="admin-form">
+  <form id="recoverEmailForm" class="admin-form">
 
-    <label class="title-labels-recover-form">Correo</label>
-    <input type="email" id="email" class="form-control"
-           placeholder="correo@ejemplo.com" required>
-      <p class="recover-message">Se Enviará un Correo de Recuperación de Contraseña a tu Email</p>
+    <label class="title-labels-form">Correo</label>
+    <input
+      type="email"
+      id="email"
+      name="email"
+      class="form-control"
+      placeholder="correo@ejemplo.com"
+      required
+    >
+
+    <p>Se enviará un correo de recuperación a tu email</p>
 
     <button type="submit" class="ingresar-butt">
       Enviar Correo
@@ -43,43 +50,46 @@
 
     <h3 class="warning-title-admin">Solo para administradores</h3>
   </form>
- 
 </section>
-
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-document.getElementById("recoverForm").addEventListener("submit", e => {
+document.getElementById("recoverEmailForm").addEventListener("submit", e => {
   e.preventDefault();
-
-  const email = document.getElementById("email").value;
 
   fetch("generar_token.php", {
     method: "POST",
-    headers: {"Content-Type":"application/x-www-form-urlencoded"},
-    body: `email=${encodeURIComponent(email)}`
+    body: new FormData(e.target)
   })
-  .then(r => r.json())
-  .then(res => {
-    if (!res.ok) {
-      Swal.fire("Error", res.msg, "error");
-      return;
+  .then(r => {
+    if (!r.ok) {
+      throw new Error("HTTP " + r.status);
     }
- Swal.fire(
-    "Correo enviado",
-    "Si el correo existe, te llegará un enlace de recuperación.",
-    "success"
-  );
-  // opcional: limpiar input
-  document.getElementById("email").value = "";
+    return r.json();
+  })
+  .then(res => {
+
+    if (res.ok) {
+      Swal.fire(
+        "Listo",
+        "Si el correo existe, recibirás un enlace para cambiar tu contraseña",
+        "success"
+      );
+    } else {
+      Swal.fire("Error", res.msg || "Error desconocido", "error");
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    Swal.fire(
+      "Error",
+      "No se pudo enviar la solicitud (revisa consola)",
+      "error"
+    );
   });
 });
 </script>
-
-</body>
-</html>
-
 
 </body>
 </html>
