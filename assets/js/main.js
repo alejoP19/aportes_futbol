@@ -460,6 +460,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const saveObsBtn = document.getElementById('saveObsBtn');
     if (saveObsBtn) saveObsBtn.addEventListener('click', saveObservaciones);
 
+
+
     // cambiar mes/año
     monthSelect.addEventListener("change", refreshSheet);
     yearSelect.addEventListener("change", refreshSheet);
@@ -489,8 +491,12 @@ if (btnVer && tabla) {
 }
 
 
+
+})
+
 // ----------- CERRAR SESION ----------------- //
-    
+const btnLogout = document.getElementById("btnLogout");
+if (btnLogout) {
 btnLogout.addEventListener("click", function (e) {
     e.preventDefault();
 
@@ -511,11 +517,10 @@ btnLogout.addEventListener("click", function (e) {
                 title: "¡Perfecto, Continuemos!",
                 icon: "success",
                 draggable: true
-});
+            });
             return;
         }
 
-        // 🟢 Mostrar mensaje de despedida (tu estilo)
         Swal.fire({
             title: "¡Sesión Cerrada!",
             text: "¡Te Esperamos Pronto!",
@@ -524,23 +529,24 @@ btnLogout.addEventListener("click", function (e) {
             confirmButtonText: "OK"
         }).then(() => {
 
-            // 🔥 Llamada real al logout.php
-            fetch("/backend/auth/logout.php", {
+            // 🔥 Llamada real al logout.php (RUTA CORRECTA)
+            fetch("/APORTES_FUTBOL/backend/auth/logout.php", {
                 method: 'POST',
-                credentials: 'same-origin'
+                credentials: 'include'   // incluye cookie de sesión sí o sí
             })
-           .then(() => {
-    window.location.href = "/";
-})
-.catch(() => {
-    window.location.href = "/";
-
+            .then(() => {
+                // Redirigir al index público
+                window.location.href = "/APORTES_FUTBOL/public/index.php";
+            })
+            .catch(() => {
+                // Fallback al raíz del proyecto
+                window.location.href = "/APORTES_FUTBOL/";
             });
 
         });
     });
 });
-})
+}
 
 
 
@@ -854,4 +860,86 @@ document.addEventListener("pointerup", function (e) {
     // autocerrar
     setTimeout(() => tip.remove(), 2000);
 
+});
+
+
+
+// =============================
+// EDITAR APORTANTE (NOMBRE / TEL)
+// =============================
+document.addEventListener("click", (e) => {
+    const btn = e.target.closest(".btn-edit-player");
+    if (!btn) return;
+
+console.log("CLICK EDIT:", btn.dataset);  // 👈 prueba
+    const id       = btn.dataset.id;
+    const nombre   = btn.dataset.nombre || "";
+    const telefono = btn.dataset.telefono || "";
+
+    Swal.fire({
+        title: "Editar aportante",
+        html: `
+          <div style="text-align:left">
+            <label>Nombre del aportante</label>
+            <input id="swalNombre" class="swal2-input" value="${nombre}">
+          </div>
+          <div style="text-align:left; margin-top:8px;">
+            <label>Teléfono</label>
+            <input id="swalTelefono" class="swal2-input" value="${telefono}">
+          </div>
+        `,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: "Guardar cambios",
+        cancelButtonText: "Cancelar",
+        preConfirm: () => {
+            const nuevoNombre   = document.getElementById("swalNombre").value.trim();
+            const nuevoTelefono = document.getElementById("swalTelefono").value.trim();
+
+            if (!nuevoNombre) {
+                Swal.showValidationMessage("El nombre no puede estar vacío");
+                return false;
+            }
+
+            return {
+                nombre: nuevoNombre,
+                telefono: nuevoTelefono
+            };
+        }
+    }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        const { nombre: nuevoNombre, telefono: nuevoTelefono } = result.value;
+        const fd = new FormData();
+        fd.append("id", id);
+        fd.append("nombre", nuevoNombre);
+        fd.append("telefono", nuevoTelefono);
+
+        fetch(`${API}/aportes/update_player.php`, {
+            method: "POST",
+            body: fd
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (!res.ok) {
+                Swal.fire("Error", res.msg || "No se pudo actualizar el aportante", "error");
+                return;
+            }
+
+            Swal.fire("Actualizado", "Datos del aportante actualizados correctamente", "success");
+
+            // 🔁 Refrescar tabla mensual
+            if (typeof refreshSheet === "function") {
+                refreshSheet();
+            }
+
+            // 🔁 Refrescar listado de aportantes del panel izquierdo (select)
+            if (typeof loadPlayersList === "function") {
+                loadPlayersList();
+            }
+        })
+        .catch(() => {
+            Swal.fire("Error", "Error de comunicación con el servidor", "error");
+        });
+    });
 });

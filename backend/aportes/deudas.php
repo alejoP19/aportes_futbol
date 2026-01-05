@@ -1,6 +1,7 @@
 <?php
 include "../../conexion.php";
-header("Content-Type: application/json");
+require_once __DIR__ . "../auth/auth.php"; // ajusta la ruta según tu estructura
+
 
 $data = json_decode(file_get_contents("php://input"), true);
 

@@ -1,7 +1,10 @@
 <?php
 header("Content-Type: application/json");
-include "../auth/auth.php";
+require_once __DIR__ . "../auth/auth.php"; // ajusta la ruta según tu estructura
 protegerAdmin();
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: Sat, 01 Jan 2000 00:00:00 GMT");
 include "../../conexion.php";
 
 $nombre = trim($_POST['nombre'] ?? '');

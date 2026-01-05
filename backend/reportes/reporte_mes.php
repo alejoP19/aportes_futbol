@@ -131,28 +131,44 @@ foreach ($jugadores as $j) {
 // =========================
 $total_mes_base = intval($conexion->query("
     SELECT IFNULL(SUM(LEAST(aporte_principal,2000)),0)
-    FROM aportes WHERE YEAR(fecha)=$anio AND MONTH(fecha)=$mes
+    FROM aportes 
+    WHERE YEAR(fecha)=$anio 
+      AND MONTH(fecha)=$mes
 ")->fetch_row()[0]);
 
+// 🔴 ANTES: sumaba años anteriores
+// WHERE YEAR(fecha)<$anio OR (YEAR(fecha)=$anio AND MONTH(fecha)<=$mes)
+//
+// ✅ AHORA: solo el año seleccionado, de enero al mes actual
 $total_anio_base = intval($conexion->query("
     SELECT IFNULL(SUM(LEAST(aporte_principal,2000)),0)
-    FROM aportes WHERE YEAR(fecha)<$anio OR (YEAR(fecha)=$anio AND MONTH(fecha)<=$mes)
+    FROM aportes 
+    WHERE YEAR(fecha)=$anio 
+      AND MONTH(fecha)<= $mes
 ")->fetch_row()[0]);
 
 $otros_mes = intval($conexion->query("
-    SELECT IFNULL(SUM(valor),0) FROM otros_aportes WHERE mes=$mes AND anio=$anio
+    SELECT IFNULL(SUM(valor),0) 
+    FROM otros_aportes 
+    WHERE mes=$mes AND anio=$anio
 ")->fetch_row()[0]);
 
 $otros_anio = intval($conexion->query("
-    SELECT IFNULL(SUM(valor),0) FROM otros_aportes WHERE anio=$anio AND mes<=$mes
+    SELECT IFNULL(SUM(valor),0) 
+    FROM otros_aportes 
+    WHERE anio=$anio AND mes<=$mes
 ")->fetch_row()[0]);
 
 $gasto_mes = intval($conexion->query("
-    SELECT IFNULL(SUM(valor),0) FROM gastos WHERE mes=$mes AND anio=$anio
+    SELECT IFNULL(SUM(valor),0) 
+    FROM gastos 
+    WHERE mes=$mes AND anio=$anio
 ")->fetch_row()[0]);
 
 $gasto_anio = intval($conexion->query("
-    SELECT IFNULL(SUM(valor),0) FROM gastos WHERE anio=$anio AND mes<=$mes
+    SELECT IFNULL(SUM(valor),0) 
+    FROM gastos 
+    WHERE anio=$anio AND mes<=$mes
 ")->fetch_row()[0]);
 
 // =========================
@@ -162,9 +178,8 @@ $total_mes_real  = $total_mes_base  + $otros_mes  - $gasto_mes;
 $total_anio_real = $total_anio_base + $otros_anio - $gasto_anio;
 
 // SALDO TOTAL DEL MES (SE MUESTRA APARTE)
-$saldo_mes = $saldo_total_mes;
-$saldo_mes  = $total_mes_real;
-$saldo_anio = $total_anio_real;
+$saldo_mes  = $saldo_total_mes;
+$saldo_anio = $saldo_total_anio;
 
 $obs = trim(get_obs($conexion, $mes, $anio));
 ?>
@@ -197,12 +212,11 @@ $obs = trim(get_obs($conexion, $mes, $anio));
 <?php
 $totalJugador = 0;
 foreach ($days as $d):
-  $f = sprintf("%04d-%02d-%02d", $anio, $mes, $d);
-$r = get_aporte_real($conexion, $j['id'], $f);
+    $f = sprintf("%04d-%02d-%02d", $anio, $mes, $d);
+    $r = get_aporte_real($conexion, $j['id'], $f);
     $v = min($r,2000);
     $totalJugador += $v;
 
-    // 🔴 CORRECCIÓN: detectar deuda del día
     $hayDeudaDia = isset($deudas_mes[$j['id']][$d]);
 ?>
 <td>
@@ -214,9 +228,8 @@ $r = get_aporte_real($conexion, $j['id'], $f);
 <?php endforeach; ?>
 
 <?php
-// 🔴 detectar deuda en fecha especial (día NO miércoles ni sábado)
+// detectar deuda en fecha especial (día NO miércoles ni sábado)
 $hayDeudaEspecial = false;
-
 if (isset($deudas_mes[$j['id']])) {
     foreach ($deudas_mes[$j['id']] as $dia => $v) {
         $w = date('N', strtotime("$anio-$mes-$dia"));
@@ -232,7 +245,6 @@ if (isset($deudas_mes[$j['id']])) {
         <span style="color:#d00; font-size:9pt;">●</span>
     <?php endif; ?>
 </td>
-
 
 <?php
 $otros = get_otros($conexion, $j['id'], $mes, $anio);
@@ -252,8 +264,6 @@ $totalJugador += $otros_val;
 
 <br>
 
-
-
 <h3>Resumen General</h3>
 <table border="1" width="60%" cellspacing="0" cellpadding="4">
   <tr><td><strong>Total del mes</strong></td><td>$ <?= number_format($total_mes_real,0,',','.') ?></td></tr>
@@ -263,7 +273,6 @@ $totalJugador += $otros_val;
   <tr><td><strong>Total gastos del año</strong></td><td>$ <?= number_format($gasto_anio,0,',','.') ?></td></tr>
   <tr><td><strong>Total aportes del año (hasta este mes)</strong></td><td>$ <?= number_format($total_anio_real,0,',','.') ?></td></tr>
 </table>
-
 
 <?php if ($obs): ?>
 <br>

@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = new FormData(form);
 
         try {
-            const r = await fetch("/aportes_futbol/backend/auth/login.php", {
+            const r = await fetch("/APORTES_FUTBOL/backend/auth/login.php", {
                 method: "POST",
                 body: data
             });
@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
        
 
             if (txt.trim() === "OK") {
-                window.location.href = "/aportes_futbol/index.php";
+                window.location.href = "/APORTES_FUTBOL/index.php";
             } else {
                 Swal.fire({
                     icon: "error",

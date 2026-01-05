@@ -1,7 +1,5 @@
 <?php
 header("Content-Type: application/json");
-include "../auth/auth.php";
-protegerAdmin();
 include "../../conexion.php";
 
 /* ======================================================

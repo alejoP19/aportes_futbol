@@ -1,47 +1,38 @@
 
 <?php
+// backend/auth/login.php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once __DIR__ . "/../../conexion.php";
 
-session_start();
-include "../../conexion.php";
+// 1. Leer datos del POST
+$email    = $_POST['email']    ?? '';
+$password = $_POST['password'] ?? '';
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+// 2. Buscar admin por correo
+$stmt = $conexion->prepare("SELECT id, email, password FROM usuarios WHERE email = ? LIMIT 1");
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$res = $stmt->get_result();
+$admin = $res->fetch_assoc();
+$stmt->close();
 
-    $email = trim(strtolower($_POST["email"] ?? ""));
-   $password = trim($_POST["password"] ?? "");
-
-    if ($email === "" || $password === "") {
-        echo "ERROR";
-        exit;
-    }
-
-    $stmt = $conexion->prepare(
-        "SELECT id, nombre, rol, password
-         FROM usuarios
-         WHERE email = ?
-         LIMIT 1"
-    );
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $res = $stmt->get_result();
-
-    if ($res && $res->num_rows === 1) {
-        $user = $res->fetch_assoc();
-if (!password_verify($password, $user["password"])) {
-    echo "NO COINCIDE";
+if (!$admin) {
+    echo "ERROR";
     exit;
 }
-   if (password_verify($password, $user["password"])) {
 
-            $_SESSION["usuario_id"] = $user["id"];
-            $_SESSION["rol"]        = $user["rol"];
-            $_SESSION["nombre"]     = $user["nombre"];
-            $_SESSION["email"]      = $email;
-
-            echo "OK";
-            exit;
-        }
-    }
-
+// 3. Verificar contraseña
+if (!password_verify($password, $admin['password'])) {
     echo "ERROR";
+    exit;
 }
+
+// 4. ✅ Guardar sesión correcta
+$_SESSION['admin_id'] = $admin['id'];   // opcional
+$_SESSION['is_admin'] = true;           // 👈 ESTA es la que revisa esAdmin()
+
+echo "OK";
+exit;
 

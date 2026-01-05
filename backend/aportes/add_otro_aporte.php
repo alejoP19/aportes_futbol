@@ -1,8 +1,6 @@
 <?php
 header("Content-Type: application/json");
-include "../auth/auth.php";
-protegerAdmin();
-include "../../conexion.php";
+
 
 $id_jugador = intval($_POST['id_jugador'] ?? 0);
 $mes = intval($_POST['mes'] ?? date('n'));

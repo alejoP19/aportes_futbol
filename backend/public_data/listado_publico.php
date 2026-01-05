@@ -109,7 +109,7 @@ if (!empty($playerIds)) {
 }
 
 // -------------------------------------------
-// (helper) saldo hasta el mes consultado (CORRECTO)
+// (helper) saldo hasta el mes consultado
 // -------------------------------------------
 function get_saldo_hasta_mes($conexion, $id_jugador, $mes, $anio) {
 
@@ -144,14 +144,8 @@ function get_saldo_hasta_mes($conexion, $id_jugador, $mes, $anio) {
 }
 
 
-// -------------------------------------------
-// 2.1) Cargar deudas reales por jugador y día
-// -------------------------------------------
 // =====================================================
-// CARGAR TODAS LAS DEUDAS PARA MOSTRAR EN TABLA PUBLICA
-// =====================================================
-// =====================================================
-// DEUDAS EN TODA LA BD (para totales acumulados)
+// DEUDAS (todas / mes / acumuladas hasta el mes)
 // =====================================================
 $deudas_all = [];
 
@@ -163,7 +157,7 @@ $qDeu = $conexion->query("
 while ($d = $qDeu->fetch_assoc()) {
     $pid = intval($d['id_jugador']);
     $dia = intval(date("j", strtotime($d['fecha'])));
-    $mesDeuda = intval(date("n", strtotime($d['fecha'])));
+    $mesDeuda  = intval(date("n", strtotime($d['fecha'])));
     $anioDeuda = intval(date("Y", strtotime($d['fecha'])));
 
     $deudas_all[$pid][] = [
@@ -172,11 +166,9 @@ while ($d = $qDeu->fetch_assoc()) {
         "anio" => $anioDeuda
     ];
 }
-// =====================================================
-// DEUDAS DEL MES ACTUAL (solo para mostrar X en tabla)
-// =====================================================
-$deudas_mes = [];
 
+// Deudas del MES actual (para X en tabla)
+$deudas_mes = [];
 foreach ($deudas_all as $pid => $lista) {
     foreach ($lista as $d) {
         if ($d["mes"] == $mes && $d["anio"] == $anio) {
@@ -184,11 +176,9 @@ foreach ($deudas_all as $pid => $lista) {
         }
     }
 }
-// =====================================================
-// TOTAL DE DEUDAS ACUMULADAS HASTA ESTE MES
-// =====================================================
-$deudas_acum_cnt = [];
 
+// Deudas acumuladas hasta este mes (para total_deudas)
+$deudas_acum_cnt = [];
 foreach ($deudas_all as $pid => $lista) {
     $count = 0;
     foreach ($lista as $d) {
@@ -220,8 +210,8 @@ foreach ($players as $p) {
         "otros"         => $otros_map[$pid] ?? [],
         "saldo"         => 0,
         "total_mes"     => 0,
-        "deudas"        => $deudas_mes[$pid] ?? [],      // SOLO del mes actual (para mostrar X)
-        "total_deudas"  => $deudas_acum_cnt[$pid] ?? 0   // TOTAL acumulado hasta este mes
+        "deudas"        => $deudas_mes[$pid] ?? [],
+        "total_deudas"  => $deudas_acum_cnt[$pid] ?? 0
     ];
 
     $total_jugador = 0;
@@ -257,15 +247,12 @@ foreach ($players as $p) {
     }
 
     $fila['total_mes'] = $total_jugador + $total_otros;
-   $fila['saldo'] = get_saldo_hasta_mes($conexion, $pid, $mes, $anio);
+    $fila['saldo']     = get_saldo_hasta_mes($conexion, $pid, $mes, $anio);
 
     $rows[] = $fila;
 }
 
-
-
 $saldo_total_mes = 0;
-
 foreach ($rows as $r) {
     $saldo_total_mes += intval($r['saldo'] ?? 0);
 }
@@ -289,15 +276,19 @@ $month_total = $conexion->query("
       AND YEAR(fecha)  = $anio
 ")->fetch_assoc()['s'];
 
+// 🔴 ANTES: sumaba años anteriores también
+// FROM aportes
+// WHERE (YEAR(fecha) < $anio OR (YEAR(fecha) = $anio AND MONTH(fecha) <= $mes))
+//
+// ✅ AHORA: SOLO el año seleccionado hasta este mes
 $year_total = $conexion->query("
     SELECT IFNULL(SUM(
         CASE WHEN aporte_principal > 2000 THEN 2000 ELSE aporte_principal END
     ),0) AS s
     FROM aportes
-    WHERE (YEAR(fecha) < $anio OR (YEAR(fecha) = $anio AND MONTH(fecha) <= $mes))
+    WHERE YEAR(fecha) = $anio
+      AND MONTH(fecha) <= $mes
 ")->fetch_assoc()['s'];
-
-
 
 $otros_mes = $conexion->query("
     SELECT IFNULL(SUM(valor),0) AS s 
@@ -325,22 +316,15 @@ $gastos_anio = $conexion->query("
     WHERE anio = $anio AND mes <= $mes
 ")->fetch_assoc()['s'];
 
-// $month_total_final = $month_total + $otros_mes - $gastos_mes;
-// $year_total_final  = $year_total + $otros_year - $gastos_anio;
-
-
 $month_total_final =
-    $month_total
-  + $otros_mes
-  - $gastos_mes;
+      $month_total
+    + $otros_mes
+    - $gastos_mes;
 
 $year_total_final  =
-    $year_total
-  + $otros_year
-  - $gastos_anio;
-
-
-
+      $year_total
+    + $otros_year
+    - $gastos_anio;
 
 // detalle de gastos
 $gastos_detalle = [];
@@ -374,31 +358,25 @@ $resObs        = $qObs->get_result()->fetch_assoc();
 $observaciones = $resObs['texto'] ?? "";
 $qObs->close();
 
-
 echo json_encode([
-    "mes" => $mes,
-    "anio" => $anio,
-    "dias_validos" => $dias_validos,
-    "fecha_especial" => $fecha_especial,
+    "mes"           => $mes,
+    "anio"          => $anio,
+    "dias_validos"  => $dias_validos,
+    "fecha_especial"=> $fecha_especial,
 
-    "rows" => $rows,
-
-    // ✅ OBSERVACIONES CORRECTAS
+    "rows"          => $rows,
     "observaciones" => $observaciones,
 
-    // ✅ GASTOS
-    "gastos_detalle" => $gastos_detalle,
+    "gastos_detalle"=> $gastos_detalle,
 
-    // ✅ TOTALES (NOMBRES CORRECTOS)
-   "totales" => [
-    "month_total"       => intval($month_total_final),
-    "year_total"        => intval($year_total_final),
-    "otros_mes_total"   => intval($otros_mes),
-    "gastos_mes"        => intval($gastos_mes),
-    "gastos_anio"       => intval($gastos_anio),
-    "saldo_mes"         => intval($saldo_total_mes),
-
-]
+    "totales" => [
+        "month_total"       => intval($month_total_final),
+        "year_total"        => intval($year_total_final),
+        "otros_mes_total"   => intval($otros_mes),
+        "gastos_mes"        => intval($gastos_mes),
+        "gastos_anio"       => intval($gastos_anio),
+        "saldo_mes"         => intval($saldo_total_mes),
+    ]
 ]);
 
 exit;

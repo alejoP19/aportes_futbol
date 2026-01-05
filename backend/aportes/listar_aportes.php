@@ -1,5 +1,11 @@
 <?php
 include "../../conexion.php";
+require_once __DIR__ . "/../auth/auth.php";
+protegerAdmin();
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: Sat, 01 Jan 2000 00:00:00 GMT");
+
 header("Content-Type: text/html; charset=utf-8");
 
 // --- Obtener mes y año ---
@@ -16,7 +22,8 @@ for ($d = 1; $d <= $days_count; $d++) {
 }
 
 // --- obtener todos los jugadores (activos y eliminados)
-$jug_res = $conexion->query("SELECT id, nombre, activo FROM jugadores ORDER BY nombre ASC");
+$jug_res = $conexion->query("SELECT id, nombre, telefono, activo FROM jugadores ORDER BY nombre ASC");
+
 $jugadores = [];
 while ($r = $jug_res->fetch_assoc()) $jugadores[] = $r;
 
@@ -321,16 +328,26 @@ echo "
     echo "<td><strong>".number_format($saldoAcumulado,0,',','.')."</strong></td>";
      $total_saldo_global += $saldoAcumulado;
 
-    echo "<td class='acciones'>
-          <button class='btn-del-player' data-id='{$jugId}'>🗑️</button>
-          </td>";
+  // sanitizar nombre y teléfono para usarlos en data-*
+$nombreSafe   = htmlspecialchars($jug['nombre'],   ENT_QUOTES, 'UTF-8');
+$telefonoSafe = htmlspecialchars($jug['telefono'] ?? '', ENT_QUOTES, 'UTF-8');
 
-          echo "<td class='estado-deuda'>
-        <label class='chk-deuda-global ".($tieneDeuda ? "con-deuda" : "")."'>
-           
-            ".($tieneDeuda ? "Debe: {$deudaDias} días" : "")."
-        </label>
+echo "<td class='acciones'>
+        <button 
+            class='btn-edit-player' 
+            data-id='{$jugId}' 
+            data-nombre='{$nombreSafe}' 
+            data-telefono='{$telefonoSafe}'
+            title='Editar aportante'
+        >✏️</button>
+
+        <button 
+            class='btn-del-player' 
+            data-id='{$jugId}'
+            title='Eliminar aportante'
+        >🗑️</button>
       </td>";
+
 
 }
 
