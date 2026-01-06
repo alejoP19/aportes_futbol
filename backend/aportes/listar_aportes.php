@@ -167,6 +167,7 @@ echo "<th data-group='total'>Total Mes</th>";
 echo "<th data-group='saldo'>Saldo</th>";
 echo "<th>Acciones</th>";
 echo "<th>Deudas</th>";
+echo "<th></th>";
 echo "</tr>";
 
 echo "<tr>";
@@ -184,8 +185,9 @@ echo "<th data-group='otros'>Tipo</th>";
 echo "<th data-group='otros'>Valor</th>";
 echo "<th data-group='total'>Por Jugador</th>";
 echo "<th data-group='saldo'>Tu Saldo</th>";
-echo "<th>Eliminar</th>";
+echo "<th>Editar / Eliminar</th>";
 echo "<th>Tu Deuda</th>";
+echo "<th>Teléfono</th>";
 
 echo "</tr>";
 echo "</thead>";
@@ -347,6 +349,21 @@ echo "<td class='acciones'>
             title='Eliminar aportante'
         >🗑️</button>
       </td>";
+// === COLUMNA "TU DEUDA" (acumulada hasta el mes mostrado) ===
+echo "<td class='estado-deuda'>
+        <label class='chk-deuda-global ".($tieneDeuda ? "con-deuda" : "")."'>
+            ".($tieneDeuda ? "Debe: {$deudaDias} días" : "")."
+        </label>
+      </td>";
+
+      $telefonoView = $jug['telefono'] ? htmlspecialchars($jug['telefono']) : "";
+// echo "<td class='telefono-cell' title='{$telefonoView}'>{$telefonoView}</td>";
+
+echo "<td 
+        class='telefono-cell' 
+        data-full='{$telefonoView}'
+      >{$telefonoView}</td>";
+
 
 
 }

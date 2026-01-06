@@ -98,8 +98,10 @@ activarBusquedaJugadores();
     });
 
    // Inputs de aporte
+
+
 container.querySelectorAll('.cell-aporte').forEach(input => {
-     input.addEventListener('blur', async ev => {
+  input.addEventListener('blur', async ev => {
     const id = ev.target.dataset.player;
     const fecha = ev.target.dataset.fecha;
     const raw = (ev.target.value || "").toString().trim();
@@ -114,28 +116,23 @@ container.querySelectorAll('.cell-aporte').forEach(input => {
         if (isNaN(valorToSend)) valorToSend = null;
     }
 
-    /* --------------------------------------------
-       ⭐ MOSTRAR ESTRELLA INMEDIATA (ANTES DEL REFRESH)
-    ----------------------------------------------*/
+    // ⭐ Estrella inmediata
     let wrapper = ev.target.closest(".aporte-wrapper");
-if (wrapper) {
-    let flag = wrapper.querySelector(".saldo-flag");
-    if (flag) {
-
-        if (valorToSend > 2000) {
-            flag.textContent = "★";
-            flag.classList.add("show");   // ← activa animación
-        } else {
-            flag.classList.remove("show"); // ← oculta animación
-            setTimeout(() => flag.textContent = "", 200);
+    if (wrapper) {
+        let flag = wrapper.querySelector(".saldo-flag");
+        if (flag) {
+            if (valorToSend > 2000) {
+                flag.textContent = "★";
+                flag.classList.add("show");
+            } else {
+                flag.classList.remove("show");
+                setTimeout(() => flag.textContent = "", 200);
+            }
         }
-
     }
-}
-
 
     // Guardar en backend
-    await postJSON(`${API}/aportes/guardar_aporte.php`, { 
+    const resp = await postJSON(`${API}/aportes/guardar_aporte.php`, { 
         id_jugador: id, 
         fecha, 
         valor: valorToSend 
@@ -144,10 +141,16 @@ if (wrapper) {
     ev.target.classList.add('saved');
     setTimeout(() => ev.target.classList.remove('saved'), 400);
 
-    await loadTotals(monthSelect.value, yearSelect.value);
+    // 🔃 Recargar TODO lo relacionado (tabla + totales + gastos + obs)
+    if (resp && resp.ok) {
+        await refreshSheet();
+    } else {
+        console.error("Error guardando aporte:", resp);
+        // opcional: mostrar Swal de error
+    }
+  });
 });
 
-});
     // Botones eliminar
 container.querySelectorAll(".btn-del-player").forEach(btn => {
     btn.addEventListener("click", ev => {
@@ -942,4 +945,19 @@ console.log("CLICK EDIT:", btn.dataset);  // 👈 prueba
             Swal.fire("Error", "Error de comunicación con el servidor", "error");
         });
     });
+});
+
+
+document.addEventListener("click", (e) => {
+  const cell = e.target.closest(".telefono-cell");
+  if (!cell) return;
+
+  const numero = cell.dataset.full || cell.textContent.trim();
+
+  Swal.fire({
+    title: "Teléfono",
+    text: numero,
+    icon: "info",
+    confirmButtonText: "Cerrar"
+  });
 });

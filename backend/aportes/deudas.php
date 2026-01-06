@@ -1,63 +1,83 @@
 <?php
-include "../../conexion.php";
-require_once __DIR__ . "../auth/auth.php"; // ajusta la ruta según tu estructura
+// backend/aportes/deudas.php
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-$data = json_decode(file_get_contents("php://input"), true);
+require_once __DIR__ . "/../../conexion.php";
+require_once __DIR__ . "/../auth/auth.php";
 
-$accion     = $data['accion'] ?? '';
+header("Content-Type: application/json; charset=utf-8");
+
+// ✅ Opción: validar admin sin redirigir
+if (!esAdmin()) {
+    http_response_code(401);
+    echo json_encode([
+        "ok"  => false,
+        "msg" => "No autorizado"
+    ]);
+    exit;
+}
+
+// Leer JSON del body
+$raw  = file_get_contents("php://input");
+$data = json_decode($raw, true);
+
+$accion     = $data['accion']     ?? '';
 $id_jugador = intval($data['id_jugador'] ?? 0);
-$fecha      = $data['fecha'] ?? '';
+$fecha      = $data['fecha']      ?? '';
 
 if (!$id_jugador || !$fecha) {
     echo json_encode(["ok" => false, "msg" => "Datos incompletos"]);
     exit;
 }
 
-// ============================
-// OPCIÓN A — Deuda POR DÍA
-// ============================
+try {
 
-if ($accion === "agregar") {
+    switch ($accion) {
+        case "agregar":
+            // AGREGA SOLO ESE DÍA
+            $stmt = $conexion->prepare("
+                INSERT IGNORE INTO deudas_aportes (id_jugador, fecha)
+                VALUES (?, ?)
+            ");
+            $stmt->bind_param("is", $id_jugador, $fecha);
+            $stmt->execute();
+            $stmt->close();
+            echo json_encode(["ok" => true]);
+            break;
 
-    // AGREGA SOLO ESE DÍA
-    $stmt = $conexion->prepare("
-        INSERT IGNORE INTO deudas_aportes (id_jugador, fecha)
-        VALUES (?, ?)
-    ");
-    $stmt->bind_param("is", $id_jugador, $fecha);
-    $stmt->execute();
-    $stmt->close();
+        case "borrar":
+            // BORRA SOLO ESE DÍA
+            $stmt = $conexion->prepare("
+                DELETE FROM deudas_aportes
+                WHERE id_jugador = ? AND fecha = ?
+            ");
+            $stmt->bind_param("is", $id_jugador, $fecha);
+            $stmt->execute();
+            $stmt->close();
+            echo json_encode(["ok" => true]);
+            break;
 
-    echo json_encode(["ok" => true]);
-    exit;
-}
+        case "borrar_todas":
+            // BORRA TODAS LAS DEUDAS DE ESE JUGADOR
+            $stmt = $conexion->prepare("
+                DELETE FROM deudas_aportes
+                WHERE id_jugador = ?
+            ");
+            $stmt->bind_param("i", $id_jugador);
+            $stmt->execute();
+            $stmt->close();
+            echo json_encode(["ok" => true]);
+            break;
 
-if ($accion === "borrar") {
+        default:
+            echo json_encode(["ok" => false, "msg" => "Acción inválida"]);
+            break;
+    }
 
-    // BORRA SOLO ESE DÍA
-    $stmt = $conexion->prepare("
-        DELETE FROM deudas_aportes
-        WHERE id_jugador = ? AND fecha = ?
-    ");
-    $stmt->bind_param("is", $id_jugador, $fecha);
-    $stmt->execute();
-    $stmt->close();
-
-    echo json_encode(["ok" => true]);
-    exit;
-}
-
-echo json_encode(["ok" => false, "msg" => "Acción inválida"]);
-if ($accion === "borrar_todas") {
-    $stmt = $conexion->prepare("
-        DELETE FROM deudas_aportes
-        WHERE id_jugador = ?
-    ");
-    $stmt->bind_param("i", $id_jugador);
-    $stmt->execute();
-    $stmt->close();
-    
-    echo json_encode(["ok" => true]);
-    exit;
+} catch (Throwable $e) {
+    // ❗No imprimimos HTML, solo JSON
+    echo json_encode(["ok" => false, "msg" => "Error interno al procesar la deuda"]);
 }

@@ -826,6 +826,22 @@ width: 120px;
 
 
 }
+
+/* COLUMNA - ACCIONES */
+
+.acciones{
+ 
+  background-color: #f2f5f4;
+
+}
+
+.planilla td.telefono-cell {
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .btn-del-player {
     background: #ff3b3b;
     color: white;

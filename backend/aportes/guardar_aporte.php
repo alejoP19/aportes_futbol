@@ -170,49 +170,58 @@ try {
     $delMoves->execute();
     $delMoves->close();
 
-    /* ======================================================
-       4) Consumir saldo (máximo 2000) SOLO de excedentes anteriores a esta fecha
-          SIN modificar aportes viejos: solo insertamos moves
-       ====================================================== */
-    $to_consume = min($valor, 2000);
-    if ($to_consume > 0) {
+  /* ======================================================
+   4) Consumir saldo SOLO si el aporte del día es EXACTAMENTE 2000
+      - valor > 2000 → NO consume saldo, solo genera excedente.
+      - valor = 2000 → consume 2000 de saldo (si hay disponible).
+   ====================================================== */
+$to_consume = 0;
 
-        // Candidatos source: aportes anteriores con excedente (>2000)
-        $q = $conexion->prepare("
-            SELECT id
-            FROM aportes
-            WHERE id_jugador = ?
-              AND fecha < ?
-              AND aporte_principal > 2000
-            ORDER BY fecha ASC, id ASC
+// Si el aporte del día es exactamente 2000, este día "gasta" un saldo de 2000
+if ($valor === 2000) {
+    $to_consume = 2000;
+}
+
+if ($to_consume > 0) {
+
+    // Candidatos source: aportes anteriores con excedente (>2000)
+    $q = $conexion->prepare("
+        SELECT id
+        FROM aportes
+        WHERE id_jugador = ?
+          AND fecha < ?
+          AND aporte_principal > 2000
+        ORDER BY fecha ASC, id ASC
+    ");
+    $q->bind_param("is", $id_jugador, $fecha);
+    $q->execute();
+    $sources = $q->get_result()->fetch_all(MYSQLI_ASSOC);
+    $q->close();
+
+    foreach ($sources as $s) {
+        if ($to_consume <= 0) break;
+
+        $source_id = (int)$s['id'];
+        $disp = get_disponible_source($conexion, $source_id);
+        if ($disp <= 0) continue;
+
+        // Nunca vamos a consumir más de lo disponible en ese aporte
+        $dec = min($disp, $to_consume);
+
+        $insMove = $conexion->prepare("
+            INSERT INTO aportes_saldo_moves
+              (id_jugador, source_aporte_id, target_aporte_id, amount, fecha_consumo)
+            VALUES
+              (?, ?, ?, ?, ?)
         ");
-        $q->bind_param("is", $id_jugador, $fecha);
-        $q->execute();
-        $sources = $q->get_result()->fetch_all(MYSQLI_ASSOC);
-        $q->close();
+        $insMove->bind_param("iiiis", $id_jugador, $source_id, $target_id, $dec, $fecha);
+        $insMove->execute();
+        $insMove->close();
 
-        foreach ($sources as $s) {
-            if ($to_consume <= 0) break;
-
-            $source_id = (int)$s['id'];
-            $disp = get_disponible_source($conexion, $source_id);
-            if ($disp <= 0) continue;
-
-            $dec = min($disp, $to_consume);
-
-            $insMove = $conexion->prepare("
-                INSERT INTO aportes_saldo_moves
-                  (id_jugador, source_aporte_id, target_aporte_id, amount, fecha_consumo)
-                VALUES
-                  (?, ?, ?, ?, ?)
-            ");
-            $insMove->bind_param("iiiis", $id_jugador, $source_id, $target_id, $dec, $fecha);
-            $insMove->execute();
-            $insMove->close();
-
-            $to_consume -= $dec;
-        }
+        $to_consume -= $dec;
     }
+}
+
 
     $conexion->commit();
 
