@@ -1,6 +1,8 @@
 <?php
 header("Content-Type: application/json");
 include "../../conexion.php";
+require_once __DIR__ . "/../auth/auth.php";
+protegerAdmin();
 
 $mes  = intval($_GET['mes']  ?? date('n'));
 $anio = intval($_GET['anio'] ?? date('Y'));
@@ -16,32 +18,41 @@ $today = $conexion->query("
     WHERE fecha = CURDATE()
 ")->fetch_row()[0];
 
+/*
+  ✅ TOTAL MES:
+  Para cada aporte del mes:
+  aporte_efectivo = MIN(aporte_principal + consumido_en_ese_target, 3000)
+*/
 $month_total = $conexion->query("
     SELECT IFNULL(SUM(
-        CASE WHEN aporte_principal > 2000 THEN 2000 ELSE aporte_principal END
-    ),0)
-    FROM aportes
-    WHERE MONTH(fecha) = $mes 
-      AND YEAR(fecha)  = $anio
-")->fetch_row()[0];
+        LEAST(a.aporte_principal + IFNULL(t.consumido,0), 3000)
+    ),0) AS total_mes
+    FROM aportes a
+    LEFT JOIN (
+        SELECT target_aporte_id, SUM(amount) AS consumido
+        FROM aportes_saldo_moves
+        GROUP BY target_aporte_id
+    ) t ON t.target_aporte_id = a.id
+    WHERE MONTH(a.fecha) = $mes
+      AND YEAR(a.fecha)  = $anio
+")->fetch_assoc()['total_mes'] ?? 0;
 
-/**
- * 🔴 ANTES (MAL):
- *  WHERE (YEAR(fecha) < $anio OR (YEAR(fecha) = $anio AND MONTH(fecha) <= $mes))
- *
- * Esto sumaba TODOS los años anteriores + el año actual.
- *
- * ✅ AHORA (BIEN):
- *  Solo el año seleccionado, desde enero hasta el mes elegido.
- */
+/*
+  ✅ TOTAL AÑO (enero..mes):
+*/
 $year_total = $conexion->query("
     SELECT IFNULL(SUM(
-        CASE WHEN aporte_principal > 2000 THEN 2000 ELSE aporte_principal END
-    ),0)
-    FROM aportes
-    WHERE YEAR(fecha)  = $anio
-      AND MONTH(fecha) <= $mes
-")->fetch_row()[0];
+        LEAST(a.aporte_principal + IFNULL(t.consumido,0), 3000)
+    ),0) AS total_anio
+    FROM aportes a
+    LEFT JOIN (
+        SELECT target_aporte_id, SUM(amount) AS consumido
+        FROM aportes_saldo_moves
+        GROUP BY target_aporte_id
+    ) t ON t.target_aporte_id = a.id
+    WHERE YEAR(a.fecha) = $anio
+      AND MONTH(a.fecha) <= $mes
+")->fetch_assoc()['total_anio'] ?? 0;
 
 // ========================
 // OTROS APORTES
@@ -49,17 +60,10 @@ $year_total = $conexion->query("
 $otros_total = $conexion->query("
     SELECT IFNULL(SUM(valor),0)
     FROM otros_aportes
-    WHERE mes  = $mes 
+    WHERE mes  = $mes
       AND anio = $anio
 ")->fetch_row()[0];
 
-/**
- * 🔴 ANTES:
- * WHERE (anio < $anio OR (anio = $anio AND mes <= $mes))
- *
- * ✅ AHORA:
- * Solo otros aportes del año actual hasta ese mes.
- */
 $otros_year = $conexion->query("
     SELECT IFNULL(SUM(valor),0)
     FROM otros_aportes
@@ -67,13 +71,16 @@ $otros_year = $conexion->query("
       AND mes <= $mes
 ")->fetch_row()[0];
 
+// ========================
+// SALDO TOTAL (INFORMATIVO)
+// ========================
 $saldo_total = $conexion->query("
     SELECT IFNULL(SUM(
         GREATEST(IFNULL(ex.excedente,0) - IFNULL(co.consumido,0), 0)
     ),0) AS saldo
     FROM jugadores j
     LEFT JOIN (
-        SELECT id_jugador, SUM(GREATEST(aporte_principal - 2000, 0)) AS excedente
+        SELECT id_jugador, SUM(GREATEST(aporte_principal - 3000, 0)) AS excedente
         FROM aportes
         WHERE fecha <= '$fechaCorte'
         GROUP BY id_jugador
@@ -84,7 +91,7 @@ $saldo_total = $conexion->query("
         WHERE fecha_consumo <= '$fechaCorte'
         GROUP BY id_jugador
     ) co ON co.id_jugador = j.id
-")->fetch_assoc()['saldo'];
+")->fetch_assoc()['saldo'] ?? 0;
 
 // ========================
 // GASTOS
@@ -92,17 +99,10 @@ $saldo_total = $conexion->query("
 $gastos_mes = $conexion->query("
     SELECT IFNULL(SUM(valor),0)
     FROM gastos
-    WHERE mes  = $mes 
+    WHERE mes  = $mes
       AND anio = $anio
 ")->fetch_row()[0];
 
-/**
- * 🔴 ANTES:
- * WHERE (anio < $anio OR (anio = $anio AND mes <= $mes))
- *
- * ✅ AHORA:
- * Solo gastos del año actual hasta ese mes.
- */
 $gastos_anio = $conexion->query("
     SELECT IFNULL(SUM(valor),0)
     FROM gastos
@@ -111,14 +111,10 @@ $gastos_anio = $conexion->query("
 ")->fetch_row()[0];
 
 // ========================
-// TOTALES CORRECTOS
+// TOTALES
 // ========================
-
-// Total del mes (sin sumar saldo como ingreso)
-$month_total_final = $month_total + $otros_total - $gastos_mes;
-
-// Total del año (acumulado real del año seleccionado)
-$year_total_final  = $year_total + $otros_year - $gastos_anio;
+$month_total_final = (int)$month_total + (int)$otros_total - (int)$gastos_mes;
+$year_total_final  = (int)$year_total + (int)$otros_year - (int)$gastos_anio;
 
 echo json_encode([
     'ok'          => true,
@@ -128,5 +124,5 @@ echo json_encode([
     'otros_mes'   => (int)$otros_total,
     'gastos_mes'  => (int)$gastos_mes,
     'gastos_anio' => (int)$gastos_anio,
-    'saldo_mes'   => (int)$saldo_total   // 👈 sigue igual
+    'saldo_mes'   => (int)$saldo_total
 ]);

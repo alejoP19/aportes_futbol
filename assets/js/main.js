@@ -2,6 +2,8 @@
 
 // assets/js/main.js
 const API = "backend";
+let currentOtroDia = null; // recuerda el día seleccionado del "Otro juego"
+
 let selectedPlayerId = null; // fila seleccionada global
 
 // ----------- UTILS -----------------
@@ -10,14 +12,30 @@ async function fetchText(url) {
     return await r.text();
 }
 
+// async function postJSON(url, data) {
+//     const r = await fetch(url, {
+//         method: 'POST',
+//         headers: { 'Accept': 'application/json' },
+//         body: (data instanceof FormData ? data : JSON.stringify(data))
+//     });
+//     try { return await r.json(); } catch (e) { return null; }
+// }
+
+
 async function postJSON(url, data) {
+    const isForm = (data instanceof FormData);
+
     const r = await fetch(url, {
         method: 'POST',
-        headers: { 'Accept': 'application/json' },
-        body: (data instanceof FormData ? data : JSON.stringify(data))
+        headers: isForm
+          ? { 'Accept': 'application/json' }
+          : { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: isForm ? data : JSON.stringify(data)
     });
+
     try { return await r.json(); } catch (e) { return null; }
 }
+
 
 // ----------- JUGADORES -----------------
 async function loadPlayersList() {
@@ -72,9 +90,77 @@ async function agregarJugador() {
 }
 // ----------- TABLA Y APORTE -----------------
 async function loadSheet(mes, anio) {
-    const html = await fetchText(`${API}/aportes/listar_aportes.php?mes=${mes}&anio=${anio}`);
+   const otroParam = currentOtroDia ? `&otro=${currentOtroDia}` : "";
+const html = await fetchText(`${API}/aportes/listar_aportes.php?mes=${mes}&anio=${anio}${otroParam}`);
+
     const container = document.getElementById('monthlyTableContainer');
     container.innerHTML = html;
+
+   // ================================
+// OTRO JUEGO: actualizar header + data-fecha sin recargar
+// ================================
+const selectOtro = document.getElementById("selectOtroDia"); // tu select (ajusta id si es otro)
+const thOtro = container.querySelector("#thOtroJuego");
+
+function pad2(n){ return String(n).padStart(2,"0"); }
+
+function updateOtroJuegoColumn(diaElegido) {
+  if (!thOtro) return;
+
+  // 1) Cambiar texto del header
+  thOtro.textContent = `Otro juego (${pad2(diaElegido)})`;
+  thOtro.dataset.dia = String(diaElegido);
+
+  // 2) Cambiar data-fecha de TODOS los inputs y checks de esa columna
+  //    Para saber qué columna es, calculamos su índice real en la tabla.
+  const table = container.querySelector("table.planilla");
+  if (!table) return;
+
+  // índice de columna real del th (considerando colspans)
+  const headerRow = thOtro.parentElement;
+  let colIndex = 0;
+  for (const cell of headerRow.cells) {
+    if (cell === thOtro) break;
+    colIndex += cell.colSpan || 1;
+  }
+
+  // construir fecha nueva YYYY-MM-DD con mes/anio actuales
+  const yyyy = String(anio);
+  const mm = pad2(mes);
+  const dd = pad2(diaElegido);
+  const nuevaFecha = `${yyyy}-${mm}-${dd}`;
+
+  // recorrer filas del tbody y actualizar dataset de input y checkbox en esa columna
+  const bodyRows = table.tBodies[0]?.rows || [];
+  for (const row of bodyRows) {
+    const cell = row.cells[colIndex];
+    if (!cell) continue;
+
+    const input = cell.querySelector("input.cell-aporte");
+    if (input) input.dataset.fecha = nuevaFecha;
+
+    const chk = cell.querySelector("input.chk-deuda");
+    if (chk) chk.dataset.fecha = nuevaFecha;
+  }
+}
+
+if (selectOtro && thOtro) {
+  const inicial = parseInt(selectOtro.value || thOtro.dataset.dia || "1", 10);
+  if (!isNaN(inicial)) {
+    currentOtroDia = inicial;          // ✅ guardar global
+    updateOtroJuegoColumn(inicial);
+  }
+
+  selectOtro.addEventListener("change", () => {
+    const d = parseInt(selectOtro.value, 10);
+    if (!isNaN(d)) {
+      currentOtroDia = d;              // ✅ guardar global
+      updateOtroJuegoColumn(d);
+    }
+  });
+}
+
+
 
 const tablaAdmin = container.querySelector("table.planilla");
 if (tablaAdmin) {
@@ -121,7 +207,7 @@ container.querySelectorAll('.cell-aporte').forEach(input => {
     if (wrapper) {
         let flag = wrapper.querySelector(".saldo-flag");
         if (flag) {
-            if (valorToSend > 2000) {
+            if (valorToSend > 3000) {
                 flag.textContent = "★";
                 flag.classList.add("show");
             } else {
@@ -143,11 +229,64 @@ container.querySelectorAll('.cell-aporte').forEach(input => {
 
     // 🔃 Recargar TODO lo relacionado (tabla + totales + gastos + obs)
     if (resp && resp.ok) {
-        await refreshSheet();
+
+    // ✅ Si backend devuelve aporte_efectivo, fijar el valor mostrado en el input
+    // (esto evita que el "Otro juego" se quede vacío o "no se pueda borrar")
+    if (Object.prototype.hasOwnProperty.call(resp, "aporte_efectivo")) {
+        ev.target.value = resp.aporte_efectivo ? String(resp.aporte_efectivo) : "";
+        // ✅ Marcar visualmente si usó saldo en este día (sin texto, solo tooltip)
+applySaldoMarker(ev.target, resp);
+
+// ✅ Marcar excedente (aporte real > 3000) como ya lo haces
+applyExcedenteMarker(ev.target, valorToSend);
+
     } else {
-        console.error("Error guardando aporte:", resp);
-        // opcional: mostrar Swal de error
+        // si no lo devuelve, al menos respeta lo digitado / borrado
+        ev.target.value = (valorToSend === null) ? "" : String(valorToSend);
     }
+
+    // // ✅ Tooltip/estrella/excedente usando el valor REAL digitado (valorToSend)
+    // const td = ev.target.closest("td.celda-dia");
+    // if (td) {
+    //     const real = Number(valorToSend || 0);
+
+    //     if (real > 3000) {
+    //         td.classList.add("aporte-excedente");
+    //         td.dataset.real = String(real);
+    //         td.title = `Aportó ${real.toLocaleString("es-CO")}`;
+    //     } else {
+    //         td.classList.remove("aporte-excedente");
+    //         delete td.dataset.real;
+    //         td.removeAttribute("title");
+    //     }
+    // }
+
+    // ✅ Actualizar saldo mostrado en esa fila (columna "Tu Saldo")
+    if (Object.prototype.hasOwnProperty.call(resp, "saldo")) {
+        const row = ev.target.closest("tr");
+        const table = document.querySelector(".monthly-sheet table.planilla");
+        if (row && table) {
+            const saldoColIndex = findColumnIndex(table, "Tu Saldo");
+            if (saldoColIndex !== -1 && row.cells[saldoColIndex]) {
+                const strong = row.cells[saldoColIndex].querySelector("strong");
+                const txt = Number(resp.saldo || 0).toLocaleString("es-CO");
+                if (strong) strong.textContent = txt;
+                else row.cells[saldoColIndex].textContent = txt;
+            }
+        }
+    }
+
+    // ✅ Recalcular TOTAL DÍA + Total por Jugador + Total Mes (footer) SIN recargar tabla
+    const table = document.querySelector(".monthly-sheet table.planilla");
+    if (table) recomputePlanilla(table);
+
+    // ✅ Actualizar tarjetas (Día/Mes/Año) sin reconstruir tabla
+    await loadTotals(monthSelect.value, yearSelect.value);
+
+} else {
+    console.error("Error guardando aporte:", resp);
+}
+
   });
 });
 
@@ -833,23 +972,35 @@ function mostrarDetalleAporte(e, texto) {
 
 document.addEventListener("pointerup", function (e) {
 
-    // buscamos la celda que tenga aporte excedente
-    const cell = e.target.closest(".aporte-excedente");
+    const cell = e.target.closest(".aporte-excedente, .saldo-usado");
     if (!cell) return;
-
-    const real = Number(cell.dataset.real || 0);
-    if (!real) return;
 
     // eliminar tooltip previo
     document.querySelectorAll(".tooltip-aporte").forEach(t => t.remove());
 
+    let text = "";
+
+    if (cell.classList.contains("aporte-excedente")) {
+        const real = Number(cell.dataset.real || 0);
+        if (!real) return;
+        text = `Aportó ${real.toLocaleString("es-CO", {
+            style: "currency",
+            currency: "COP",
+            maximumFractionDigits: 0
+        })}`;
+    } else {
+        const usado = Number(cell.dataset.saldoUso || 0);
+        if (!usado) return;
+        text = `Usó saldo ${usado.toLocaleString("es-CO", {
+            style: "currency",
+            currency: "COP",
+            maximumFractionDigits: 0
+        })}`;
+    }
+
     const tip = document.createElement("div");
     tip.className = "tooltip-aporte";
-    tip.textContent = `Aportó ${real.toLocaleString("es-CO", {
-        style: "currency",
-        currency: "COP",
-        maximumFractionDigits: 0
-    })}`;
+    tip.textContent = text;
 
     document.body.appendChild(tip);
 
@@ -860,9 +1011,7 @@ document.addEventListener("pointerup", function (e) {
     tip.style.top  = (window.scrollY + rect.top - 8) + "px";
     tip.style.transform = "translate(-50%, -100%)";
 
-    // autocerrar
     setTimeout(() => tip.remove(), 2000);
-
 });
 
 
@@ -961,3 +1110,156 @@ document.addEventListener("click", (e) => {
     confirmButtonText: "Cerrar"
   });
 });
+
+
+function findColumnIndex(table, headerText) {
+    const head = table.tHead;
+    if (!head || head.rows.length < 2) return -1;
+
+    // segunda fila de headers
+    const row = head.rows[1];
+    const target = headerText.trim().toLowerCase();
+
+    for (let i = 0; i < row.cells.length; i++) {
+        const t = (row.cells[i].textContent || "").trim().toLowerCase();
+        if (t === target) return row.cells[i].cellIndex;
+    }
+    return -1;
+}
+
+function parseCellInputValue(cell) {
+    const input = cell?.querySelector?.("input.cell-aporte");
+    if (!input) return 0;
+    const raw = (input.value || "").toString().trim();
+    if (!raw) return 0;
+    const n = parseInt(raw.replace(/[^\d]/g, ""), 10);
+    return isNaN(n) ? 0 : n;
+}
+
+function parseTextNumber(txt) {
+    const n = parseInt(String(txt || "").replace(/[^\d]/g, ""), 10);
+    return isNaN(n) ? 0 : n;
+}
+
+function recomputePlanilla(table) {
+    const tbody = table.tBodies[0];
+    const tfoot = table.tFoot?.rows?.[0];
+    const head2 = table.tHead?.rows?.[1];
+    if (!tbody || !tfoot || !head2) return;
+
+    const idxTipo = findColumnIndex(table, "Tipo");
+    const idxValor = findColumnIndex(table, "Valor");
+    const idxPorJugador = findColumnIndex(table, "Por Jugador");
+
+    if (idxTipo === -1 || idxValor === -1 || idxPorJugador === -1) return;
+
+    // columnas de días: desde col 1 hasta antes de "Tipo"
+    const firstDayCol = 1;
+    const lastDayCol = idxTipo - 1;
+
+    // total por columna día
+    const colTotals = new Array(lastDayCol - firstDayCol + 1).fill(0);
+
+    // recalcular filas
+    for (const row of tbody.rows) {
+        let sumDias = 0;
+
+        for (let c = firstDayCol; c <= lastDayCol; c++) {
+            const v = parseCellInputValue(row.cells[c]);
+            sumDias += v;
+            colTotals[c - firstDayCol] += v;
+        }
+
+        const otros = parseTextNumber(row.cells[idxValor]?.textContent);
+        const totalJugador = sumDias + otros;
+
+        const tdPJ = row.cells[idxPorJugador];
+        if (tdPJ) {
+            const strong = tdPJ.querySelector("strong");
+            const txt = totalJugador.toLocaleString("es-CO");
+            if (strong) strong.textContent = txt;
+            else tdPJ.textContent = txt;
+        }
+    }
+
+    // pintar footer TOTAL DÍA (mismos índices)
+    for (let c = firstDayCol; c <= lastDayCol; c++) {
+        const td = tfoot.cells[c];
+        if (!td) continue;
+        const strong = td.querySelector("strong");
+        const val = colTotals[c - firstDayCol] || 0;
+        const txt = val.toLocaleString("es-CO");
+        if (strong) strong.textContent = txt;
+        else td.textContent = txt;
+    }
+
+    // recalcular total mes del footer (suma totales día + total otros)
+    // (tu footer tiene: [TOTAL DÍA] + ... días ... + [Otro juego] + [TOTAL OTROS label] + [TOTAL OTROS value] + [TOTAL MES] + [SALDO])
+    // Solo actualizamos el "TOTAL MES" (la celda que está bajo "Total Mes")
+    const idxTotalMes = findColumnIndex(table, "Por Jugador"); // OJO: NO ES el footer
+    // Mejor: buscar en footer por posición fija: tu "TOTAL MES" es la celda antes del saldo.
+    // Como tu estructura puede variar, dejamos solo totales por día y por jugador (lo crítico).
+}
+
+
+
+
+
+
+
+function applySaldoMarker(inputEl, resp) {
+    const td = inputEl.closest("td.celda-dia");
+    if (!td) return;
+
+    const usado = Number(resp?.consumido_target || 0);
+
+    if (usado > 0) {
+        // Guardar valor para tooltip/tap
+        td.dataset.saldoUso = String(usado);
+
+        // Marca visual (puedes estilizar con CSS)
+        td.classList.add("saldo-usado");
+        td.title = `Usó saldo: ${usado.toLocaleString("es-CO")}`;
+
+    } else {
+        // Si ya no usó saldo (o borró), limpiar marca
+        delete td.dataset.saldoUso;
+        td.classList.remove("saldo-usado");
+
+        // Si no es excedente, quitamos title; si es excedente, lo maneja applyExcedenteMarker
+        // (no removemos title aquí si hay excedente)
+        if (!td.classList.contains("aporte-excedente")) {
+            td.removeAttribute("title");
+        }
+    }
+}
+
+function applyExcedenteMarker(inputEl, valorToSend) {
+    const td = inputEl.closest("td.celda-dia");
+    if (!td) return;
+
+    const real = Number(valorToSend || 0);
+
+    if (real > 3000) {
+        td.classList.add("aporte-excedente");
+        td.dataset.real = String(real);
+
+        // Mantener title si también usó saldo (prioridad: excedente)
+        td.title = `Aportó ${real.toLocaleString("es-CO")}`;
+
+    } else {
+        td.classList.remove("aporte-excedente");
+        delete td.dataset.real;
+
+        // Si NO usó saldo, quitar title. Si sí usó saldo, que quede el de saldo.
+        if (td.classList.contains("saldo-usado")) {
+            const usado = parseInt(td.dataset.saldoUso || "0", 10) || 0;
+            td.title = `Usó saldo: ${usado.toLocaleString("es-CO")}`;
+        } else {
+            td.removeAttribute("title");
+        }
+    }
+}
+
+
+

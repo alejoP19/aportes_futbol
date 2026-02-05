@@ -1,19 +1,25 @@
 <?php
 header("Content-Type: application/json");
 include "../../conexion.php";
+require_once __DIR__ . "/../auth/auth.php";
+protegerAdmin();
+/* ======================================================
+   CONFIG
+====================================================== */
+$TOPE = 3000;
 
 /* ======================================================
    SALDO HASTA UN MES/AÑO (corte al último día del mes)
-   saldo = (excedente generado hasta corte) - (consumo hasta corte)
-   excedente = SUM(max(aporte_principal - 2000, 0))
-   consumo   = SUM(amount) en aportes_saldo_moves con fecha_consumo <= corte
-   ====================================================== */
+   saldo = excedente - consumido
+   excedente = SUM(max(aporte_principal - 3000, 0))
+   consumido = SUM(amount) en aportes_saldo_moves
+====================================================== */
 function get_saldo_acumulado_hasta_mes($conexion, $id_jugador, $mes, $anio) {
     $fechaCorte = date('Y-m-t', strtotime("$anio-$mes-01"));
 
-    // Excedente generado hasta la fecha de corte
+    // Excedente generado (con base en valor REAL guardado)
     $q1 = $conexion->prepare("
-        SELECT IFNULL(SUM(GREATEST(aporte_principal - 2000, 0)), 0) AS excedente
+        SELECT IFNULL(SUM(GREATEST(aporte_principal - 3000, 0)), 0) AS excedente
         FROM aportes
         WHERE id_jugador = ?
           AND fecha <= ?
@@ -23,7 +29,7 @@ function get_saldo_acumulado_hasta_mes($conexion, $id_jugador, $mes, $anio) {
     $excedente = (int)($q1->get_result()->fetch_assoc()['excedente'] ?? 0);
     $q1->close();
 
-    // Consumo de saldo hasta la fecha de corte (por fecha_consumo real)
+    // Consumo acumulado (por fecha_consumo real)
     $q2 = $conexion->prepare("
         SELECT IFNULL(SUM(amount), 0) AS consumido
         FROM aportes_saldo_moves
@@ -40,13 +46,13 @@ function get_saldo_acumulado_hasta_mes($conexion, $id_jugador, $mes, $anio) {
 }
 
 /* ======================================================
-   DISPONIBLE DE UNA FILA "SOURCE" (EXCEDENTE NO CONSUMIDO)
-   disponible_source = (aporte_principal - 2000) - sum(moves.amount de ese source)
-   ====================================================== */
+   DISPONIBLE DE UNA FILA SOURCE
+   disponible_source = (aporte_principal - 3000) - sum(moves.amount de ese source)
+====================================================== */
 function get_disponible_source($conexion, $source_id) {
     $q = $conexion->prepare("
         SELECT
-          GREATEST(a.aporte_principal - 2000, 0) - IFNULL(SUM(m.amount), 0) AS disponible
+          GREATEST(a.aporte_principal - 3000, 0) - IFNULL(SUM(m.amount), 0) AS disponible
         FROM aportes a
         LEFT JOIN aportes_saldo_moves m ON m.source_aporte_id = a.id
         WHERE a.id = ?
@@ -60,6 +66,9 @@ function get_disponible_source($conexion, $source_id) {
     return (int)($row['disponible'] ?? 0);
 }
 
+/* ======================================================
+   INPUT
+====================================================== */
 $input = file_get_contents("php://input");
 $data  = json_decode($input, true);
 
@@ -72,10 +81,8 @@ if (!$id_jugador || !$fecha) {
     exit;
 }
 
-// Normalizar valor
 if ($valor === "" || $valor === null) $valor = null;
 
-// Validar fecha
 $dt = strtotime($fecha);
 if ($dt === false) {
     echo json_encode(['ok' => false, 'msg' => 'fecha_invalida']);
@@ -90,11 +97,10 @@ $conexion->begin_transaction();
 try {
 
     /* ======================================================
-       1) Si valor es null => BORRAR aporte + borrar movimientos destino
-       ====================================================== */
+       1) BORRAR aporte + borrar movimientos destino
+    ====================================================== */
     if ($valor === null) {
 
-        // Buscar id del aporte (si existe)
         $sel = $conexion->prepare("SELECT id FROM aportes WHERE id_jugador=? AND fecha=? LIMIT 1");
         $sel->bind_param("is", $id_jugador, $fecha);
         $sel->execute();
@@ -109,13 +115,13 @@ try {
 
         $target_id = (int)$row['id'];
 
-        // Borrar movimientos que consumieron saldo para este día
+        // borrar consumo aplicado a este día
         $delMoves = $conexion->prepare("DELETE FROM aportes_saldo_moves WHERE target_aporte_id=?");
         $delMoves->bind_param("i", $target_id);
         $delMoves->execute();
         $delMoves->close();
 
-        // Borrar el aporte
+        // borrar aporte
         $del = $conexion->prepare("DELETE FROM aportes WHERE id=?");
         $del->bind_param("i", $target_id);
         $del->execute();
@@ -134,12 +140,13 @@ try {
     }
 
     /* ======================================================
-       2) INSERT/UPDATE del aporte (guardar el valor real escrito)
-       ====================================================== */
+       2) UPSERT del aporte (GUARDA VALOR REAL DIGITADO)
+          - Aquí NO hacemos cap a 3000 porque el saldo depende del real.
+          - El cap a 3000 se hace al MOSTRAR (listar_aportes.php) con LEAST().
+    ====================================================== */
     $valor = (int)$valor;
     if ($valor < 0) $valor = 0;
 
-    // UPSERT
     $stmtIns = $conexion->prepare("
         INSERT INTO aportes (id_jugador, fecha, aporte_principal)
         VALUES (?, ?, ?)
@@ -149,7 +156,7 @@ try {
     $stmtIns->execute();
     $stmtIns->close();
 
-    // Obtener target_id
+    // target_id
     $selId = $conexion->prepare("SELECT id FROM aportes WHERE id_jugador=? AND fecha=? LIMIT 1");
     $selId->bind_param("is", $id_jugador, $fecha);
     $selId->execute();
@@ -162,76 +169,78 @@ try {
     $target_id = (int)$rowId['id'];
 
     /* ======================================================
-       3) Si este día se re-edita, primero borramos sus moves previos
-          (para recalcular consumo correctamente)
-       ====================================================== */
+       3) Si el día se re-edita, borrar moves previos de ese día
+    ====================================================== */
     $delMoves = $conexion->prepare("DELETE FROM aportes_saldo_moves WHERE target_aporte_id=?");
     $delMoves->bind_param("i", $target_id);
     $delMoves->execute();
     $delMoves->close();
 
-  /* ======================================================
-   4) Consumir saldo SOLO si el aporte del día es EXACTAMENTE 2000
-      - valor > 2000 → NO consume saldo, solo genera excedente.
-      - valor = 2000 → consume 2000 de saldo (si hay disponible).
-   ====================================================== */
-$to_consume = 0;
-
-// Si el aporte del día es exactamente 2000, este día "gasta" un saldo de 2000
-if ($valor === 2000) {
-    $to_consume = 2000;
-}
-
-if ($to_consume > 0) {
-
-    // Candidatos source: aportes anteriores con excedente (>2000)
-    $q = $conexion->prepare("
-        SELECT id
-        FROM aportes
-        WHERE id_jugador = ?
-          AND fecha < ?
-          AND aporte_principal > 2000
-        ORDER BY fecha ASC, id ASC
-    ");
-    $q->bind_param("is", $id_jugador, $fecha);
-    $q->execute();
-    $sources = $q->get_result()->fetch_all(MYSQLI_ASSOC);
-    $q->close();
-
-    foreach ($sources as $s) {
-        if ($to_consume <= 0) break;
-
-        $source_id = (int)$s['id'];
-        $disp = get_disponible_source($conexion, $source_id);
-        if ($disp <= 0) continue;
-
-        // Nunca vamos a consumir más de lo disponible en ese aporte
-        $dec = min($disp, $to_consume);
-
-        $insMove = $conexion->prepare("
-            INSERT INTO aportes_saldo_moves
-              (id_jugador, source_aporte_id, target_aporte_id, amount, fecha_consumo)
-            VALUES
-              (?, ?, ?, ?, ?)
-        ");
-        $insMove->bind_param("iiiis", $id_jugador, $source_id, $target_id, $dec, $fecha);
-        $insMove->execute();
-        $insMove->close();
-
-        $to_consume -= $dec;
+    /* ======================================================
+       4) CONSUMIR SALDO PARA COMPLETAR HASTA 3000
+          - Si valor < 3000 => consume (3000 - valor) si hay saldo disponible.
+          - Si valor >= 3000 => NO consume (si es 5000 genera excedente 2000).
+    ====================================================== */
+    $to_consume = 0;
+    if ($valor > 0 && $valor < $TOPE) {
+        $to_consume = $TOPE - $valor;
     }
-}
 
+    $consumido_target = 0;
+
+    if ($to_consume > 0) {
+
+        // sources: aportes anteriores con excedente (>3000)
+        $q = $conexion->prepare("
+            SELECT id
+            FROM aportes
+            WHERE id_jugador = ?
+              AND fecha < ?
+              AND aporte_principal > 3000
+            ORDER BY fecha ASC, id ASC
+        ");
+        $q->bind_param("is", $id_jugador, $fecha);
+        $q->execute();
+        $sources = $q->get_result()->fetch_all(MYSQLI_ASSOC);
+        $q->close();
+
+        foreach ($sources as $s) {
+            if ($to_consume <= 0) break;
+
+            $source_id = (int)$s['id'];
+            $disp = get_disponible_source($conexion, $source_id);
+            if ($disp <= 0) continue;
+
+            $dec = min($disp, $to_consume);
+
+            $insMove = $conexion->prepare("
+                INSERT INTO aportes_saldo_moves
+                  (id_jugador, source_aporte_id, target_aporte_id, amount, fecha_consumo)
+                VALUES
+                  (?, ?, ?, ?, ?)
+            ");
+            $insMove->bind_param("iiiis", $id_jugador, $source_id, $target_id, $dec, $fecha);
+            $insMove->execute();
+            $insMove->close();
+
+            $to_consume -= $dec;
+            $consumido_target += $dec;
+        }
+    }
 
     $conexion->commit();
 
     $saldo_actual = get_saldo_acumulado_hasta_mes($conexion, $id_jugador, $mes, $anio);
 
+    // aporte efectivo de ese día (cash + saldo_consumido), cap 3000
+    $aporte_efectivo = min($valor + $consumido_target, $TOPE);
+
     echo json_encode([
         'ok' => true,
         'action' => 'upsert',
         'target_id' => $target_id,
-        'tope' => min($valor, 2000),
+        'consumido_target' => $consumido_target,
+        'aporte_efectivo' => $aporte_efectivo,
         'saldo' => $saldo_actual
     ]);
     exit;
