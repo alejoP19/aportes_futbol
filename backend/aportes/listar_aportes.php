@@ -163,6 +163,41 @@ while ($row = $resTot->fetch_assoc()) {
 }
 
 /* ===========================
+   FECHA "DEUDA DESDE" (la más antigua hasta el mes actual)
+=========================== */
+$deudas_desde = [];
+$resDesde = $conexion->query("
+    SELECT id_jugador, MIN(fecha) AS desde
+    FROM deudas_aportes
+    WHERE (YEAR(fecha) < $anio)
+       OR (YEAR(fecha) = $anio AND MONTH(fecha) <= $mes)
+    GROUP BY id_jugador
+");
+while ($row = $resDesde->fetch_assoc()) {
+    $deudas_desde[(int)$row['id_jugador']] = $row['desde']; // YYYY-MM-DD
+}
+
+/* ===========================
+   LISTA DE FECHAS DE DEUDAS (hasta el mes seleccionado)
+   -> Para mostrar: "Deudas: N" y debajo las fechas
+=========================== */
+$deudas_lista = [];
+$fechaCorteDeuda = date('Y-m-t', strtotime("$anio-$mes-01"));
+
+$resLista = $conexion->query("
+    SELECT id_jugador, fecha
+    FROM deudas_aportes
+    WHERE fecha <= '$fechaCorteDeuda'
+    ORDER BY fecha ASC
+");
+
+while ($row = $resLista->fetch_assoc()) {
+    $jid = (int)$row['id_jugador'];
+    $deudas_lista[$jid][] = date("d-m-Y", strtotime($row['fecha']));
+}
+
+
+/* ===========================
    HTML
 =========================== */
 echo "<div class='monthly-sheet'>";
@@ -299,6 +334,8 @@ $saldoAttr = ($consumo > 0) ? " data-saldo-uso='{$consumo}' " : "";
            placeholder='$'
            value='".($cashCap>0?$cashCap:"")."'>
     <span class='saldo-flag ".($flag ? "show" : "")."'>★</span>
+<!-- ✨ Símbolo cuando completó con saldo (persistente por data-saldo-uso) -->
+<span class='saldo-uso-flag ".($consumo > 0 ? "show" : "")."'>✚</span>
     
     <label class='chk-deuda-label ".($hayDeuda?"con-deuda":"")."'>
       <input type='checkbox'
@@ -348,6 +385,8 @@ $saldoAttrO = ($consumoO > 0) ? " data-saldo-uso='{$consumoO}' " : "";
            placeholder='$'
            value='".($cashCapO>0?$cashCapO:"")."'>
     <span class='saldo-flag ".($flagO ? "show" : "")."'>★</span>
+    <!-- ✨ Símbolo cuando completó con saldo (persistente por data-saldo-uso) -->
+<span class='saldo-uso-flag ".($consumoO > 0 ? "show" : "")."'>✚</span>
 
     <label class='chk-deuda-label ".($hayDeudaOtro ? "con-deuda" : "")."'>
       <input type='checkbox'
@@ -394,11 +433,28 @@ $saldoAttrO = ($consumoO > 0) ? " data-saldo-uso='{$consumoO}' " : "";
                     title='Eliminar aportante'>🗑️</button>
           </td>";
 
-    echo "<td class='estado-deuda'>
-            <label class='chk-deuda-global ".($tieneDeuda ? "con-deuda" : "")."'>
-              ".($tieneDeuda ? "Debe: {$deudaDias} días" : "")."
-            </label>
-          </td>";
+
+
+$listaFechas = $deudas_lista[$jugId] ?? [];
+
+echo "<td class='estado-deuda'>
+        <label class='chk-deuda-global ".($tieneDeuda ? "con-deuda" : "")."'>";
+
+if ($tieneDeuda) {
+    echo "Deudas: {$deudaDias}";
+
+    if (!empty($listaFechas)) {
+        echo "<div class='deuda-desde' style='font-size:12px; color:#2e8b57; margin-top:4px;'>
+                ".implode("<br>", array_map("htmlspecialchars", $listaFechas))."
+              </div>";
+    }
+}
+
+echo "  </label>
+      </td>";
+
+
+
 
     $telefonoView = $jug['telefono'] ? htmlspecialchars($jug['telefono']) : "";
     echo "<td class='telefono-cell' data-full='{$telefonoView}'>{$telefonoView}</td>";

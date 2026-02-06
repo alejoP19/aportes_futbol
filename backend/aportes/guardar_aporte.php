@@ -6,6 +6,10 @@ protegerAdmin();
 /* ======================================================
    CONFIG
 ====================================================== */
+// ✅ [NUEVO] Permitir consumir saldo de aportes "futuros" dentro del mismo mes (solo para pruebas).
+// En producción puedes dejarlo en false si quieres mantener la lógica estricta.
+$ALLOW_FUTURE_SOURCES_IN_MONTH = true;
+
 $TOPE = 3000;
 
 /* ======================================================
@@ -134,7 +138,9 @@ try {
         echo json_encode([
             'ok' => true,
             'action' => 'deleted',
-            'saldo' => $saldo_actual
+            'saldo' => $saldo_actual,
+            'consumido_target' => 0,
+            'aporte_efectivo'  => 0
         ]);
         exit;
     }
@@ -190,19 +196,57 @@ try {
 
     if ($to_consume > 0) {
 
-        // sources: aportes anteriores con excedente (>3000)
-        $q = $conexion->prepare("
-            SELECT id
-            FROM aportes
-            WHERE id_jugador = ?
-              AND fecha < ?
-              AND aporte_principal > 3000
-            ORDER BY fecha ASC, id ASC
-        ");
-        $q->bind_param("is", $id_jugador, $fecha);
-        $q->execute();
-        $sources = $q->get_result()->fetch_all(MYSQLI_ASSOC);
-        $q->close();
+        // // sources: aportes anteriores con excedente (>3000)
+        // $q = $conexion->prepare("
+        //     SELECT id
+        //     FROM aportes
+        //     WHERE id_jugador = ?
+        //       AND fecha < ?
+        //       AND aporte_principal > 3000
+        //     ORDER BY fecha ASC, id ASC
+        // ");
+        // $q->bind_param("is", $id_jugador, $fecha);
+
+// ✅ [NUEVO] Si el target es un día "anterior" (p.ej. Otro juego (01)),
+// podemos permitir consumir excedentes del mismo mes hasta el último día del mes.
+// Esto evita que el "otro juego" no complete a 3000 cuando hay excedente en días posteriores.
+$fechaIniMes   = sprintf("%04d-%02d-01", $anio, $mes);
+$fechaCorteMes = date('Y-m-t', strtotime($fechaIniMes));
+
+if (!empty($ALLOW_FUTURE_SOURCES_IN_MONTH)) {
+
+    $q = $conexion->prepare("
+        SELECT id
+        FROM aportes
+        WHERE id_jugador = ?
+          AND fecha <= ?              -- ✅ permite excedentes hasta fin de mes
+          AND aporte_principal > 3000
+          AND id <> ?                 -- ✅ evita usar el mismo target como source (por seguridad)
+        ORDER BY fecha ASC, id ASC
+    ");
+    $q->bind_param("isi", $id_jugador, $fechaCorteMes, $target_id);
+
+} else {
+
+    // comportamiento original (estricto): solo excedentes anteriores al día target
+    $q = $conexion->prepare("
+        SELECT id
+        FROM aportes
+        WHERE id_jugador = ?
+          AND fecha < ?
+          AND aporte_principal > 3000
+          AND id <> ?
+        ORDER BY fecha ASC, id ASC
+    ");
+    $q->bind_param("isi", $id_jugador, $fecha, $target_id);
+}
+
+$q->execute();
+$sources = $q->get_result()->fetch_all(MYSQLI_ASSOC);
+$q->close();
+
+
+      
 
         foreach ($sources as $s) {
             if ($to_consume <= 0) break;

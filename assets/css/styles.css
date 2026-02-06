@@ -407,9 +407,11 @@ margin-top: 2%;
 
 /* Celda donde completó con saldo */
 td.celda-dia.saldo-usado {
-  outline: 2px dashed rgba(0, 150, 255, 0.6);
+  outline: 1px dashed rgba(134, 134, 134, 0.6);
   outline-offset: -3px;
   border-radius: 6px;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .aporte-wrapper {
@@ -421,23 +423,47 @@ td.celda-dia.saldo-usado {
 .saldo-flag {
     position: absolute;
     top: 12px;
-    left: 6%;
+    left: 12%;
     transform: translateX(-50%);
     font-size: 15px;
     pointer-events: none;
     font-weight: bold;
     color: #ecc901;
     opacity: 0;
-    transition: 
-        opacity 0.35s ease,
-        transform 0.35s cubic-bezier(0.25, 1.3, 0.5, 1);
+     /* estado oculto: abajo + transparente (para que al quitar show baje) */
+  transform: translate(-50%, 8px) scale(.9);
+  transition: opacity .25s ease, transform .25s ease;
 }
+
 
 /* Cuando la estrella debe mostrarse */
 .saldo-flag.show {
-    opacity: 1;
-    transform: translateY(-50%) scale(1);
+   opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
+
+/* ✨ Símbolo cuando completó con saldo */
+.saldo-uso-flag{
+  position:absolute;
+  top: 12px;
+  left: 12%;
+  font-size: 14px;
+  pointer-events:none;
+  font-weight: bold;
+
+  /* elige color distinto al dorado */
+  color: #00c93c;
+
+  opacity: 0;
+  transform: translate(-50%, 8px) scale(.9);
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.saldo-uso-flag.show{
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
 
 /* Espacio dentro del input para que no tape el número */
 .aporte-wrapper input {
@@ -465,6 +491,17 @@ td.celda-dia.saldo-usado {
 .chk-deuda-global input:checked {
     accent-color: red;
     transform: scale(1.2);
+}
+.deuda-desde{
+  font-size: 11px;
+  margin-top: 4px;
+  opacity: .9;
+  animation: deudaPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes deudaPulse{
+  0%,100% { opacity: .45; }
+  50%     { opacity: 1; }
 }
 
 

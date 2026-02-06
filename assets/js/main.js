@@ -95,6 +95,9 @@ const html = await fetchText(`${API}/aportes/listar_aportes.php?mes=${mes}&anio=
 
     const container = document.getElementById('monthlyTableContainer');
     container.innerHTML = html;
+    
+     // ✅ Al cargar la tabla (recarga / cambio de mes), activar clase + title del saldo
+    initSaldoFromHTML(container);
 
    // ================================
 // OTRO JUEGO: actualizar header + data-fecha sin recargar
@@ -162,10 +165,10 @@ if (selectOtro && thOtro) {
 
 
 
-const tablaAdmin = container.querySelector("table.planilla");
-if (tablaAdmin) {
-  setupHeaderColumnHighlight(tablaAdmin);
-}
+// const tablaAdmin = container.querySelector("table.planilla");
+// if (tablaAdmin) {
+//   setupHeaderColumnHighlight(tablaAdmin);
+// }
 
 activarBusquedaJugadores();
     // Mantener fila seleccionada
@@ -232,34 +235,16 @@ container.querySelectorAll('.cell-aporte').forEach(input => {
 
     // ✅ Si backend devuelve aporte_efectivo, fijar el valor mostrado en el input
     // (esto evita que el "Otro juego" se quede vacío o "no se pueda borrar")
-    if (Object.prototype.hasOwnProperty.call(resp, "aporte_efectivo")) {
-        ev.target.value = resp.aporte_efectivo ? String(resp.aporte_efectivo) : "";
-        // ✅ Marcar visualmente si usó saldo en este día (sin texto, solo tooltip)
-applySaldoMarker(ev.target, resp);
+if (Object.prototype.hasOwnProperty.call(resp, "aporte_efectivo")) {
+  ev.target.value = resp.aporte_efectivo ? String(resp.aporte_efectivo) : "";
+} else {
+  // delete o respuesta sin aporte_efectivo
+  ev.target.value = (valorToSend === null) ? "" : String(valorToSend);
+}
 
-// ✅ Marcar excedente (aporte real > 3000) como ya lo haces
-applyExcedenteMarker(ev.target, valorToSend);
-
-    } else {
-        // si no lo devuelve, al menos respeta lo digitado / borrado
-        ev.target.value = (valorToSend === null) ? "" : String(valorToSend);
-    }
-
-    // // ✅ Tooltip/estrella/excedente usando el valor REAL digitado (valorToSend)
-    // const td = ev.target.closest("td.celda-dia");
-    // if (td) {
-    //     const real = Number(valorToSend || 0);
-
-    //     if (real > 3000) {
-    //         td.classList.add("aporte-excedente");
-    //         td.dataset.real = String(real);
-    //         td.title = `Aportó ${real.toLocaleString("es-CO")}`;
-    //     } else {
-    //         td.classList.remove("aporte-excedente");
-    //         delete td.dataset.real;
-    //         td.removeAttribute("title");
-    //     }
-    // }
+// ✅ IMPORTANTE: actualizar SIEMPRE marcadores (aunque sea delete)
+applySaldoMarker(ev.target, resp);              // si no hay consumido_target => lo toma como 0 y limpia
+applyExcedenteMarker(ev.target, valorToSend);   // si valorToSend es null/<=3000 => limpia ⭐
 
     // ✅ Actualizar saldo mostrado en esa fila (columna "Tu Saldo")
     if (Object.prototype.hasOwnProperty.call(resp, "saldo")) {
@@ -1208,31 +1193,38 @@ function recomputePlanilla(table) {
 
 
 function applySaldoMarker(inputEl, resp) {
-    const td = inputEl.closest("td.celda-dia");
-    if (!td) return;
+  const td = inputEl.closest("td.celda-dia");
+  if (!td) return;
 
-    const usado = Number(resp?.consumido_target || 0);
+  const usado = Number(resp?.consumido_target || 0);
+  const flag = td.querySelector(".saldo-uso-flag"); // ✨
 
-    if (usado > 0) {
-        // Guardar valor para tooltip/tap
-        td.dataset.saldoUso = String(usado);
+  if (usado > 0) {
+    // Guardar valor para tooltip/tap
+    td.dataset.saldoUso = String(usado);
 
-        // Marca visual (puedes estilizar con CSS)
-        td.classList.add("saldo-usado");
-        td.title = `Usó saldo: ${usado.toLocaleString("es-CO")}`;
+    // Marca visual + tooltip
+    td.classList.add("saldo-usado");
+    td.title = `Usó saldo: ${usado.toLocaleString("es-CO")}`;
 
-    } else {
-        // Si ya no usó saldo (o borró), limpiar marca
-        delete td.dataset.saldoUso;
-        td.classList.remove("saldo-usado");
+    // Mostrar símbolo ✨
+    if (flag) flag.classList.add("show");
 
-        // Si no es excedente, quitamos title; si es excedente, lo maneja applyExcedenteMarker
-        // (no removemos title aquí si hay excedente)
-        if (!td.classList.contains("aporte-excedente")) {
-            td.removeAttribute("title");
-        }
+  } else {
+    // Si ya no usó saldo (o borró), limpiar
+    delete td.dataset.saldoUso;
+    td.classList.remove("saldo-usado");
+
+    // Ocultar símbolo ✨
+    if (flag) flag.classList.remove("show");
+
+    // Si no es excedente, quitar title
+    if (!td.classList.contains("aporte-excedente")) {
+      td.removeAttribute("title");
     }
+  }
 }
+
 
 function applyExcedenteMarker(inputEl, valorToSend) {
     const td = inputEl.closest("td.celda-dia");
@@ -1261,5 +1253,42 @@ function applyExcedenteMarker(inputEl, valorToSend) {
     }
 }
 
+/* ==========================================================
+   INIT: activar saldo-usado desde HTML (data-saldo-uso)
+   Esto hace que al recargar o cambiar de mes:
+   - el tooltip siga saliendo
+   - y el símbolo ✨ no desaparezca
+========================================================== */
+function initSaldoFromHTML(container) {
+  container.querySelectorAll("td.celda-dia[data-saldo-uso]").forEach(td => {
+    const usado = parseInt(td.dataset.saldoUso || "0", 10) || 0;
+
+    if (usado > 0) {
+      td.classList.add("saldo-usado");
+      td.title = `Usó saldo: ${usado.toLocaleString("es-CO")}`;
+
+      // asegurar que el icono ✨ quede visible
+      const flag = td.querySelector(".saldo-uso-flag");
+      if (flag) flag.classList.add("show");
+    } else {
+      td.classList.remove("saldo-usado");
+      if (!td.classList.contains("aporte-excedente")) td.removeAttribute("title");
+
+      const flag = td.querySelector(".saldo-uso-flag");
+      if (flag) flag.classList.remove("show");
+    }
+  });
+}
 
 
+
+
+
+
+
+
+
+
+
+
+ 
