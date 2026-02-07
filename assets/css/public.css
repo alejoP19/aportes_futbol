@@ -186,13 +186,122 @@ body {
   border-radius: 10px;
   box-shadow: -1px 1px 10px white;
 }
-/* CONTENEDOR que scrollea */
-#contenedorTabla,
-.monthly-sheet {
-  overflow: auto;
-  max-height: 100vh;
-  -webkit-overflow-scrolling: touch;
+
+/* ====== Buscador dentro del THEAD ====== */
+.planilla thead .public-search-row th{
+backdrop-filter: blur(6px);
+padding: 10px 12px;
+border-bottom: 1px solid rgba(0,0,0,0.08);
+display: flex;
+width: 350px;
+min-width: 350px;
+max-width: max-content;
+margin: 10px;
+justify-self: flex-start;
+gap: 8px;
+padding: 6px 12px;
+background: linear-gradient(135deg, #00694f, #028f6b);
+border-radius: 10px;
+box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+z-index: 90;
+  
 }
+.planilla thead tr.public-search-row th.col-activa{
+  background: linear-gradient(135deg, #00694f, #028f6b) !important;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.15) !important;
+}
+/* contenedor del input */
+.public-search-wrap{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  justify-content:space-around;
+}
+
+/* input */
+.public-search-input{
+  max-width: 520px;
+  border-radius: 999px;
+    flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 14px;
+  padding: 6px 4px;
+}
+
+
+
+.public-search-input::placeholder {
+ color: rgba(255, 255, 255, 0.945);
+  font-size: large;
+  font-weight: lighter;
+  text-shadow: -1px 1px 1px #000000;
+
+  
+}
+
+
+/* botón limpiar */
+.public-search-clear{ 
+margin-right: -14%;
+  background: rgba(255, 122, 144, 0.781);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  color: #ffffff;
+   text-shadow: -1px 1px 1px #000000;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  transition: background 0.80s ease, transform 0.90s ease;
+ 
+}
+
+.public-search-clear:hover{
+  background: rgba(235, 66, 89, 0.945);
+  transform: scale(1.1);
+  transform: scale(0.95);
+}
+@keyframes parpadear {
+  0% { opacity: 0.90; }
+  50% { opacity: 0.70; }
+  100% { opacity: 0.90; }
+}
+.planilla thead .public-search-row th:focus-within .public-search-clear{
+ background: rgba(235, 66, 89, 0.945);
+margin-right: 0%;
+ animation: parpadear 3s linear infinite;
+}
+
+/* enfoque */
+.public-search-clear:focus-within {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.781),
+              0 6px 12px rgba(248, 248, 248, 0.788);
+}    
+.public-search-input:focus {
+ 
+display: flex;
+color: #ffffff;
+border-radius: 18px;
+font-weight:lighter; 
+font-size: large;
+padding: 4px;
+box-shadow: none;
+text-shadow: -1px 1px 1px black,
+-1px 1px 1px black,
+-1px 1px 1px black;
+font-style:italic;
+background-color: #00a77d; 
+width: 100%;
+align-self: flex-start;
+border: 1px dotted #000000; 
+outline: none;
+ 
+}
+
 
 /* LA TABLA NO debe tener overflow */
 .planilla {
@@ -607,7 +716,7 @@ border: 1px solid rgba(194, 194, 194, 0.849);
   color: #ff0224;
   font-size: 20px;
   text-shadow: -1px 1px 1px #000000,-1px 1px 1px #000000;
-  margin-top: -5%;
+  margin-top: -3%;
   bottom: 0%;
 }
 .totales-gastos .gastos-valor-valor{
@@ -710,28 +819,219 @@ font-weight:lighter;
  font-size: large;
 }
 
+
   /* Tabla */
-  #contenedorTabla { 
+  #contenedorTabla{
+    /* 🔥 CLAVE: que el contenedor abrace la tabla y el scroll no quede “salido” */
+    width: fit-content;
+    max-width: 94%;
+    margin: 0 auto 3% auto;
+
+    overflow: auto;                 /* X + Y */
+    max-height: calc(100vh - 100px);/* ajusta si quieres */
+
+    border-radius: 10px;
+    background:transparent;  /* para que el scroll se vea “dentro” */
     box-shadow: none;
-  margin-bottom: 3%;
+    scrollbar-gutter: stable both-edges; /* evita saltos y se ve más limpio */
+    -webkit-overflow-scrolling: touch;
+    
+  }
+
+ 
+
+
+ /* Scrollbar bonito para el contenedor de la tabla */
+  #contenedorTabla::-webkit-scrollbar{
+    width: 10px;   /* scroll Y */
+    height: 10px;  /* scroll X */
+  }
+
+  #contenedorTabla::-webkit-scrollbar-track{
+    background: rgba(0,0,0,.10);
+    border-radius: 12px;
+  }
+
+  #contenedorTabla::-webkit-scrollbar-thumb{
+    background: rgba(22, 160, 109, 0.85); /* tu verde */
+    border-radius: 12px;
+    border: 2px solid rgba(241,241,241,.88); /* “inset” */
+  }
+
+  #contenedorTabla::-webkit-scrollbar-thumb:hover{
+    background: rgba(36,90,75,.95);
+  }
+
+  /* Firefox */
+  #contenedorTabla{
+    scrollbar-width: thin;
+    scrollbar-color: rgba(10, 90, 60, 0.85) rgba(0,0,0,.10);
+  }
+
+
+
+/* ====== Buscador dentro del THEAD ====== */
+.planilla thead .public-search-row th{
+  position: static;
+margin:4%;
+margin-left: 90%;
+padding: 3px 8px;
+width: 450px;
+min-width: 450px;
+ 
 }
+
+.public-search-input::placeholder {
+  font-size: medium; 
+}
+
+
+/* botón limpiar */
+.public-search-clear{ 
+margin-right: -53%;
+ 
+}
+
+
+.planilla thead .public-search-row th:focus-within .public-search-clear{
+margin-right: -32%;
+ 
+}
+
+
+
+/* opcional: que se vea más compacto */
+.deuda-fechas-public{
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 14px;
+}
+.deuda-fecha-item{
+  margin: 2px 0;
+}
+
 
   .planilla {
   width: 100%;
   margin-top: 4%;
   margin-bottom: 2%;
   min-width: 100%;
+
+
+  }
+.planilla td.otros-tipos,
+.planilla td.columna-deuda strong{
+  display:block;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+
+ .planilla th,
+  .planilla td{
+    min-width: 90px;   /* un poco más anchas */
+
   }
 
-  .planilla th, .planilla td {
-    padding: 4px 6px;
-    
+  .planilla td.player-name{
+    min-width: 170px;  /* para nombres */
   }
+
+  .planilla td.otros-tipos{
+    min-width: 160px;  /* para que no se “aplane” */
+  }
+  .planilla  td.otros-valor{
+    min-width: 100px;  /* para que no se “aplane” */
+  }
+  .planilla td.columna-deuda{
+    min-width: 120px;  /* para deuda */
+  }
+
+
+  
+/* Opcional: que el texto no se “pegue” */
+.planilla td.columna-deuda strong{
+  display:block;
+  margin-bottom: 6px;
+}
+
+
+/* ================================
+   SCROLL BONITO DENTRO DE CELDAS (LAPTOP)
+   Solo afecta desktop/laptop
+================================ */
+
+/* 1) el TD no debe volverse "contenedor scroll" */
+.planilla td.otros-tipos,
+.planilla td.columna-deuda {
+  vertical-align: top;         /* no centre el bloque, queda más natural */
+}
+
+/* 2) el DIV interno es el que scrollea */
+.planilla .cell-scroll{
+  display: block;
+  max-height: 35px;            /* ajusta: 30/45/60/80 según gusto */
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;          /* espacio para scrollbar */
+  box-sizing: border-box;
+
+  /* opcional: evita que “salte” el layout cuando aparece scrollbar */
+  scrollbar-gutter: stable;
+}
+
+/* 3) Scrollbar delgado (Chrome/Edge/Safari) */
+.planilla .cell-scroll::-webkit-scrollbar{
+  width: 8px;
+}
+
+.planilla .cell-scroll::-webkit-scrollbar-track{
+  background: rgba(0,0,0,0.08);
+  border-radius: 10px;
+}
+
+.planilla .cell-scroll::-webkit-scrollbar-thumb{
+  background: rgba(36,90,75,0.65);   /* verde oscuro de tu paleta */
+  border-radius: 10px;
+  border: 2px solid rgba(0,0,0,0.08); /* “padding visual” */
+}
+
+.planilla .cell-scroll::-webkit-scrollbar-thumb:hover{
+  background: rgba(36,90,75,0.85);
+}
+
+/* quita flechas (las de arriba/abajo) */
+.planilla .cell-scroll::-webkit-scrollbar-button{
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* 4) Firefox */
+.planilla .cell-scroll{
+  scrollbar-width: thin;
+  scrollbar-color: rgba(36,90,75,0.75) rgba(0,0,0,0.10);
+}
+
+
+
+
+  /* opcional: que no se vea enorme el texto del listado */
+  .deuda-fechas-public{
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 14px;
+  }
+
+
 
   .player-name {
     padding-left: 14px;
     font-size: 14px !important;
   }
+
+
+
   /* Gastos / observaciones */
 .gastos-observaciones {
 display: grid;
@@ -827,6 +1127,9 @@ font-size: 27px;
   .observaciones-box {
     padding: 20px;
   }
+
+   
+
 }
 
 
@@ -835,7 +1138,43 @@ font-size: 27px;
    ======================================================= */
 @media (min-width: 768px) and (max-width: 1023px) {
 
-  .planilla th, .planilla td {
-    padding: 5px 6px;
+  .planilla th,
+  .planilla td{
+    min-width: 90px;   /* un poco más anchas */
+  }
+
+  .planilla td.player-name{
+    min-width: 220px;  /* para nombres */
+  }
+
+  .planilla td.otros-tipos{
+    min-width: 260px;  /* para que no se “aplane” */
+  }
+
+  .planilla td.columna-deuda{
+    min-width: 220px;  /* para deuda */
   }
 }
+
+
+/* ✚ saldo usado (público) */
+.saldo-plus-public{
+  display:inline-block;
+  margin-right:6px;
+  font-weight:700;
+  color:#1f9d55;   /* verde */
+  font-size:14px;
+  line-height:14px;
+  cursor:default;
+}
+
+/* lista de fechas de deuda */
+.deuda-fechas-public{
+  margin-top:4px;
+  font-size:12px;
+  color:#0a7a2a;
+}
+.deuda-fecha-item{
+  line-height:14px;
+}
+
