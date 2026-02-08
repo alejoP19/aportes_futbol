@@ -68,6 +68,38 @@ function get_saldo_hasta_mes($conexion, $id_jugador, $mes, $anio, $TOPE = 3000) 
 
     return max(0, $excedente - $consumido);
 }
+function get_saldo_anio_hasta_mes($conexion, $id_jugador, $mes, $anio, $TOPE = 3000) {
+    $fechaCorte = date('Y-m-t', strtotime("$anio-$mes-01"));
+
+    // excedente generado SOLO en el año
+    $q1 = $conexion->prepare("
+        SELECT IFNULL(SUM(GREATEST(aporte_principal - ?, 0)),0) AS excedente
+        FROM aportes
+        WHERE id_jugador = ?
+          AND YEAR(fecha) = ?
+          AND fecha <= ?
+    ");
+    $q1->bind_param("iiis", $TOPE, $id_jugador, $anio, $fechaCorte);
+    $q1->execute();
+    $excedente = (int)($q1->get_result()->fetch_assoc()['excedente'] ?? 0);
+    $q1->close();
+
+    // consumo SOLO en el año (por fecha_consumo)
+    $q2 = $conexion->prepare("
+        SELECT IFNULL(SUM(amount),0) AS consumido
+        FROM aportes_saldo_moves
+        WHERE id_jugador = ?
+          AND YEAR(fecha_consumo) = ?
+          AND fecha_consumo <= ?
+    ");
+    $q2->bind_param("iis", $id_jugador, $anio, $fechaCorte);
+    $q2->execute();
+    $consumido = (int)($q2->get_result()->fetch_assoc()['consumido'] ?? 0);
+    $q2->close();
+
+    return max(0, $excedente - $consumido);
+}
+
 
 // -------------------------------------------
 // 2) Jugadores
@@ -259,6 +291,12 @@ foreach ($players as $p) {
 $saldo_total_mes = 0;
 foreach ($rows as $r) $saldo_total_mes += (int)($r['saldo'] ?? 0);
 
+$saldo_total_anio = 0;
+foreach ($rows as $r) {
+    $saldo_total_anio += (int)get_saldo_anio_hasta_mes($conexion, (int)$r["id"], $mes, $anio, $TOPE);
+}
+
+
 // -------------------------------------------
 // 6) Totales generales (igual admin: cap + consumo)
 // -------------------------------------------
@@ -333,6 +371,71 @@ while ($g = $resDet->fetch_assoc()) {
 }
 $qDet->close();
 
+
+// detalle de otros aportes del mes (lista cada registro)
+$otros_detalle = [];
+$qOtrosDet = $conexion->prepare("
+    SELECT tipo, valor
+    FROM otros_aportes
+    WHERE mes = ? AND anio = ?
+    ORDER BY id ASC
+");
+$qOtrosDet->bind_param("ii", $mes, $anio);
+$qOtrosDet->execute();
+$resOD = $qOtrosDet->get_result();
+while ($o = $resOD->fetch_assoc()) {
+    $otros_detalle[] = [
+        "tipo"  => $o["tipo"],
+        "valor" => (int)$o["valor"],
+    ];
+}
+$qOtrosDet->close();
+
+
+// // detalle de otros aportes (agrupado por tipo)
+// $otros_detalle = [];
+// $qOtrosDet = $conexion->prepare("
+//     SELECT tipo, valor
+//     FROM otros_aportes
+//     WHERE mes = ? AND anio = ?
+//     ORDER BY id ASC
+// ");
+// $qOtrosDet->bind_param("ii", $mes, $anio);
+// $qOtrosDet->execute();
+// $resOtrosDet = $qOtrosDet->get_result();
+// while ($o = $resOtrosDet->fetch_assoc()) {
+//     $otros_detalle[] = 
+//     [
+//         "tipo" => $o["tipo"], 
+//         "valor" => (int)$o["valor"]
+
+//     ];
+// }
+// $qOtrosDet->close();
+
+
+
+// detalle de otros aportes del mes (SIN agrupar, trae cada fila)
+// $otros_detalle = [];
+// $qOtrosDet = $conexion->prepare("
+//     SELECT tipo, valor
+//     FROM otros_aportes
+//     WHERE mes = ? AND anio = ?
+//     ORDER BY id ASC
+// ");
+// $qOtrosDet->bind_param("ii", $mes, $anio);
+// $qOtrosDet->execute();
+// $resOD = $qOtrosDet->get_result();
+// while ($o = $resOD->fetch_assoc()) {
+//     $otros_detalle[] = [
+//         "tipo"  => $o["tipo"],
+//         "valor" => (int)$o["valor"],
+//     ];
+// }
+// $qOtrosDet->close();
+
+
+
 // observaciones
 $qObs = $conexion->prepare("
     SELECT texto
@@ -346,6 +449,15 @@ $resObs = $qObs->get_result()->fetch_assoc();
 $observaciones = $resObs['texto'] ?? "";
 $qObs->close();
 
+// DEBUG temporal
+file_put_contents(__DIR__."/debug_saldo.txt", print_r([
+  "mes"=>$mes, "anio"=>$anio,
+  "saldo_total_mes"=>$saldo_total_mes,
+  "saldo_total_anio"=>$saldo_total_anio,
+], true));
+
+
+
 echo json_encode([
     "mes"           => $mes,
     "anio"          => $anio,
@@ -358,13 +470,22 @@ echo json_encode([
     "observaciones" => $observaciones,
     "gastos_detalle"=> $gastos_detalle,
 
+       // ✅ AQUÍ, a nivel raíz:
+    "otros_detalle" => $otros_detalle,
+
     "totales" => [
         "month_total"       => (int)$month_total_final,
         "year_total"        => (int)$year_total_final,
-        "otros_mes_total"   => (int)$otros_mes,
         "gastos_mes"        => (int)$gastos_mes,
         "gastos_anio"       => (int)$gastos_anio,
         "saldo_mes"         => (int)$saldo_total_mes,
+
+        // totales extra
+        "saldo_vigente_total" => (int)$saldo_total_mes,
+        "saldo_total_anio"  => (int)$saldo_total_anio,
+
+        // (si quieres conservarlo también aquí no pasa nada)
+        "otros_mes_total"   => (int)$otros_mes,
     ]
 ]);
 exit;

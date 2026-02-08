@@ -1,10 +1,7 @@
 <?php
 header("Content-Type: application/json");
-require_once __DIR__ . "../auth/auth.php"; // ajusta la ruta según tu estructura
+include "../auth/auth.php";
 protegerAdmin();
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Pragma: no-cache");
-header("Expires: Sat, 01 Jan 2000 00:00:00 GMT");
 include "../../conexion.php";
 
 $nombre = trim($_POST['nombre'] ?? '');
@@ -22,3 +19,4 @@ $stmt->bind_param("siii", $nombre, $valor, $mes, $anio);
 $stmt->execute();
 
 echo json_encode(['ok'=>true]);
+

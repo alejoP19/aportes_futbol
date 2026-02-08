@@ -29,6 +29,7 @@ include "conexion.php";
 
 <button id="btnLogout" class="logout-button">Cerrar Sesión</button>
 
+
   <!-- TÍTULO -->
   <div class="title">
     <h1>Aportes</h1>
@@ -148,11 +149,11 @@ include "conexion.php";
 
     <div class="otros-aportes-card">
       <h4>Agregar Otro Aporte</h4>
-      <label for="selectPlayerOtro">¿Quién va a Aporta?</label>
+      <label for="selectPlayerOtro">¿Quién va a Aportar?</label>
       <select id="selectPlayerOtros"></select>
       <label for="otroTipo"> Tipo de Aporte</label>
       <input id="otroTipo" type="text" placeholder=" Ejemplo: Balón)" />
-      <label for="otroValor"> Valor a Aportar</label>
+      <label for="otroValor"> Valor Del Aporte</label>
       <input id="otroValor" type="number" placeholder="$" />
       <button id="btnAddOtro" class="otro-aporte">Agregar</button>
     </div>
@@ -172,6 +173,7 @@ include "conexion.php";
 <script>window.API_BASE = "backend"; window.isAdmin = <?php echo isset($_SESSION['is_admin'])? "true":"false"; ?>;</script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <!-- MAIN JS -->
 <script src="assets/js/main.js"></script>
 
@@ -179,4 +181,3 @@ include "conexion.php";
 
 
 </body>
-</html>

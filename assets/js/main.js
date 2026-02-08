@@ -12,14 +12,7 @@ async function fetchText(url) {
     return await r.text();
 }
 
-// async function postJSON(url, data) {
-//     const r = await fetch(url, {
-//         method: 'POST',
-//         headers: { 'Accept': 'application/json' },
-//         body: (data instanceof FormData ? data : JSON.stringify(data))
-//     });
-//     try { return await r.json(); } catch (e) { return null; }
-// }
+
 
 
 async function postJSON(url, data) {

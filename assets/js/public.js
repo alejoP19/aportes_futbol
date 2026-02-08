@@ -62,6 +62,7 @@ async function cargarDatos() {
   renderTotales(data);
   renderObservaciones(data.observaciones);
   renderGastos(data, mes, anio);
+  renderOtrosAportesPublico(data, mes, anio);
 }
 
 /* ==========================================================
@@ -463,6 +464,50 @@ function renderGastos(data, mes, anio) {
 }
 
 /* ==========================================================
+   OTROS APORTES (CARD)
+========================================================== */
+
+  function renderOtrosAportesPublico(data, mes, anio){
+  const box = document.getElementById("otrosAportesPublico");
+  if (!box) return;
+
+  const detalle = Array.isArray(data.otros_detalle) ? data.otros_detalle : [];
+  const t = data.totales || {};
+
+  let html = `<h3 class="titulo-otros">Otros Aportes</h3>`;
+
+  if (detalle.length){
+    html += `<ul class="lista-otros">`;
+    detalle.forEach(o => {
+      const tipo  = o.tipo ?? "";
+      const valor = Number(o.valor ?? 0);
+      html += `
+        <li>
+          <label>* ${escapeHtml(tipo)}</label>
+          <p>${formatMoney(valor)}</p>
+        </li>
+        
+      `;
+    });
+    html += `</ul>`;
+  } else {
+    html += `<p>No hay otros aportes registrados este mes.</p>`;
+  }
+
+  html += `
+    <div class="totales-gastos">
+      <label class="gastos-valor-label">Total Otros Aportes de este mes</label>
+      <p class="gastos-valor-valor">${formatMoney(t.otros_mes_total || 0)}</p>
+    </div>
+  `;
+
+  box.innerHTML = html;
+}
+
+
+
+
+/* ==========================================================
    PDF EXPORT
 ========================================================== */
 
@@ -516,14 +561,28 @@ function renderTotales(data) {
   const t = data.totales ?? {};
 
   const elMes   = document.getElementById("tMes");
-  const elOtros = document.getElementById("tOtros");
   const elAnio  = document.getElementById("tAnio");
   const elSaldo = document.getElementById("tSaldoMes");
 
-  if (elMes)   elMes.textContent   = t.month_total     ? formatMoney(t.month_total)      : "0";
-  if (elOtros) elOtros.textContent = t.otros_mes_total ? formatMoney(t.otros_mes_total)  : "0";
-  if (elAnio)  elAnio.textContent  = t.year_total      ? formatMoney(t.year_total)       : "0";
-  if (elSaldo) elSaldo.textContent = t.saldo_mes       ? formatMoney(t.saldo_mes)        : "0";
+  const elMesConSaldo  = document.getElementById("tMesConSaldo");
+  const elAnioConSaldo = document.getElementById("tAnioConSaldo");
+
+  const monthTotal = Number(t.month_total || 0);
+  const yearTotal  = Number(t.year_total  || 0);
+
+  const saldoMes   = Number(t.saldo_vigente_total || 0);
+
+  // Estos dos vienen del PHP como “extra”
+  // const saldoTotalMes  = Number(t.saldo_total_mes  || 0);
+ const saldoVigente = Number(t.saldo_vigente_total || t.saldo_mes || 0); // saldo acumulado vigente
+
+  if (elMes)   elMes.textContent   = formatMoney(monthTotal);
+  if (elAnio)  elAnio.textContent  = formatMoney(yearTotal);
+  if (elSaldo) elSaldo.textContent = formatMoney(saldoMes);
+
+  // ✅ Totales con saldo (los marcamos como “menos importantes” con class .extra)
+  if (elMesConSaldo) elMesConSaldo.textContent = formatMoney(monthTotal + saldoVigente);
+  if (elAnioConSaldo) elAnioConSaldo.textContent = formatMoney(yearTotal + saldoVigente);
 }
 
 /* ==========================================================

@@ -1,6 +1,6 @@
 <?php
 header("Content-Type: application/json");
-
+include "../../conexion.php";
 
 $id = intval($_POST['id'] ?? 0);
 

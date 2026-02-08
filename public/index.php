@@ -42,9 +42,9 @@
 
 <div class="gastos-observaciones">
   <!-- Nueva sección para mostrar gastos del mes / año -->
-  <section id="gastosMesPublico" class="observaciones-box">
-    
-    </section>
+  <section id="gastosMesPublico" class="observaciones-box"></section>
+  <section id="otrosAportesPublico" class="observaciones-box"></section>
+
     <section id="totales" class="totales-card">
       <h2>Totales</h2>
 
@@ -52,22 +52,24 @@
       <label><strong>Total Aportes del Mes</strong></label>
         <p id="tMes"></p>
     </div>
-
-    <div class="totals-items" >
-      <label><strong>Total Otros Aportes Del Mes </strong></label>
-        <p id="tOtros"></p>
-    </div>
-
     <div class="totals-items" >
       <label><strong>Total Aportes Del Año </strong></label>
         <p id="tAnio"></p>
     </div>
-<div class="totals-items saldo-box">
-  <label><strong>Total Saldo del Mes</strong></label>
-  <p id="tSaldoMes"></p>
-</div>
 
+    <div class="totals-items saldo-box">
+      <label><strong>Total Saldo del Mes</strong></label>
+      <p id="tSaldoMes"></p>
+    </div>
 
+      <div class="totals-items extra">
+    <label><strong>Total del Mes (con saldos)</strong></label>
+    <p id="tMesConSaldo"></p>
+  </div>
+
+  <div class="totals-items extra">
+    <label><strong>Total del Año (con saldos)</strong></label>
+    <p id="tAnioConSaldo"></p>
 
 </section>
     <div class="box-container-observ" >
