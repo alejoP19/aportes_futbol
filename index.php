@@ -93,16 +93,17 @@ include "conexion.php";
     <div class="pagination" id="paginationContainer">
       
     </div>
-    <div class="gastos-card">
-        <h4>Agregar Gasto</h4>
+
     
-        <label for="gastoNombre">Nombre del gasto</label>
-        <input id="gastoNombre" type="text" placeholder="Ej: Árbitro, Balón, Limpieza">
-    
-        <label for="gastoValor">Valor del gasto</label>
-        <input id="gastoValor" type="number" placeholder="$">
-    
-        <button id="btnAddGasto" class="save-gasto">Registrar Gasto</button>
+    <div class="otros-aportes-card">
+      <h4>Agregar Otro Aporte</h4>
+      <label for="selectPlayerOtros">¿Quién va a Aportar?</label>
+      <select id="selectPlayerOtros"></select>
+      <label for="otroTipo"> Tipo de Aporte</label>
+      <input id="otroTipo" type="text" placeholder=" Ejemplo: Balón)" />
+      <label for="otroValor"> Valor Del Aporte</label>
+      <input id="otroValor" type="number" placeholder="$" />
+      <button id="btnAddOtro" class="add-otro-aporte-butt">Agregar</button>
     </div>
   </section>
 
@@ -125,37 +126,40 @@ include "conexion.php";
     </div>
   </section>
 
-  <!-- PANEL DERECHO: TOTALES + OTROS APORTES + PDF -->
-  <aside class="right-panel">
-    <div class="totals-card">
-      <h3>Totales (COP)</h3>
-      <div>Mes: <strong id="tMes">0</strong></div>
-      <div>Año: <strong id="tAnio">0</strong></div>
-      <div>Otros Aportes: <strong id="tOtros">0</strong></div>
-      <div>Gastos del Mes: <strong id="tGastosMes">0</strong></div>
-      <div>Gastos del Año: <strong id="tGastosAnio">0</strong></div>
-      <div>Total Saldo Mes: <strong id="tSaldoMes">0</strong></div>
+ 
 
-      <div > <strong id="tDia">0</strong></div>
+
+
+ <div class="gastos-card">
+        <h4>Agregar Gasto</h4>
+    
+        <label for="gastoNombre">Nombre del gasto</label>
+        <input id="gastoNombre" type="text"  placeholder="Ej: Árbitro, Balón, Limpieza">
+    
+        <label for="gastoValor">Valor del gasto</label>
+        <input id="gastoValor" type="number"  placeholder="$">
+    
+        <button id="btnAddGasto" class="save-gasto">Registrar Gasto</button>
     </div>
 
 
-    <div class="otros-aportes-card" id="cardGastosListado">
+    <div class="gastos-regist-card" id="cardGastosListado">
         <h4>Gastos Registrados</h4>
         <ul id="listaGastos" style="list-style:none;padding-left:0;"></ul>
     </div>
 
+     <!-- PANEL DERECHO: TOTALES + OTROS APORTES + PDF -->
+  <aside class="right-panel">
+    <div class="totals-card">
+      <h4>Totales (COP)</h4>
+      <div> <span> Mes: <strong id="tMes" class="totales-item-value">0</strong></span> </div>
+      <div> <span> Año: <strong id="tAnio" class="totales-item-value">0</strong></span></div>
+      <div> <span>Otros Aportes: <strong id="tOtros" class="totales-item-value">0</strong></span> </div>
+      <div> <span>Gastos del Mes: <strong id="tGastosMes" class="totales-item-value">0</strong></span> </div>
+      <div> <span> Gastos del Año: <strong id="tGastosAnio" class="totales-item-value">0</strong></span></div>
+      <div> <span>Total Saldo Mes: <strong id="tSaldoMes" class="totales-item-value">0</strong></span></div>
 
-
-    <div class="otros-aportes-card">
-      <h4>Agregar Otro Aporte</h4>
-      <label for="selectPlayerOtro">¿Quién va a Aportar?</label>
-      <select id="selectPlayerOtros"></select>
-      <label for="otroTipo"> Tipo de Aporte</label>
-      <input id="otroTipo" type="text" placeholder=" Ejemplo: Balón)" />
-      <label for="otroValor"> Valor Del Aporte</label>
-      <input id="otroValor" type="number" placeholder="$" />
-      <button id="btnAddOtro" class="otro-aporte">Agregar</button>
+      <div> <strong id="tDia">0</strong></div>
     </div>
 
     <div class="notes-card">

@@ -1,7 +1,7 @@
 Array
 (
-    [mes] => 11
-    [anio] => 2025
-    [saldo_total_mes] => 2000
-    [saldo_total_anio] => 2000
+    [mes] => 2
+    [anio] => 2026
+    [saldo_total_mes] => 10000
+    [saldo_total_anio] => 8000
 )

@@ -74,31 +74,27 @@ function renderTablaPublic(data) {
 
   const dias          = data.dias_validos;
   const fechaEspecial = data.otro_dia;
-  const TOPE          = Number(data.tope || 3000);
 
-  let html = `<table class="planilla"><thead>`;
-
-  // ✅ total de columnas reales: 1 (nombres) + dias + 1 (especial) + 2 (otros) + 1 (total) + 1 (saldo) + 1 (deuda)
   const totalCols = dias.length + 7;
 
-  // ✅ FILA BUSCADOR (THEAD)
-  html += `
-    <tr class="public-search-row">
-      <th colspan="${totalCols}">
-        <div class="public-search-wrap">
-          <span class="icono-buscar">🔍</span>
-          <input id="searchPublic"
-                 type="text"
-                 class="form-control public-search-input"
-                 placeholder="Buscar jugador..."
-                 autocomplete="off">
-          <button type="button" class="public-search-clear" title="Limpiar">×</button>
-        </div>
-      </th>
-    </tr>
+  let html = `
+    <div class="public-search-bar">
+      <div class="public-search-wrap">
+        <span class="icono-buscar">🔍</span>
+        <input id="searchPublic"
+              type="text"
+              class="form-control public-search-input"
+              placeholder="Buscar jugador..."
+              autocomplete="off">
+        <button type="button" class="public-search-clear" title="Limpiar">×</button>
+      </div>
+    </div>
+
+    <table class="planilla">
+      <thead>
   `;
 
-  // ---------------- CABECERA 1 ----------------
+  // --- CABECERAS (igual que antes, pero YA SIN public-search-row) ---
   html += `<tr>`;
   html += `<th>Nombres</th>`;
   html += `<th colspan="${dias.length + 1}">Días de los juegos</th>`;
@@ -108,7 +104,6 @@ function renderTablaPublic(data) {
   html += `<th>Deudas</th>`;
   html += `</tr>`;
 
-  // ---------------- CABECERA 2 ----------------
   html += `<tr><th></th>`;
   dias.forEach(d => html += `<th>${d}</th>`);
   html += `<th>Otra Fecha (${fechaEspecial})</th>`;
@@ -117,6 +112,9 @@ function renderTablaPublic(data) {
   html += `<th>Tu Saldo</th>`;
   html += `<th>Tu Deuda</th>`;
   html += `</tr></thead><tbody>`;
+
+  // ... resto igual ...
+
 
   /* ==========================================================
       FILAS POR JUGADOR
@@ -342,43 +340,51 @@ function aplicarFiltroPublico(cont, q) {
   Sombreado De Columnas
 ========================================================== */
 
+
 function setupHeaderColumnHighlight(table) {
   if (!table || !table.tHead) return;
 
   const headRows = table.tHead.rows;
+  const groupRow = headRows[0];                  // fila con colspans (Nombres / Días / Otros / etc)
+  const colRow   = headRows[headRows.length - 1]; // fila con columnas reales (4,7,11... Tipo, Valor...)
 
-  // ✅ fila 0 = buscador
-  const searchRow = headRows[0];
-
-  // ✅ fila 1 = cabecera 1 (colspan)
-  const groupRow  = headRows[1];
-
-  // ✅ última fila = cabecera 2 (días/tipo/valor...)
-  const colRow    = headRows[headRows.length - 1];
+  // Devuelve la celda (th/td) que "cubre" el índice real de columna, respetando colSpan
+  function cellAtColIndex(row, colIndex) {
+    let acc = 0;
+    for (const cell of row.cells) {
+      const span = cell.colSpan || 1;
+      if (colIndex >= acc && colIndex < acc + span) return cell;
+      acc += span;
+    }
+    return null;
+  }
 
   function clear() {
-    table.querySelectorAll(".col-activa").forEach(el => el.classList.remove("col-activa", "col-especial"));
+    table.querySelectorAll(".col-activa, .col-especial").forEach(el => {
+      el.classList.remove("col-activa", "col-especial");
+    });
   }
 
   function paintCol(colIndex) {
     clear();
 
+    // Pintar toda la tabla (thead + tbody + tfoot) respetando colspans
     Array.from(table.rows).forEach(row => {
-      if (row === searchRow || row.classList.contains("public-search-row")) return;
-      const cell = row.cells[colIndex];
+      const cell = cellAtColIndex(row, colIndex);
       if (cell) cell.classList.add("col-activa");
     });
 
-    const h = colRow.cells[colIndex];
-    if (h && /\(28\)|otra\s*fecha|fecha\s*especial/i.test(h.textContent || "")) {
+    // Marcar especial si la columna clickeada corresponde a "Otra Fecha"
+    const header = cellAtColIndex(colRow, colIndex);
+    if (header && /\(28\)|otra\s*fecha|fecha\s*especial/i.test(header.textContent || "")) {
       Array.from(table.rows).forEach(row => {
-        if (row === searchRow || row.classList.contains("public-search-row")) return;
-        const cell = row.cells[colIndex];
+        const cell = cellAtColIndex(row, colIndex);
         if (cell) cell.classList.add("col-especial");
       });
     }
   }
 
+  // Índice real de inicio de un TH con colspan dentro de su fila
   function startIndexFromColspan(th) {
     let start = 0;
     for (const cell of th.parentElement.cells) {
@@ -389,21 +395,19 @@ function setupHeaderColumnHighlight(table) {
   }
 
   table.tHead.addEventListener("click", (e) => {
-    // ✅ ignorar clicks del buscador
-    if (e.target.closest(".public-search-row")) return;
-
     const th = e.target.closest("th");
     if (!th) return;
 
     const row = th.parentElement;
 
-    // ✅ si clic en fila 1 (groupRow): pintar primera columna del grupo
+    // Si clic en la fila de grupos (colspan): pintar la primera columna real del grupo
     if (row === groupRow) {
       const start = startIndexFromColspan(th);
       paintCol(start);
     } else {
-      // fila 2 (colRow): columna exacta
-      paintCol(th.cellIndex);
+      // Si clic en la fila de columnas reales: usar el índice real de esa columna
+      const colIndex = startIndexFromColspan(th); // aquí también sirve aunque colSpan sea 1
+      paintCol(colIndex);
     }
 
     e.stopPropagation();

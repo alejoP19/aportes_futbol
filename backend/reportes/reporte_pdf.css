@@ -108,6 +108,61 @@ tr, td, th {
     height: 40px;
 }
 
+
+
+/* ===========================
+   TOTALES CON SALDO (BLOQUE EXTRA)
+=========================== */
+.totales-con-saldo{
+    background-color: #d7f2e3; /* verde suave */
+    border: 1px solid #2e8b57;
+    padding: 12px;
+    margin: 18px auto 25px auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.totales-con-saldo-title{
+    margin: 0 0 10px 0;
+    font-size: 13pt;
+}
+
+/* 👇 AQUÍ está la corrección clave */
+table.totales-con-saldo-table{
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+
+    border-collapse: collapse;
+    table-layout: fixed;     /* evita que una celda empuje la tabla */
+}
+
+/* celdas */
+.totales-con-saldo-table td{
+    border: 1px solid rgba(0,0,0,0.25);
+    padding: 8px;
+    font-size: 11pt;
+    box-sizing: border-box;
+}
+
+/* columna texto */
+.totales-con-saldo-table td.label{
+    width: 75%;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
+
+/* columna dinero */
+.totales-con-saldo-table td.money{
+    width: 25%;
+    text-align: right;
+    font-weight: bold;
+    color: #0b5a2a;
+    white-space: nowrap; /* el valor no baja de línea */
+}
+
+
+
 /* ===========================
    BLOQUES DE OBSERVACIONES Y TOTALES
 =========================== */

@@ -4,7 +4,7 @@ VARIABLES
 :root {
 --aside-width: 100px;
 --aside-narrow: 200px;
---topbar-bg: #5d616b;
+--topbar-bg: #042421;
 --primary-blue: #1c6e9e;
 --danger-red: #fa0505;
 --pdf-red: #fa0526;
@@ -82,8 +82,10 @@ text-shadow: -1px 1px 2px rgba(0,0,0,0.8),
 -1px 1px 1px rgba(0,0,0,0.6); 
 }
 .subtitle { 
+  margin-top: 10px;
+  margin-bottom: 10%;
 font-size:20px;
-color:#fdff76;
+color:#fffc4c;
 text-shadow: -1px 1px 2px rgba(0,0,0,0.8), 
 -1px 1px 1px rgba(0,0,0,0.6); 
 }
@@ -183,22 +185,371 @@ display: grid;
 grid-template-columns: 1fr;
 gap: 15px;
 padding: 15px;
+
+
 }
 
 /* paneles */
-
-.left-panel, .middle-panel, .right-panel {
-background: #f0f0f0;
-border-radius: 8px;
-border: 1px solid var(--border);
-padding: 15px;
-width: 98%;
-justify-self: center;
-}
-.left-panel {
+.left-panel, .middle-panel,.right-panel {
 margin-top: -1% !important;
 margin-bottom: 0% !important;
+background: linear-gradient(180deg,
+      rgba(231, 231, 231, 0.95),
+      rgba(230, 230, 230, 0.95));
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  margin-bottom: 3px !important;
+  justify-self: center;
+  border-radius: 18px;
+  padding: 15px;
+  box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+  transition: transform .15s ease, box-shadow .15s ease;
+  border: 1px solid rgba(226, 226, 226, 0.712);
 }
+
+.controls, .gastos-card,.totals-card, .gastos-regist-card,.otros-aportes-card{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding:15px;
+   justify-self: center;
+  border-radius: 18px;
+  margin-bottom: 1px !important;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.controls{
+background: linear-gradient(380deg,
+      rgba(238, 240, 238, 0.95),
+      rgba(146, 247, 188, 0.95));
+box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+border: 1px solid rgba(37, 230, 188, 0.185);
+}
+
+.save-player-btn { 
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 90%;
+  text-shadow: -1px 1px 1px #000;
+  font-size: medium;
+  margin: 25px !important;
+  justify-self: center;
+  border-radius: 18px;
+  padding: 10px;
+background: linear-gradient(180deg,
+rgba(17, 189, 60, 0.95),
+rgba(2, 224, 157, 0.95)); 
+color:rgba(255,255,255,0.888); 
+box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+transition: transform .15s ease, box-shadow .15s ease;
+border: 1px solid rgba(0, 212, 124, 0.712);
+}
+.save-player-btn:hover { 
+background: linear-gradient(180deg,
+     rgba(17, 189, 60, 0.95),
+rgba(2, 224, 157, 0.95));  
+outline:1px solid rgba(168, 238, 217, 0.623); 
+box-shadow:0 0 20px rgba(114, 252, 155, 0.842); 
+padding:9; 
+}
+
+.otros-aportes-card{ 
+background: linear-gradient(380deg,
+      rgba(240, 240, 240, 0.95),
+      rgba(166, 198, 247, 0.95));
+box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+border: 1px solid rgba(37, 230, 188, 0.185);
+}
+
+.add-otro-aporte-butt{ 
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 90%;
+  text-shadow: -1px 1px 1px #000;
+  font-size: medium;
+  margin: 28px;
+  align-self: center;
+  border-radius: 18px;
+  padding: 10px;
+  background: linear-gradient(180deg,
+  rgba(11, 166, 228, 0.95),
+  rgba(88, 194, 226, 0.95));
+  color:rgba(255,255,255,0.888); 
+  text-shadow: -1px 1px 1px #000;
+  box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+  transition: transform .15s ease, box-shadow .15s ease;
+  border: 1px solid rgba(89, 173, 212, 0.712);
+
+}
+.add-otro-aporte-butt:hover { 
+ background: linear-gradient(180deg,
+  rgba(11, 166, 228, 0.95),
+  rgba(88, 194, 226, 0.95));
+outline:1px solid rgba(169, 231, 255, 0.815); 
+border: 1px solid rgba(166, 228, 247, 0.884);
+box-shadow:0 0 20px rgba(167, 223, 255, 0.842); 
+padding:9; 
+
+}
+
+.gastos-card{ 
+border:1px solid #bbb;background: linear-gradient(380deg,
+      rgba(241, 241, 241, 0.95),
+      #f8caca);
+  box-shadow: 0 0 1px rgba(255, 202, 214, 0.918);
+  border: 1px solid rgba(245, 173, 185, 0.815);
+}
+
+.save-gasto{ 
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 90%;
+  text-shadow: -1px 1px 1px #000;
+  font-size: medium;
+  margin: 25px !important;
+  align-self: center;
+  border-radius: 18px;
+  padding: 10px;
+   background: linear-gradient(180deg,
+      rgba(255, 159, 159, 0.95),
+      #ff5353);
+    color:rgba(255, 255, 255, 0.888); 
+  box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+  transition: transform .15s ease, box-shadow .15s ease;
+  border: 1px solid rgba(212, 89, 120, 0.712);
+}
+.save-gasto:hover { 
+ background: linear-gradient(180deg,
+      rgba(255, 187, 187, 0.95),
+      #fc5e5e);
+outline:1px solid rgba(255, 169, 187, 0.815); 
+border: 1px solid rgba(247, 166, 177, 0.884);
+box-shadow:0 0 20px rgba(255, 167, 174, 0.842); 
+padding:9; 
+}
+
+
+.gastos-regist-card{
+ background: linear-gradient(30deg,
+      rgba(230, 230, 230, 0.95),
+      #ffdfdf);
+box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+border: 1px solid rgba(226, 226, 226, 0.712);
+
+}
+
+.gastos-regist-card-items {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  margin: 5% 1%;
+
+}
+ 
+.totales-gastos-item-value{
+color:#da000b;
+font-weight:bold; 
+font-size: 16px;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
+
+}
+
+.buttons-gastos-container {
+  position: relative;
+  display: flex;
+  gap: 0px;
+  flex-direction: row;
+  justify-self: flex-end;
+  gap: 7px;
+}
+
+.btnEditGasto{
+   margin-top: 0.5rem;
+  bottom: 0rem;
+  right: 0rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  font-size: 1.2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.979);
+  background: rgba(107, 213, 255, 0.973);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform .12s ease, background .12s ease;
+  z-index: 3;
+}
+
+.btnEditGasto:hover {
+  background: rgba(0, 228, 228, 0.795);
+  color: #ffffff;
+  border: 1px solid rgba(0, 230, 238, 0.979);
+  transform: scale(1.06);
+}
+
+.btnDeleteGasto {
+  margin-top: 0.5rem;
+  bottom: 0rem;
+  right: 0rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  font-size: 1.2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 0, 55, 0.979);
+  background: rgba(255, 226, 226, 0.973);
+  color: #f50541;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform .12s ease, background .12s ease;
+  z-index: 3;
+}
+
+.btnDeleteGasto:hover {
+  background: rgba(228, 0, 38, 0.726);
+  color: #ffcece;
+  border: 1px solid rgba(255, 5, 5, 0.979);
+  transform: scale(1.06);
+}
+
+
+.totals-card{
+background: linear-gradient(180deg,
+      rgba(231, 231, 231, 0.95),
+      rgba(183, 192, 201, 0.95));
+box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+border: 1px solid rgba(226, 226, 226, 0.712); 
+
+}
+
+.middle-panel.expanded {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto; /* habilita interacción */
+  max-height: calc(100vh - 140px); /* dejar espacio para header y botón */
+  margin-top: -116%;
+
+  background: linear-gradient(180deg,
+      rgba(231, 231, 231, 0.95),
+      rgba(136, 184, 231, 0.95));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 3px !important;
+  justify-self: center;
+  border-radius: 18px;
+  padding: 15px;
+  box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+  transition: transform .15s ease, box-shadow .15s ease;
+  border: 1px solid rgba(226, 226, 226, 0.712);
+
+}
+
+
+/* panel izquierdo colapsado */
+.container.panel-collapsed .left-panel {
+width: 0;
+opacity: 0;
+pointer-events: none;
+transition: all 1s ease;
+
+}
+
+.add-player-box {
+margin-top:10px;
+}
+
+
+
+
+.controls input, .otros-aportes-card input,.gastos-card input,.otros-aportes-card > select { 
+width:100%;
+padding:9px;
+border-radius:8px;
+border:1px solid #bbb;background: linear-gradient(180deg,
+      rgba(231, 231, 231, 0.95),
+      rgba(183, 192, 201, 0.95));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 3px !important;
+  justify-self: center;
+  border-radius: 18px;
+  padding: 15px;
+  box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+  transition: transform .15s ease, box-shadow .15s ease;
+  border: 1px solid rgba(226, 226, 226, 0.712);
+margin-bottom:5%;
+margin-top: 2%;
+}
+
+
+/* right panel cards */
+.right-panel { 
+
+background: linear-gradient(180deg,
+      rgba(231, 231, 231, 0.95),
+      rgba(183, 192, 201, 0.95));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 3px !important;
+  justify-self: center;
+  border-radius: 18px;
+  padding: 15px;
+  box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+  transition: transform .15s ease, box-shadow .15s ease;
+  border: 1px solid rgba(226, 226, 226, 0.712);
+}
+
+ 
+
+.add-player-title,.gastos-card h4,.notes-card h4,.totals-card h4, .gastos-regist-card h4 {
+margin-top:10%; 
+font-size:18px;
+margin-bottom:15%; 
+font-style:italic; 
+color: #000000;
+font-weight:bold; 
+text-shadow: -1px 1px 1px rgb(255, 255, 255);
+justify-self: center;
+}
+
+
+.totals-card span, #listaGastos span{
+color: #000000;
+font-weight:bold; 
+font-size: large;
+text-shadow: -1px 1px 1px rgb(255, 255, 255);
+list-style: none;
+
+}
+.totales-item-value{
+color: #00c73c;
+font-weight:bold; 
+font-size: medium;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
+
+}
+
+
+
+.add-player-box  label, .otros-aportes-card label, .gastos-card label{
+font-weight:bold; 
+font-style:italic;
+color: #000000;
+text-shadow: -1px 1px 1px rgb(255, 255, 255);
+}
+
 
   .middle-panel:not(.expanded) {
       display: none !important;
@@ -214,185 +565,24 @@ margin-bottom: 0% !important;
   transform: translateY(-20px);
   pointer-events: none; /* desactiva interacción mientras está oculto */
   transition: opacity 0.4s ease, transform 0.4s ease;
-}
 
-.middle-panel.expanded {
-
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto; /* habilita interacción */
-  max-height: calc(100vh - 140px); /* dejar espacio para header y botón */
-  margin-top: -116%;
-
-}
-
-
-/* panel izquierdo colapsado */
-.container.panel-collapsed .left-panel {
-width: 0;
-opacity: 0;
-pointer-events: none;
-transition: all 1s ease;
-
+  background: linear-gradient(180deg,
+      rgba(231, 231, 231, 0.95),
+      rgba(136, 184, 231, 0.95));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 3px !important;
+  justify-self: center;
+  border-radius: 18px;
+  padding: 15px;
+  box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+  transition: transform .15s ease, box-shadow .15s ease;
+  border: 1px solid rgba(226, 226, 226, 0.712);
 }
 
 
-
-
-
-
-/* =====================================================
-BOTONES / FORMULARIOS
-===================================================== */
-.add-player-box {
-margin-top:10px;
-
-}
-.add-player-title, .otros-aportes-card h4, .gastos-card h4, .notes-card h4 {
-margin-top:10%; 
-font-size:18px;
-margin-bottom:15%; 
-font-style:italic; 
-color: #000000;
-font-weight:bold; 
-text-shadow: -1px 1px 1px rgb(255, 255, 255),
--1px 1px 1px rgb(255, 255, 255),
--1px 1px 1px rgb(255, 255, 255);
-justify-self: center;
-}
-
-.save-player-btn { 
-display:flex; 
-margin:auto; 
-width:90%; 
-margin-top:10%; 
-margin-bottom: 7%;
-justify-content:center; 
-padding:8px 40px; 
-background-color:#2ebe76e7; 
-color:rgba(255, 255, 255, 0.888);
-text-shadow: -1px 1px 1px #000;
-cursor: pointer;
-border: 1px solid rgb(151, 151, 151); 
-outline:0; 
-font-size:16px; 
-border-radius:10px; 
-transition: .3s;
-}
-.save-player-btn:hover { 
-background-color: rgba(80, 230, 125, 0.979); 
-outline:1px solid rgba(0, 199, 73, 0.87); 
-color:#ffffff; border-radius:25px; 
-text-shadow: -1px 1px 1px #000,
--1px 1px 1px #000;
-box-shadow:0 0 20px rgba(114, 252, 155, 0.842); 
-border: none;
-padding:7px 39px; 
-}
-
-.gastos-card{
-margin-top: 20% !important;
-background:#c4d7d8; 
-border:1px solid var(--border); 
-border-radius:8px; 
-padding:12px; 
-margin-bottom:10px ; 
-margin: auto;
-min-width: 100%;
-}
-.gastos-card input { 
-width:100%;
-padding:9px;
-border-radius:8px;
-border:1px solid #bbb;
-margin-bottom:5%;
-margin-top: 2%;
-}
-.save-gasto{ 
-background:var(--primary-blue); 
-display:flex; 
-width:80%; 
-margin:auto; 
-margin-top:8%; 
-margin-bottom: 4%;
-justify-content:center; 
-padding:8px 20px; 
-color:rgba(255,255,255,0.888); 
-text-shadow: -1px 1px 1px #000;
-border: 1px solid black;
-outline:-5; 
-border-radius:10px; 
-font-size:16px; 
-transition: .3s;
-}
-.save-gasto:hover { 
-background-color: rgba(11, 122, 167, 0.842); 
-outline:1px solid rgba(0, 119, 255, 0.87); 
-color:#ffffff; 
-text-shadow: -1px 1px 1px #000000;
-border-radius:25px; 
-box-shadow:0 0 20px rgba(160, 255, 250, 0.938); 
-border: none;
-padding:7px 29px; 
-cursor: pointer;
-}
-
-/* right panel cards */
-.right-panel { 
-
-border:1px solid var(--border);
-border-radius:8px; 
-width:99%; 
-padding:10px;
-background:#ebebeb; 
-top:100%;
-margin-bottom: 2%;
-}
-
- 
-
-.totals-card{
-background:#cfecdd; 
-border:1px solid var(--border); 
-border-radius:8px;
-padding:12px;
-margin-bottom:15px;
-font-weight:lighter; 
-
-}
-.totals-card h3{ 
-color: #000000;
-font-weight:bold; 
-text-shadow: -1px 1px 1px rgb(255, 255, 255),
--1px 1px 1px rgb(255, 255, 255),
--1px 1px 1px rgb(255, 255, 255);
-font-style:italic;
-justify-self: center;
-}
-.otros-aportes-card{
-background:#c4d7d8; 
-border:1px solid var(--border); 
-border-radius:8px; 
-padding:12px; 
-margin-bottom:10px ; 
-margin: auto;
-min-width: 100%;
-}
-
-.add-player-box  label, .otros-aportes-card label, .gastos-card label{
-font-weight:lighter; 
-font-style:italic;
-color: #00aa63;
-text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
-}
-.add-player-box input,.otros-aportes-card input, .otros-aportes-card,.otros-aportes-card select { 
-width:100%;
-padding:9px;
-border-radius:8px;
-border:1px solid #bbb;
-margin-bottom:5%;
-margin-top: 2%;
-}
 .tooltip-aporte{
   position:absolute;
   background:#222;
@@ -505,41 +695,13 @@ td.celda-dia.saldo-usado {
 }
 
 
-.otro-aporte{ 
-background:var(--primary-blue); 
-display:flex; 
-width:80%; 
-margin:auto; 
-margin-top:8%; 
-margin-bottom: 4%;
-justify-content:center; 
-padding:8px 20px; 
-color:rgba(255,255,255,0.888); 
-text-shadow: -1px 1px 1px #000;
-border: 1px solid black;
-outline:-5; 
-border-radius:10px; 
-font-size:16px; 
-transition: .3s;
-}
-.otro-aporte:hover { 
-background-color: rgba(11, 122, 167, 0.842); 
-outline:1px solid rgba(0, 119, 255, 0.87); 
-color:#ffffff; 
-text-shadow: -1px 1px 1px #000000;
-border-radius:25px; 
-box-shadow:0 0 20px rgba(160, 255, 250, 0.938); 
-border: none;
-padding:7px 29px; 
-cursor: pointer;
-}
 
 .notes-card{ 
-background:#c4d7d8; 
-border:1px solid var(--border); 
-border-radius:8px; 
-padding:12px; 
-margin-bottom:15px; 
+background: linear-gradient(180deg,
+      rgba(231, 231, 231, 0.95),
+      rgba(183, 192, 201, 0.95));
+  box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+  border: 1px solid rgba(226, 226, 226, 0.712); 
 }
 
 .export-pdf-butt{ 

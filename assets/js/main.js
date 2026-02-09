@@ -157,12 +157,6 @@ if (selectOtro && thOtro) {
 }
 
 
-
-// const tablaAdmin = container.querySelector("table.planilla");
-// if (tablaAdmin) {
-//   setupHeaderColumnHighlight(tablaAdmin);
-// }
-
 activarBusquedaJugadores();
     // Mantener fila seleccionada
     if (selectedPlayerId) {
@@ -791,13 +785,15 @@ async function loadGastos() {
 
     data.gastos.forEach(g => {
         let li = document.createElement("li");
-        li.style.marginBottom = "8px";
+        li.classList.add("gastos-regist-card-items");
+    
 
         li.innerHTML = `
-            ${g.nombre}: <strong>${g.valor.toLocaleString()}</strong>
-            &nbsp; 
-            <button class="btnEditGasto" data-id="${g.id}" data-nombre="${g.nombre}" data-valor="${g.valor}">✏️</button>
-            <button class="btnDeleteGasto" data-id="${g.id}">🗑️</button>
+        <span>${g.nombre}: <strong class="totales-gastos-item-value">${g.valor.toLocaleString()}</strong></span>
+         <div class="buttons-gastos-container">
+         <button class="btnEditGasto" data-id="${g.id}" data-nombre="${g.nombre}" data-valor="${g.valor}">✏️</button>
+         <button class="btnDeleteGasto" data-id="${g.id}">🗑️</button>
+         </div>  
         `;
 
         ul.appendChild(li);

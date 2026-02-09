@@ -167,7 +167,7 @@ body {
 
   font-weight:bold;
   font-size: large;
-  color: #ffee00;
+  color: #00ffaa;
   text-shadow: -1px 1px 1px #000,
   -1px 1px 1px #000,
   -1px 1px 1px #000;
@@ -178,139 +178,128 @@ body {
    ======================================================= */
 
 #contenedorTabla {
+  position: relative; /* clave para sticky interno si lo usas */
   width: 98%;
   justify-self: center;
   overflow: auto;        /* en vez de solo overflow-x */
-
   -webkit-overflow-scrolling: touch;
   border-radius: 10px;
   box-shadow: -1px 1px 10px white;
+  background-color: #ebebeb;
 }
 
-/* ====== Buscador dentro del THEAD ====== */
-.planilla thead .public-search-row th{
-backdrop-filter: blur(6px);
-padding: 10px 12px;
+
+
+
+.public-search-bar{
+position: static;  /* se queda arriba cuando scrolleas el contenedor */
+z-index: 200;
 border-bottom: 1px solid rgba(0,0,0,0.08);
-display: flex;
-width: 350px;
-min-width: 350px;
+width: 354px;
+min-width: 354px;
 max-width: max-content;
 margin: 10px;
 justify-self: flex-start;
 gap: 8px;
-padding: 6px 12px;
+padding: 7px ;
 background: linear-gradient(135deg, #00694f, #028f6b);
 border-radius: 10px;
 box-shadow: 0 6px 16px rgba(0,0,0,0.15);
 z-index: 90;
-  
+margin: 2%;
+
 }
-.planilla thead tr.public-search-row th.col-activa{
-  background: linear-gradient(135deg, #00694f, #028f6b) !important;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15) !important;
-}
+
 /* contenedor del input */
 .public-search-wrap{
   display:flex;
-  align-items:center;
+  flex-direction: row;
+  align-items: center;
   gap:10px;
   justify-content:space-around;
+  
 }
 
 /* input */
 .public-search-input{
-  max-width: 520px;
   border-radius: 999px;
-    flex: 1;
+  flex: 1;
   border: none;
   outline: none;
-  background: transparent;
+  background: #59a08257;
   color: #ffffff;
+  text-shadow: -1px 1px 1px #000000;
   font-size: 14px;
-  padding: 6px 4px;
+  padding: 6px 10px;
+ 
 }
 
 
 
 .public-search-input::placeholder {
- color: rgba(255, 255, 255, 0.945);
-  font-size: large;
+ color: rgba(254, 255, 184, 0.89);
+  font-size: 14px;
   font-weight: lighter;
   text-shadow: -1px 1px 1px #000000;
-
-  
 }
 
-
+.public-search-input:focus {
+color: #ffffff;
+border-radius: 18px;
+box-shadow: none;
+font-style:italic;
+background-color: #00a77d; 
+border: 1px dotted #000000; 
+outline: none;
+}
 /* botón limpiar */
 .public-search-clear{ 
-margin-right: -14%;
-  background: rgba(255, 122, 144, 0.781);
+  background: rgba(221, 77, 113, 0.856);
   border: none;
   border-radius: 50%;
   width: 28px;
   height: 28px;
+  margin-right: 1%;
   color: #ffffff;
-   text-shadow: -1px 1px 1px #000000;
+  font-weight: lighter;
+  text-shadow: -1px 1px 1px #000000;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1;
   transition: background 0.80s ease, transform 0.90s ease;
  
 }
 
 .public-search-clear:hover{
-  background: rgba(235, 66, 89, 0.945);
+  background: rgba(245, 34, 62, 0.945);
   transform: scale(1.1);
   transform: scale(0.95);
 }
 @keyframes parpadear {
-  0% { opacity: 0.90; }
-  50% { opacity: 0.70; }
-  100% { opacity: 0.90; }
+  0% { opacity: 0.60; }
+  50% { opacity: 0.30; }
+  100% { opacity: 0.60; }
 }
-.planilla thead .public-search-row th:focus-within .public-search-clear{
- background: rgba(235, 66, 89, 0.945);
-margin-right: 0%;
+
+ .public-search-wrap:focus-within .public-search-clear{
+ background: rgba(247, 18, 49, 0.945) !important;
  animation: parpadear 3s linear infinite;
 }
 
-/* enfoque */
-.public-search-clear:focus-within {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.781),
-              0 6px 12px rgba(248, 248, 248, 0.788);
-}    
-.public-search-input:focus {
- 
-display: flex;
-color: #ffffff;
-border-radius: 18px;
-font-weight:lighter; 
-font-size: large;
-padding: 4px;
-box-shadow: none;
-text-shadow: -1px 1px 1px black,
--1px 1px 1px black,
--1px 1px 1px black;
-font-style:italic;
-background-color: #00a77d; 
-width: 100%;
-align-self: flex-start;
-border: 1px dotted #000000; 
-outline: none;
- 
-}
 
 
 /* LA TABLA NO debe tener overflow */
 .planilla {
   overflow: visible !important; /* CLAVE */
 }
+
+
 .planilla thead th {
   position: sticky;
   top: 0;
   z-index: 20;
+  
+  
 }
 .planilla .col-activa{
   background: rgba(255, 235, 59, 0.25) !important;
@@ -321,6 +310,7 @@ outline: none;
   box-shadow: inset 2px 0 0 #ff4fa3, inset -2px 0 0 #ff4fa3;
 }
 
+
 /* =======================================================
    TABLA — ESTRUCTURA
    ======================================================= */
@@ -330,7 +320,7 @@ outline: none;
   border-collapse: collapse;
   background: #f1f1f1;
   box-shadow: -1px 1px 10px white;
-  border-radius: 10px;
+  border-radius: 0;
   overflow: hidden;
   table-layout: auto !important;
 }
@@ -345,7 +335,8 @@ outline: none;
   vertical-align: middle;
   white-space: normal;
   word-break: break-word;
-    min-width: 70px;
+  min-width: 70px;
+  
    
 }
 
@@ -365,20 +356,42 @@ outline: none;
   z-index: 10;
 }
 
+
+.planilla thead tr:first-child th:first-child{
+  border-top-left-radius: 10px;
+}
+
+.planilla thead tr:first-child th:last-child{
+  border-top-right-radius: 10px;
+}
+
+/* Opcional: remarcar solo el borde superior en esa fila */
+.planilla thead tr:first-child th{
+  border-top: 2px solid rgba(255,255,255,0.65);
+}
+.planilla thead tr:first-child th:first-child{
+  border-left: 2px solid rgba(255,255,255,0.65);
+}
+.planilla thead tr:first-child th:last-child{
+  border-right: 2px solid rgba(255,255,255,0.65);
+}
+
+
 /* Columna activa */
 .planilla .col-activa {
-  background: rgba(255, 235, 59, 0.25) !important;
-  box-shadow: inset 2px 0 0 #f4c400, inset -2px 0 0 #f4c400;
+  background: rgba(169, 255, 236, 0.459) !important;
+  box-shadow: inset 2px 0 0 #92d1ae, inset -2px 0 0 #beddd1;
 }
 .planilla thead th.col-activa {
-  background: rgba(255, 235, 59, 0.45) !important;
+  background: rgba(0, 119, 93, 0.897) !important;
+    box-shadow: inset 2px 0 0 #276b46, inset -2px 0 0 #329e75;
 }
 
 /* Columna especial (28) activa - diferente */
 .planilla .col-activa.col-especial,
 .planilla thead th.col-activa.col-especial {
-  background: rgba(255, 105, 180, 0.18) !important; /* rosado suave */
-  box-shadow: inset 2px 0 0 #ff4fa3, inset -2px 0 0 #ff4fa3;
+  background: rgba(115, 105, 255, 0.18) !important; /* rosado suave */
+  box-shadow: inset 2px 0 0 #a14fff, inset -2px 0 0 #9b4fff;
 }
 
 
@@ -438,6 +451,8 @@ outline: none;
   text-shadow: -1px 1px 1px #ffffff,
   -1px 1px 1px #ffffff,
   -1px 1px 1px #ffffff,-1px 1px 1px #f1f1f1;
+  width: 220px;
+
 }
 
 .otros-tipos {
@@ -926,15 +941,14 @@ font-weight:lighter;
     width: fit-content;
     max-width: 94%;
     margin: 0 auto 3% auto;
-
+    padding-top: 10px;   /* opcional */
     overflow: auto;                 /* X + Y */
     max-height: calc(100vh - 100px);/* ajusta si quieres */
-
-    border-radius: 10px;
-    background:transparent;  /* para que el scroll se vea “dentro” */
     box-shadow: none;
     scrollbar-gutter: stable both-edges; /* evita saltos y se ve más limpio */
     -webkit-overflow-scrolling: touch;
+     scrollbar-width: thin;
+    scrollbar-color: rgba(10, 90, 60, 0.85) rgba(0,0,0,.10);
     
   }
 
@@ -943,8 +957,8 @@ font-weight:lighter;
 
  /* Scrollbar bonito para el contenedor de la tabla */
   #contenedorTabla::-webkit-scrollbar{
-    width: 10px;   /* scroll Y */
-    height: 10px;  /* scroll X */
+    width: 30px;   /* scroll Y */
+    height: 30px;  /* scroll X */
   }
 
   #contenedorTabla::-webkit-scrollbar-track{
@@ -962,42 +976,18 @@ font-weight:lighter;
     background: rgba(36,90,75,.95);
   }
 
-  /* Firefox */
-  #contenedorTabla{
-    scrollbar-width: thin;
-    scrollbar-color: rgba(10, 90, 60, 0.85) rgba(0,0,0,.10);
-  }
 
 
 
-/* ====== Buscador dentro del THEAD ====== */
-.planilla thead .public-search-row th{
-  position: static;
-margin:4%;
-margin-left: 90%;
-padding: 3px 8px;
-width: 450px;
-min-width: 450px;
- 
+.public-search-bar{
+width: 40%;
+min-width: 40%;
+max-width: max-content;
+margin: 22px;
+justify-self: flex-end;
+padding: 10px ;
+
 }
-
-.public-search-input::placeholder {
-  font-size: medium; 
-}
-
-
-/* botón limpiar */
-.public-search-clear{ 
-margin-right: -53%;
- 
-}
-
-
-.planilla thead .public-search-row th:focus-within .public-search-clear{
-margin-right: -32%;
- 
-}
-
 
 
 /* opcional: que se vea más compacto */
@@ -1012,20 +1002,32 @@ margin-right: -32%;
 
 
   .planilla {
-  width: 100%;
-  margin-top: 4%;
-  margin-bottom: 2%;
-  min-width: 100%;
+    width: 100%;
+    min-width: 100%;
+    margin-top: 0;          /* ✅ antes 4% */
+    margin-bottom: 2%;
 
-
+  border-collapse: separate;  /* ✅ en vez de collapse */
+  border-spacing: 0;
+  border-radius: 10px;
+  overflow: hidden;
   }
-.planilla td.otros-tipos,
-.planilla td.columna-deuda strong{
-  display:block;
+
+
+
+/* NO tocar el display del TD */
+.planilla td.otros-tipos{
+  display: table-cell; /* o simplemente quita display */
   padding-top: 6px;
   padding-bottom: 6px;
+  vertical-align: top;
 }
 
+/* Si quieres que el strong de deuda sea bloque, SOLO él */
+.planilla td.columna-deuda strong{
+  display: block;
+  margin-bottom: 6px;
+}
 
  .planilla th,
   .planilla td{
@@ -1128,6 +1130,7 @@ margin-right: -32%;
   .player-name {
     padding-left: 14px;
     font-size: 14px !important;
+   
   }
 
 
@@ -1170,7 +1173,7 @@ padding: 0;
 
  }
 
-/* Desktop: que “Otros aportes” se comporte como Gastos */
+
 /* Desktop/Laptop: Otros Aportes dentro del grid SIN desbordarse */
 #otrosAportesPublico{
   grid-column: 1 / span 2;
@@ -1221,21 +1224,6 @@ margin-bottom: 1%;
   max-width: 160px;
   box-sizing: border-box;
 }
-/* .lista-otros{
-  display:flex;
-  flex-direction: row;
-  flex-wrap: nowrap;  
-  overflow-x: auto;     
-  width: 100%;
-  gap: 10px;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-
-.lista-otros li{
-  flex: 0 0 150px;      
-} */
 
 
   /* Totales */

@@ -240,6 +240,10 @@ $gasto_anio = (int)$conexion->query("
 $total_mes_real  = (int)$month_total + $otros_mes  - $gasto_mes;
 $total_anio_real = (int)$year_total  + $otros_anio - $gasto_anio;
 
+// ✅ NUEVO: Totales con saldo (hasta la fecha del reporte)
+$total_mes_con_saldo  = (int)$total_mes_real  + (int)$saldo_total_mes;
+$total_anio_con_saldo = (int)$total_anio_real + (int)$saldo_total_anio;
+
 $obs = trim(get_obs($conexion, $mes, $anio));
 ?>
 
@@ -359,6 +363,28 @@ $hayDeudaDia = !empty($deudas_mes[$jid][(int)$d]);
 </table>
 
 <br>
+
+
+<div class="totales-con-saldo">
+  <h3 class="totales-con-saldo-title">Totales con saldo (hasta este mes)</h3>
+
+  <table class="totales-con-saldo-table">
+    <tr>
+      <td class="label"><strong>Total del mes (con saldos)</strong></td>
+      <td class="money">$ 36.000</td>
+    </tr>
+    <tr>
+      <td class="label">
+        <strong>Total del año (con saldos, hasta este mes)</strong>
+      </td>
+      <td class="money">$ 111.000</td>
+    </tr>
+  </table>
+</div>
+
+
+<br>
+
 <div class="observaciones">
   <h3 class="observaciones-title">Observaciones del mes</h3>
   <div class="obs">
