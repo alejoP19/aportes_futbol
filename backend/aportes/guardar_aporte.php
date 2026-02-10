@@ -196,16 +196,7 @@ try {
 
     if ($to_consume > 0) {
 
-        // // sources: aportes anteriores con excedente (>3000)
-        // $q = $conexion->prepare("
-        //     SELECT id
-        //     FROM aportes
-        //     WHERE id_jugador = ?
-        //       AND fecha < ?
-        //       AND aporte_principal > 3000
-        //     ORDER BY fecha ASC, id ASC
-        // ");
-        // $q->bind_param("is", $id_jugador, $fecha);
+ 
 
 // ✅ [NUEVO] Si el target es un día "anterior" (p.ej. Otro juego (01)),
 // podemos permitir consumir excedentes del mismo mes hasta el último día del mes.

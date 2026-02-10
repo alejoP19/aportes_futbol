@@ -54,7 +54,6 @@ async function loadPlayersList() {
 async function agregarJugador() {
     const nombre = document.getElementById("playerName").value.trim();
     const telefono = document.getElementById("playerPhone").value.trim();
-
     if (nombre === "") {
         Swal.fire({ icon: 'info', title: 'Nombre Requerido', text: 'El Nombre es Obligatorio' });
         return;
@@ -109,7 +108,7 @@ function updateOtroJuegoColumn(diaElegido) {
 
   // 2) Cambiar data-fecha de TODOS los inputs y checks de esa columna
   //    Para saber qué columna es, calculamos su índice real en la tabla.
-  const table = container.querySelector("table.planilla");
+  const table = container.querySelector(".planilla");
   if (!table) return;
 
   // índice de columna real del th (considerando colspans)
@@ -236,7 +235,7 @@ applyExcedenteMarker(ev.target, valorToSend);   // si valorToSend es null/<=3000
     // ✅ Actualizar saldo mostrado en esa fila (columna "Tu Saldo")
     if (Object.prototype.hasOwnProperty.call(resp, "saldo")) {
         const row = ev.target.closest("tr");
-        const table = document.querySelector(".monthly-sheet table.planilla");
+        const table = document.querySelector(".planilla");
         if (row && table) {
             const saldoColIndex = findColumnIndex(table, "Tu Saldo");
             if (saldoColIndex !== -1 && row.cells[saldoColIndex]) {
@@ -249,7 +248,7 @@ applyExcedenteMarker(ev.target, valorToSend);   // si valorToSend es null/<=3000
     }
 
     // ✅ Recalcular TOTAL DÍA + Total por Jugador + Total Mes (footer) SIN recargar tabla
-    const table = document.querySelector(".monthly-sheet table.planilla");
+    const table = document.querySelector(".planilla");
     if (table) recomputePlanilla(table);
 
     // ✅ Actualizar tarjetas (Día/Mes/Año) sin reconstruir tabla
@@ -343,7 +342,7 @@ function activarBusquedaJugadores() {
   input.oninput = () => {
     const texto = input.value.trim().toLowerCase();
 
-    const tabla = document.querySelector(".monthly-sheet table.planilla");
+    const tabla = document.querySelector(".planilla");
     if (!tabla) return;
 
     const filas = tabla.querySelectorAll("tbody tr");
@@ -779,8 +778,8 @@ document.getElementById("btnAddGasto").addEventListener("click", async () => {
 async function loadGastos() {
     let res = await fetch(`${API}/aportes/listar_gastos.php?mes=${monthSelect.value}&anio=${yearSelect.value}`);
     let data = await res.json();
-
     const ul = document.getElementById("listaGastos");
+
     ul.innerHTML = "";
 
     data.gastos.forEach(g => {
@@ -789,10 +788,11 @@ async function loadGastos() {
     
 
         li.innerHTML = `
-        <span>${g.nombre}: <strong class="totales-gastos-item-value">${g.valor.toLocaleString()}</strong></span>
+        <span>${g.nombre}: <strong class="totales-gastos-item-value">${g.valor.toLocaleString()}</strong><br>_____________________</span>
          <div class="buttons-gastos-container">
          <button class="btnEditGasto" data-id="${g.id}" data-nombre="${g.nombre}" data-valor="${g.valor}">✏️</button>
          <button class="btnDeleteGasto" data-id="${g.id}">🗑️</button>
+        
          </div>  
         `;
 
