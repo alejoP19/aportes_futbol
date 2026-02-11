@@ -1,7 +1,6 @@
+console.log("MAIN.JS SE CARGÓ CORRECTAMENTE");
 
-
-// assets/js/main.js
-const API = "backend";
+const API = "/backend";
 let currentOtroDia = null; // recuerda el día seleccionado del "Otro juego"
 
 let selectedPlayerId = null; // fila seleccionada global
@@ -13,21 +12,6 @@ async function fetchText(url) {
 }
 
 
-function normMes(m){ return String(parseInt(m, 10)); }
-function normAnio(a){ return String(parseInt(a, 10)); }
-
-function getOtroKey(mes, anio) {
-  return `otroDia_${normAnio(anio)}_${normMes(mes)}`;
-}
-
-function getStoredOtroDia(mes, anio) {
-  const v = parseInt(localStorage.getItem(getOtroKey(mes, anio)) || "", 10);
-  return Number.isFinite(v) ? v : null;
-}
-
-function setStoredOtroDia(mes, anio, dia) {
-  localStorage.setItem(getOtroKey(mes, anio), String(dia));
-}
 
 
 async function postJSON(url, data) {
@@ -69,6 +53,7 @@ async function loadPlayersList() {
 async function agregarJugador() {
     const nombre = document.getElementById("playerName").value.trim();
     const telefono = document.getElementById("playerPhone").value.trim();
+
     if (nombre === "") {
         Swal.fire({ icon: 'info', title: 'Nombre Requerido', text: 'El Nombre es Obligatorio' });
         return;
@@ -97,23 +82,14 @@ async function agregarJugador() {
 }
 // ----------- TABLA Y APORTE -----------------
 async function loadSheet(mes, anio) {
-
-     // ✅ 1) recuperar último "otro día" usado para ese mes/año
-  const stored = getStoredOtroDia(mes, anio);
-  if (stored) currentOtroDia = stored;
-
-  // ✅ 2) mandar ?otro=DD AL BACKEND (antes del fetch)
-  const otroParam = currentOtroDia ? `&otro=${currentOtroDia}` : "";
-  const html = await fetchText(`${API}/aportes/listar_aportes.php?mes=${mes}&anio=${anio}${otroParam}`);
-
+   const otroParam = currentOtroDia ? `&otro=${currentOtroDia}` : "";
+const html = await fetchText(`${API}/aportes/listar_aportes.php?mes=${mes}&anio=${anio}${otroParam}`);
 
     const container = document.getElementById('monthlyTableContainer');
     container.innerHTML = html;
     
      // ✅ Al cargar la tabla (recarga / cambio de mes), activar clase + title del saldo
     initSaldoFromHTML(container);
-    const table = container.querySelector(".planilla");
-     setupHeaderColumnHighlight(table);
 
    // ================================
 // OTRO JUEGO: actualizar header + data-fecha sin recargar
@@ -132,7 +108,7 @@ function updateOtroJuegoColumn(diaElegido) {
 
   // 2) Cambiar data-fecha de TODOS los inputs y checks de esa columna
   //    Para saber qué columna es, calculamos su índice real en la tabla.
-  const table = container.querySelector(".planilla");
+  const table = container.querySelector("table.planilla");
   if (!table) return;
 
   // índice de columna real del th (considerando colspans)
@@ -164,35 +140,27 @@ function updateOtroJuegoColumn(diaElegido) {
 }
 
 if (selectOtro && thOtro) {
-  // ✅ forzar select al último guardado (si existe)
-  const stored = getStoredOtroDia(mes, anio);
-  if (stored) {
-    currentOtroDia = stored;
-    selectOtro.value = String(stored);
-  } else {
-    // si no hay guardado, usa lo que venga del HTML
-    currentOtroDia = parseInt(selectOtro.value || thOtro.dataset.dia || "1", 10);
-    if (Number.isFinite(currentOtroDia)) {
-      setStoredOtroDia(mes, anio, currentOtroDia);
-    }
+  const inicial = parseInt(selectOtro.value || thOtro.dataset.dia || "1", 10);
+  if (!isNaN(inicial)) {
+    currentOtroDia = inicial;          // ✅ guardar global
+    updateOtroJuegoColumn(inicial);
   }
 
-  // ✅ cambio de día: guardar y RECARGAR la tabla desde backend
-  selectOtro.addEventListener("change", async () => {
+  selectOtro.addEventListener("change", () => {
     const d = parseInt(selectOtro.value, 10);
-    if (!Number.isFinite(d)) return;
-
-    currentOtroDia = d;
-    setStoredOtroDia(mes, anio, d);
-
-    // 🔥 necesario para que:
-    // - aparezcan valores de ese día
-    // - el TOTAL DÍA / TOTAL MES / tarjetas se actualicen
-    await refreshSheet();
+    if (!isNaN(d)) {
+      currentOtroDia = d;              // ✅ guardar global
+      updateOtroJuegoColumn(d);
+    }
   });
 }
 
 
+
+// const tablaAdmin = container.querySelector("table.planilla");
+// if (tablaAdmin) {
+//   setupHeaderColumnHighlight(tablaAdmin);
+// }
 
 activarBusquedaJugadores();
     // Mantener fila seleccionada
@@ -229,6 +197,21 @@ container.querySelectorAll('.cell-aporte').forEach(input => {
         if (isNaN(valorToSend)) valorToSend = null;
     }
 
+    // ⭐ Estrella inmediata
+    let wrapper = ev.target.closest(".aporte-wrapper");
+    if (wrapper) {
+        let flag = wrapper.querySelector(".saldo-flag");
+        if (flag) {
+            if (valorToSend > 3000) {
+                flag.textContent = "★";
+                flag.classList.add("show");
+            } else {
+                flag.classList.remove("show");
+                setTimeout(() => flag.textContent = "", 200);
+            }
+        }
+    }
+
     // Guardar en backend
     const resp = await postJSON(`${API}/aportes/guardar_aporte.php`, { 
         id_jugador: id, 
@@ -253,16 +236,12 @@ if (Object.prototype.hasOwnProperty.call(resp, "aporte_efectivo")) {
 
 // ✅ IMPORTANTE: actualizar SIEMPRE marcadores (aunque sea delete)
 applySaldoMarker(ev.target, resp);              // si no hay consumido_target => lo toma como 0 y limpia
-const realParaMarcar = (resp && Object.prototype.hasOwnProperty.call(resp, "valor_real"))
-  ? Number(resp.valor_real || 0)
-  : Number(valorToSend || 0);
-
-applyExcedenteMarker(ev.target, realParaMarcar); 
+applyExcedenteMarker(ev.target, valorToSend);   // si valorToSend es null/<=3000 => limpia ⭐
 
     // ✅ Actualizar saldo mostrado en esa fila (columna "Tu Saldo")
     if (Object.prototype.hasOwnProperty.call(resp, "saldo")) {
         const row = ev.target.closest("tr");
-        const table = document.querySelector(".planilla");
+        const table = document.querySelector(".monthly-sheet table.planilla");
         if (row && table) {
             const saldoColIndex = findColumnIndex(table, "Tu Saldo");
             if (saldoColIndex !== -1 && row.cells[saldoColIndex]) {
@@ -275,7 +254,7 @@ applyExcedenteMarker(ev.target, realParaMarcar);
     }
 
     // ✅ Recalcular TOTAL DÍA + Total por Jugador + Total Mes (footer) SIN recargar tabla
-    const table = document.querySelector(".planilla");
+    const table = document.querySelector(".monthly-sheet table.planilla");
     if (table) recomputePlanilla(table);
 
     // ✅ Actualizar tarjetas (Día/Mes/Año) sin reconstruir tabla
@@ -369,7 +348,7 @@ function activarBusquedaJugadores() {
   input.oninput = () => {
     const texto = input.value.trim().toLowerCase();
 
-    const tabla = document.querySelector(".planilla");
+    const tabla = document.querySelector(".monthly-sheet table.planilla");
     if (!tabla) return;
 
     const filas = tabla.querySelectorAll("tbody tr");
@@ -549,30 +528,14 @@ document.getElementById('tSaldoMes').innerText = j.saldo_mes
         
 }
 
-function getOtroKey(mes, anio) {
-  return `otroDia_${anio}_${mes}`;
-}
 
-function getStoredOtroDia(mes, anio) {
-  const v = parseInt(localStorage.getItem(getOtroKey(mes, anio)) || "", 10);
-  return Number.isFinite(v) ? v : null;
-}
 // ----------- REFRESH COMPLETA -----------------
-
-
-
 async function refreshSheet() {
     const mes = monthSelect.value;
     const anio = yearSelect.value;
-
-
-      // ✅ cargar el "otro día" guardado para ese mes/año
-     currentOtroDia = getStoredOtroDia(mes, anio);
-
     await loadSheet(mes, anio);
     await loadTotals(mes, anio);
-     await loadGastos();
-    //  await loadOtrosPartidosInfo(mes, anio); 
+     await loadGastos(); 
     loadObservaciones(mes, anio);
 }
 
@@ -684,20 +647,20 @@ btnLogout.addEventListener("click", function (e) {
             iconColor: "#0e9625ff",
             confirmButtonText: "OK"
         }).then(() => {
-
-            // 🔥 Llamada real al logout.php (RUTA CORRECTA)
-            fetch("/APORTES_FUTBOL/backend/auth/logout.php", {
+  // 🔥 Llamada real al logout.php
+            fetch("/backend/auth/logout.php", {
                 method: 'POST',
-                credentials: 'include'   // incluye cookie de sesión sí o sí
+                credentials: 'same-origin'
             })
             .then(() => {
                 // Redirigir al index público
-                window.location.href = "/APORTES_FUTBOL/public/index.php";
+                window.location.href = "/";
             })
             .catch(() => {
                 // Fallback al raíz del proyecto
-                window.location.href = "/APORTES_FUTBOL/";
+                window.location.href = "/";
             });
+
 
         });
     });
@@ -821,22 +784,19 @@ document.getElementById("btnAddGasto").addEventListener("click", async () => {
 async function loadGastos() {
     let res = await fetch(`${API}/aportes/listar_gastos.php?mes=${monthSelect.value}&anio=${yearSelect.value}`);
     let data = await res.json();
-    const ul = document.getElementById("listaGastos");
 
+    const ul = document.getElementById("listaGastos");
     ul.innerHTML = "";
 
     data.gastos.forEach(g => {
         let li = document.createElement("li");
-        li.classList.add("gastos-regist-card-items");
-    
+        li.style.marginBottom = "8px";
 
         li.innerHTML = `
-        <span>${g.nombre}: <strong class="totales-gastos-item-value">${g.valor.toLocaleString()}</strong><br>_____________________</span>
-         <div class="buttons-gastos-container">
-         <button class="btnEditGasto" data-id="${g.id}" data-nombre="${g.nombre}" data-valor="${g.valor}">✏️</button>
-         <button class="btnDeleteGasto" data-id="${g.id}">🗑️</button>
-        
-         </div>  
+            ${g.nombre}: <strong>${g.valor.toLocaleString()}</strong>
+            &nbsp; 
+            <button class="btnEditGasto" data-id="${g.id}" data-nombre="${g.nombre}" data-valor="${g.valor}">✏️</button>
+            <button class="btnDeleteGasto" data-id="${g.id}">🗑️</button>
         `;
 
         ul.appendChild(li);
@@ -1258,41 +1218,32 @@ function applySaldoMarker(inputEl, resp) {
 }
 
 
-function applyExcedenteMarker(inputEl, realValue) {
-  const td = inputEl.closest("td.celda-dia");
-  if (!td) return;
+function applyExcedenteMarker(inputEl, valorToSend) {
+    const td = inputEl.closest("td.celda-dia");
+    if (!td) return;
 
-  const real = Number(realValue || 0);
-  const star = td.querySelector(".saldo-flag"); // ⭐
+    const real = Number(valorToSend || 0);
 
-  if (real > 3000) {
-    td.classList.add("aporte-excedente");
-    td.dataset.real = String(real);
-    td.title = `Aportó ${real.toLocaleString("es-CO")}`;
+    if (real > 3000) {
+        td.classList.add("aporte-excedente");
+        td.dataset.real = String(real);
 
-    if (star) {
-      star.textContent = "★";
-      star.classList.add("show");
-    }
+        // Mantener title si también usó saldo (prioridad: excedente)
+        td.title = `Aportó ${real.toLocaleString("es-CO")}`;
 
-  } else {
-    td.classList.remove("aporte-excedente");
-    delete td.dataset.real;
-
-    if (star) {
-      star.classList.remove("show");
-      setTimeout(() => { star.textContent = "★"; }, 0); // opcional, mantener el símbolo
-    }
-
-    if (td.classList.contains("saldo-usado")) {
-      const usado = parseInt(td.dataset.saldoUso || "0", 10) || 0;
-      td.title = `Usó saldo: ${usado.toLocaleString("es-CO")}`;
     } else {
-      td.removeAttribute("title");
-    }
-  }
-}
+        td.classList.remove("aporte-excedente");
+        delete td.dataset.real;
 
+        // Si NO usó saldo, quitar title. Si sí usó saldo, que quede el de saldo.
+        if (td.classList.contains("saldo-usado")) {
+            const usado = parseInt(td.dataset.saldoUso || "0", 10) || 0;
+            td.title = `Usó saldo: ${usado.toLocaleString("es-CO")}`;
+        } else {
+            td.removeAttribute("title");
+        }
+    }
+}
 
 /* ==========================================================
    INIT: activar saldo-usado desde HTML (data-saldo-uso)
@@ -1322,43 +1273,6 @@ function initSaldoFromHTML(container) {
 }
 
 
-// async function loadOtrosPartidosInfo(mes, anio) {
-//   const box = document.getElementById("otrosPartidosInfo");
-//   if (!box) return;
-
-//   const j = await (await fetch(`${API}/aportes/get_otros_partidos_info.php?mes=${mes}&anio=${anio}`)).json();
-//   if (!j || !j.ok) {
-//     box.innerHTML = "";
-//     return;
-//   }
-
-//   const totalGeneral = Number(j.total_general || 0).toLocaleString("es-CO");
-//   const cantidad = Number(j.cantidad || 0);
-
-//   if (!cantidad) {
-//     box.innerHTML = `
-//       <div><strong>Otros partidos</strong></div>
-//       <div style="opacity:.8; margin-top:6px;">No hay registros en días no normales.</div>
-//     `;
-//     return;
-//   }
-
-//   const rows = (j.items || []).map(it => {
-//     const fecha = it.fecha_label;
-//     const val = Number(it.efectivo_total || 0).toLocaleString("es-CO");
-//     return `<li>${fecha}: <strong>${val}</strong></li>`;
-//   }).join("");
-
-//   box.innerHTML = `
-//     <div><strong>Otros partidos (${cantidad})</strong></div>
-//     <ul style="margin:8px 0 0 18px; padding:0;">
-//       ${rows}
-//     </ul>
-//     <div style="margin-top:8px;">
-//       Total otros partidos: <strong>${totalGeneral}</strong>
-//     </div>
-//   `;
-// }
 
 
 

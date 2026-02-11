@@ -160,10 +160,13 @@ include "conexion.php";
         <div> <span>Gastos del Mes: <strong id="tGastosMes" class="totales-item-value">0</strong></span> </div>
         <div> <span> Gastos del Año: <strong id="tGastosAnio" class="totales-item-value">0</strong></span></div>
         <div> <span>Total Saldo Mes: <strong id="tSaldoMes" class="totales-item-value">0</strong></span></div>
+         <!-- <div> <span>Otros Partidos Info: <strong id="otrosPartidosInfo" class="totales-otros-card" ></strong></span></div> -->
+ 
 
         <div> <strong id="tDia">0</strong></div>
       </div>
-
+   <div> <span>Otros Partidos Info: <strong id="otrosPartidosInfo" class="totales-otros-card" ></strong></span></div>
+ 
       <!-- Observaciones -->
       <div class="observaciones-container" id="gastosWrapper">
         <h3>Observaciones Del Mes</h3>

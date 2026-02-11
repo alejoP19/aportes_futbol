@@ -138,9 +138,10 @@ try {
         echo json_encode([
             'ok' => true,
             'action' => 'deleted',
-            'saldo' => $saldo_actual,
             'consumido_target' => 0,
-            'aporte_efectivo'  => 0
+            'aporte_efectivo'  => 0,
+            'saldo' => $saldo_actual,
+            'valor_real' => $valor   // ✅ NUEVO
         ]);
         exit;
     }

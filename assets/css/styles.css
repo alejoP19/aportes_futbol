@@ -23,7 +23,6 @@ font-family: "Lucida Sans Unicode", sans-serif;
 padding: 0;
 margin: 0;
 overflow-x: hidden;
-background-color: #78a597d2;
 }
 
 /* =====================================================
@@ -98,18 +97,19 @@ bottom: 30% !important;
 width: 38% !important;
 right: -4% !important;
 background: linear-gradient(180deg,
-      rgba(61, 119, 80, 0.95),
-      rgba(43, 88, 67, 0.829));
-border: 1px solid rgb(0, 167, 103);
-box-shadow:0 0 2px rgba(0, 218, 109, 0.842);
+      rgba(90, 161, 114, 0.95),
+      rgba(78, 141, 112, 0.829));
+border: 1px solid rgb(0, 167, 111);
+box-shadow:0 0 4px rgba(0, 218, 109, 0.842);
 }
 .logout-button:hover {
 background: linear-gradient(180deg,
-      rgba(104, 199, 135, 0.95),
-      rgba(69, 146, 110, 0.829));
-
-box-shadow:0 0 5px rgba(0, 218, 109, 0.842);
-outline:1px solid rgba(238, 237, 168, 0.623); 
+     rgba(124, 204, 151, 0.95),
+      rgba(111, 192, 154, 0.829));
+color: #fff783 !important;
+text-shadow: -1px 1px 1px rgba(0,0,0,0.7), -1px 1px 1px rgba(0,0,0,0.7) !important;
+box-shadow:0 0 5px #fff783 !important;
+outline:1px solid rgba(255, 255, 255, 0.904); 
 
 }
 .toggle-left-panel {
@@ -148,24 +148,31 @@ grid-area: year;
 .month { 
 grid-area: month;
 }
-.date-selectors label ,.otro-juego-picker span { 
+.date-selectors label { 
 color:white; 
 font-weight:lighter; 
 text-shadow: -1px 1px 1px rgba(0,0,0,0.7), -1px 1px 1px rgba(0,0,0,0.7);
  
 }
-.date-selectors select,.otro-juego-picker > select {
+.date-selectors select,.otro-juego-picker > select  {
 padding:5px 23px !important; 
 border:1px solid #4e7a66 !important; 
 color: #000000;
-border:1px solid #dfe794 !important;
+border:1px solid #52cc89 !important;
 background: linear-gradient(180deg,
-rgba(202, 245, 212, 0.95),
-rgba(130, 216, 151, 0.95)) !important;
+rgba(242, 255, 245, 0.95),
+rgba(153, 235, 194, 0.95)) !important;
 box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
 font-weight:bold !important; 
 text-shadow: -1px 1px 1px rgba(255, 255, 255, 0.973), -1px 1px 1px rgba(255, 255, 255, 0.966);
  
+}
+option{
+
+background-color: #ace9d1;
+color: rgb(0, 0, 0);
+
+
 }
 /* =====================================================
 LAYOUT PRINCIPAL (mobile-first)
@@ -180,29 +187,34 @@ padding: 15px;
 
 }
 
+
 /* paneles */
 .left-panel, .middle-panel,.right-panel,.gastos-section {
 margin-top: -1% !important;
 margin-bottom: 0% !important;
-background: linear-gradient(180deg,
-      rgba(231, 231, 231, 0.95),
-      rgba(230, 230, 230, 0.95));
+background: transparent !important;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 3px;
   width: 100%;
-  margin-bottom: 3px !important;
+  margin-bottom: 1px !important;
   justify-self: center;
   border-radius: 18px;
-  padding: 15px;
+  padding: 1px;
   box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
   transition: transform .15s ease, box-shadow .15s ease;
-  border: 1px solid rgba(226, 226, 226, 0.712);
+  border: none !important;
+ 
 }
 
 .add-aportante,form, .gastos-card,.totals-card, 
 .gastos-regist-card,.otros-aportes-card,.observaciones-container,
 .notes-card{
+  background: linear-gradient(380deg,
+      rgba(202, 202, 202, 0.95), rgba(245, 245, 245, 0.95)
+      );
+      box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+      border: 1px solid rgba(214, 214, 214, 0.521);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -240,13 +252,13 @@ background: linear-gradient(180deg,
 
 /* AGREGAR APORTANTE CARD     */
 
-.add-aportante{
+/* .add-aportante{
 background: linear-gradient(380deg,
-      rgba(238, 240, 238, 0.95),
-      rgba(146, 247, 188, 0.95));
+      rgba(224, 228, 226, 0.911),
+      rgba(190, 199, 194, 0.95));
       box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
-      border: 1px solid rgba(37, 230, 188, 0.185);
-    }
+      border: 1px solid rgba(214, 214, 214, 0.521);
+    } */
 .save-player-btn { 
 background: linear-gradient(180deg,
 rgba(17, 189, 60, 0.95),
@@ -271,14 +283,16 @@ box-shadow:0 0 20px rgba(114, 252, 155, 0.842);
 
 
 /* AGREGAR OTROS APORTES CARD     */
-
-.otros-aportes-card{ 
+.otros-aportes-card{margin-top: -1% !important; }
+/* .otros-aportes-card{ 
 background: linear-gradient(380deg,
-      rgba(240, 240, 240, 0.95),
-      rgba(166, 198, 247, 0.95));
+      rgba(224, 228, 226, 0.911),
+      rgba(190, 199, 194, 0.95));
 box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
-border: 1px solid rgba(37, 230, 188, 0.185);
-}
+border: 1px solid rgba(201, 201, 201, 0.678);
+margin-top: -3% !important;
+margin-bottom: 1% !important;
+} */
 
 .add-otro-aporte-butt{ 
   background: linear-gradient(180deg,
@@ -302,13 +316,14 @@ box-shadow:0 0 20px rgba(167, 223, 255, 0.842);
 
 /* AGREGAR GASTOS CARD */
 
-.gastos-card{ 
-border:1px solid #bbb;background: linear-gradient(380deg,
+/* .gastos-card{ 
+border:1px solid #bbb;
+background:linear-gradient(380deg,
       rgba(241, 241, 241, 0.95),
       #f8e1e1);
   box-shadow: 0 0 1px rgba(255, 202, 214, 0.918);
   border: 1px solid rgba(255, 217, 223, 0.815);
-}
+} */
 
 .save-gasto{ 
 background: linear-gradient(180deg,
@@ -332,14 +347,15 @@ box-shadow:0 0 20px rgba(255, 167, 174, 0.842);
 
 /* MOSTRAR GASTOS CARD / EDITAR - ELIMINAR    */
 
-.gastos-regist-card{
- background: linear-gradient(30deg,
-      rgba(236, 236, 236, 0.95),
-      #c7aeae);
+/* .gastos-regist-card{
+background: 
+linear-gradient(380deg,
+      rgba(206, 205, 205, 0.95),
+      #dddddd);
 box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
 border: 1px solid rgba(219, 194, 194, 0.712);
 
-}
+} */
 .gastos-regist-card h4{
   margin-bottom: 5% !important;
 }
@@ -426,14 +442,14 @@ text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
 
 
 /*  MOSTRAR TOTALES CARD     */
-.totals-card{
+/* .totals-card{
 background: linear-gradient(180deg,
       rgba(231, 231, 231, 0.95),
       rgba(183, 192, 201, 0.95));
 box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
 border: 1px solid   rgba(194, 198, 202, 0.95); 
 
-}
+} */
 
 .totales-item-value{
 color: #00c73c;
@@ -455,15 +471,15 @@ list-style: none;
 
 /* OBSERVACIONES CARD */
 
-.observaciones-container{
+/* .observaciones-container{
 background: linear-gradient(180deg,
-      rgba(226, 226, 223, 0.95),
-       rgba(230, 213, 174, 0.95)
-     );
+      rgba(183, 192, 201, 0.95),
+       rgba(212, 212, 212, 0.95));
+     
 box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
 border: 1px solid   rgba(202, 201, 194, 0.95); 
 
-}
+} */
 
 .observaciones-container h3{
 width: 100%;
@@ -519,8 +535,8 @@ box-shadow:0 0 20px rgba(114, 252, 155, 0.842);
 
 .notes-card{ 
 background: linear-gradient(180deg,
-      rgba(56, 202, 182, 0.95),
-       rgba(240, 238, 241, 0.95)
+      rgba(245, 245, 245, 0.95),
+       rgba(202, 202, 202, 0.95)
      );
   box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
   border: 1px solid  rgba(164, 184, 206, 0.95); 
@@ -550,7 +566,8 @@ box-shadow:0 0 20px rgba(245, 76, 90, 0.842);
 
 /* ESTILOS TITULOS DE CARDS */
 
-.add-aportante h4,.otros-aportes-card h4,.gastos-card h4,.gastos-regist-card h4,.totals-card h4, .notes-card h4{
+.add-aportante h4,.otros-aportes-card h4,.gastos-card h4,.gastos-regist-card h4,.totals-card h4, 
+.notes-card h4{
 font-size:18px;
 font-style:italic; 
 color: #000000;
@@ -607,6 +624,11 @@ overflow-x: hidden;
 transition: all 1s; 
 }
 
+.middle-panel:is(.expanded){
+      background:#ebebebfb !important;
+   border: 1px dotted rgba(143, 143, 143, 0.616);
+}
+
   .middle-panel:not(.expanded) {
       display: none !important;
       height: 0 !important;
@@ -624,21 +646,20 @@ top: 0.3%;
 width: 99% !important;
 max-width: 99% !important;
 align-self: center !important;
-justify-items: center;
 border-radius: 18px;
-padding:5px;
+padding:1px;
 margin: 5%;
 min-height: fit-content;
 height: 100dvh;
 z-index: 999;
 background: linear-gradient(180deg,
 rgba(247, 247, 247, 0.973),
-rgba(8, 11, 15, 0.95));
+rgba(62, 88, 122, 0.89));
 transform: translateY(0);
 pointer-events: auto; /* habilita interacción */
-box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+box-shadow: 0 0 20px rgba(0, 121, 80, 0.918);
 transition: transform .15s ease, box-shadow .15s ease;
-border: 1px solid rgba(226, 226, 226, 0.712);
+border: 2px solid rgba(0, 85, 33, 0.753);
 
 }
 
@@ -647,14 +668,19 @@ border: 1px solid rgba(226, 226, 226, 0.712);
   overflow-x: auto !important;
   overflow-y: auto !important;
   max-width: fit-content;
-  max-width: 100%;
-  width: 100%;
-  min-height: fit-content;
-  margin-top: 40%;
+  max-width: 98%;
+  width: 98%;
+  justify-self: center;
+  border-radius: 18px;
+  min-height: 100dvh;
+  margin-top: 35% !important;
   height: 100dvh;
   table-layout: fixed; /* CLAVE */
   border-collapse: collapse;
   -webkit-overflow-scrolling: touch; 
+
+ 
+
 }
 
 
@@ -707,13 +733,13 @@ font-style:italic; white-space: nowrap;
    =============================== */
 
 .buscador-jugadores {
-  position: fixed;
+  position:relative;
   display: flex;
-  width: 91.5%;
+  width: 92.5%;
   min-width: 91.5%;
   max-width: none;
   margin-left: 10px;
-  margin-bottom: 2%;
+  margin-bottom: -5%;
   justify-self: flex-start;
   gap: 8px;
   padding: 6px 12px;
@@ -799,40 +825,19 @@ font-style:italic;
 .otro-juego-picker{
 position: fixed;
 display:inline; 
-top: 15px;
+top: 65px;
 right: 15px;
 gap:6px;
 align-items:center;
 
 }
 
-
-/* Separar los titulos de los theads de los extremos de los bordes de la tabla */
-.planilla thead tr:first-child th:first-child {
-    padding: 5px 18px;
-}
-
-
-
-/* Contenedor con scroll vertical + horizontal (clave para sticky) */
-
-
-
-/* Columna activa */
-.planilla .col-activa {
-  background: rgba(255, 235, 59, 0.25) !important;
-  box-shadow: inset 2px 0 0 #f4c400, inset -2px 0 0 #f4c400;
-
-}
-.planilla thead th.col-activa {
-  background: rgba(255, 235, 59, 0.45) !important;
-}
-
-/* Columna especial (28) activa - diferente */
-.planilla .col-activa.col-especial,
-.planilla thead th.col-activa.col-especial {
-  background: rgba(255, 105, 180, 0.18) !important; /* rosado suave */
-  box-shadow: inset 2px 0 0 #ff4fa3, inset -2px 0 0 #ff4fa3;
+.otro-juego-picker span { 
+color:rgb(0, 180, 75); 
+font-weight:lighter; 
+text-shadow: -1px 1px 1px rgba(0,0,0,0.7), -1px 1px 1px rgba(8, 7, 7, 0.7);
+margin-left: 13%;
+ 
 }
 
 
@@ -858,6 +863,107 @@ background-color: #237a6b !important;
   padding: 4px;
     background-color: #01926e !important;
   
+}
+
+
+
+/* Separar los titulos de los theads de los extremos de los bordes de la tabla */
+.planilla thead tr:first-child th:first-child {
+    padding: 5px 18px;
+} 
+
+/* Columna activa */
+.planilla .col-activa {
+  background: rgba(128, 253, 176, 0.658) !important;
+  box-shadow: inset 2px 0 0 #007736, inset -2px 0 0 #beddd1;
+}
+.planilla thead th.col-activa {
+  background: rgba(0, 119, 93, 0.897) !important;
+    box-shadow: inset 2px 0 0 #276b46, inset -2px 0 0 #006941;
+}
+
+/* Columna especial (28) activa - diferente */
+.planilla .col-activa.col-especial,
+.planilla thead th.col-activa.col-especial {
+  background: rgba(115, 105, 255, 0.18) !important; /* rosado suave */
+  box-shadow: inset 2px 0 0 #a14fff, inset -2px 0 0 #9b4fff;
+}
+
+
+/* COLUMNA - ACCIONES */
+
+.acciones{
+ 
+  background-color: #d8d8d8;
+
+}
+
+.planilla td.telefono-cell {
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* BOTONES MOSTRAR GASTOS EDITAR - ELIMINAR  */
+
+.acciones-buttons {
+  display: flex;
+  gap: 0px;
+  flex-direction: row;
+  justify-self: flex-end;
+  gap: 7px;
+  margin-bottom: 12%;
+}
+
+.btn-edit-player{
+   margin-top: 0.5rem;
+  bottom: 0rem;
+  right: 0rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  font-size: 1.2rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 104, 122, 0.979);
+  background: rgba(107, 238, 255, 0.973);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform .12s ease, background .12s ease;
+  z-index: 3;
+}
+
+.btn-edit-player:hover {
+  background: rgba(176, 236, 252, 0.897);
+  color: #ffffff;
+  border: 1px solid rgba(0, 146, 151, 0.979);
+  transform: scale(1.06);
+}
+
+.btn-del-player {
+  margin-top: 0.5rem;
+  bottom: 0rem;
+  right: 0rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  font-size: 1.2rem;
+  border-radius: 999px;
+  background: rgba(236, 6, 56, 0.89);
+  color: #fddddd;
+ border: 1px solid rgba(255, 155, 180, 0.979);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform .12s ease, background .12s ease;
+  z-index: 3;
+}
+
+.btn-del-player:hover {
+  border: 1px solid rgba(255, 0, 55, 0.979);
+  background: rgba(255, 226, 226, 0.973);
+  color: #f50541;
+ 
+  transform: scale(1.06);
 }
 
 
@@ -975,16 +1081,8 @@ td.celda-dia.saldo-usado {
 
 
 
-/* fila seleccionada tabla */
-tr.selected-row { background: #eafffa !important;
-box-shadow: inset 0 0 8px rgba(28,75,158,0.35); 
-border-left:4px solid var(--primary-blue);
-transition:0.2s; }
-
-
-
 thead tr:first-child,thead tr:nth-child(2){
-background-color: #3a6352;
+background-color: #007749;
 color: #ffffff;
 font-weight:lighter; 
 text-shadow: -1px 1px 1px rgb(0, 0, 0),
@@ -1054,33 +1152,6 @@ width: 120px;
 
 }
 
-/* COLUMNA - ACCIONES */
-
-.acciones{
- 
-  background-color: #f2f5f4;
-
-}
-
-.planilla td.telefono-cell {
-  max-width: 110px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.btn-del-player {
-    background: #ff3b3b;
-    color: white;
-    border: none;
-    padding: 4px 8px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.btn-del-player:hover {
-    background: #d80f0f;
-}
 
 /* ============================
 ZEBRA PARA TBODY (mobile-first)
@@ -1101,11 +1172,39 @@ background-color: #b9b9b9 !important;  /* beige más oscuro */
 }
 
 
+
+
 /* evitar que afecte filas seleccionadas */
-.planilla tbody tr.selected-row {
-background-color: #c0e0ff !important;
+ .planilla tbody tr.selected-row {
+background-color: #f5f5f5f3 !important;
+} 
+
+/* Jugadores eliminados */
+.planilla tbody tr.eliminado {
+    background-color: #ffb7bd !important;  /* rojo suave */
+    color: #000000 !important;             /* texto en rojo oscuro */
 }
 
+/* Evitar que la zebra afecte filas eliminadas */
+.planilla tbody tr.eliminado:nth-child(odd),
+.planilla tbody tr.eliminado:nth-child(even) {
+    background-color: #fca0a8 !important;
+}
+
+/* Evitar hover sobre eliminados */
+.planilla tbody tr.eliminado:hover {
+    background-color: #ff7e85f1 !important;
+    cursor: default;
+}
+
+
+
+/* fila seleccionada tabla */
+tr.selected-row {
+background: #fc6428 !important;
+box-shadow: inset 0 0 8px rgba(28, 158, 104, 0.63); 
+border-left:4px solid var(--primary-blue);
+transition:0.2s; }
 
 .cell-aporte{
 width:60px;
@@ -1138,9 +1237,9 @@ input[type="number"] {
   overflow: visible;
 }
 /* Hover */
-#monthlyTableContainer table tr:hover { background-color: #f0f8ff; cursor: pointer; }
-#monthlyTableContainer table tr.selected-row { background-color: #c0e0ff; }
-#monthlyTableContainer table tr { transition: background-color 0.2s ease; }
+/* #monthlyTableContainer table tr:hover { background-color: #f0f8ff; cursor: pointer; }
+#monthlyTableContainer table tr.selected-row { background-color: #000000; }
+#monthlyTableContainer table tr { transition: background-color 0.2s ease; } */
 
 
 /* // ----------------->>> DESKTOP QUERIES <<<--------------------//
@@ -1258,73 +1357,99 @@ padding:4px 23px !important;
   }
 
   /* Estado visible */
-  .middle-panel.expanded {
-    position: absolute;          /* 🔥 CLAVE */
+  .middle-panel.expanded {          /* 🔥 CLAVE */
     width: 100%;
     max-width: 100%;
-    margin: 0 !important;
+    margin-top: -1% !important;
+    margin-bottom: 0% !important;
     padding: 0;
+    margin: 0;
     overflow: hidden;            /* ok aquí */
     border-radius: 10px;
- justify-self: center;
+    justify-self: center;
+
   }
   .middle-panel:not(.expanded) {
-     
       height: 100dvh;
       max-height: max-content;
-    
   }
 
 
 
 
-/* ===============================
-   TOOLBAR SOBRE LA TABLA
-   =============================== */
 
-  .tabla-toolbar {
-  width: 100%;
-  position: relative;
-  top: 0;
-  z-index: 100;
-  padding: 10px 0px 30px 0px;
-  }
-
-.month-header{ 
-font-size: larger;
-align-self: center;
-text-align: center;
-padding: 20px 0px;
+.table-wrap{
+  min-height: 100dvh;
+  margin-top: 8% !important;
+  height: 100dvh;
+  border-top-right-radius: 18px !important;
 }
 
+/* 3) Scrollbar delgado (Chrome/Edge/Safari) */
+.table-wrap::-webkit-scrollbar{
+  width: 8px;
+}
+
+.table-wrap::-webkit-scrollbar-track{
+  background: rgba(0,0,0,0.08);
+  border-radius: 10px;
+}
+
+.table-wrap::-webkit-scrollbar-thumb{
+  background: rgba(36,90,75,0.65);   /* verde oscuro de tu paleta */
+  border-radius: 10px;
+  border: 2px solid rgba(0,0,0,0.08); /* “padding visual” */
+}
+
+.table-wrap::-webkit-scrollbar-thumb:hover{
+  background: rgba(36,90,75,0.85);
+}
+
+
+.month-header{ 
+justify-self: flex-start;
+font-size: larger;
+top: 4%;
+left: 2%;
+}
 /* ===============================
    BUSCADOR
    =============================== */
 
 .buscador-jugadores {
+  width: 40%;
+  min-width: 40%;
+  margin-left:30% !important;
+  margin-bottom: -1%;
+  padding: 5px 12px;
+  align-items: center;
+}
+
+.buscador-jugadores input::placeholder {
+  font-size: medium; 
+}
+
+
+/* input */
+.buscador-jugadores input {
+  font-size: 16px !important;
+}
+
+
+.otro-juego-picker{ 
+top: 25px;
+right: 30px;
+}
+
+.otro-juego-picker span { 
+color:rgb(0, 180, 75); 
+font-weight:bold; 
+text-shadow: -1px 1px 1px rgba(0,0,0,0.7), -1px 1px 1px rgba(8, 7, 7, 0.7);
+margin-left: 8%;
+margin-bottom: 4px;
+font-size: large;
  
-padding: 7px 10px;
-margin-bottom: 0%;
-width: 410px;
-min-width: 410px;
-margin-left: 0px;
-justify-self: center;
 }
-
-/* ===== ADMIN: contenedor que hace scroll ===== */
-.table-wrap{
-  position: relative;
-  overflow-x: auto !important;
-  overflow-y: auto !important;
-  max-width: 100%;
-  width: 100%;
-  max-height: 100%;
-  height: 100%;
-  table-layout: fixed; /* CLAVE */
-  border-collapse: collapse;
-}
-
-
 
 
 /* CLASE NUEVA: tabla expandida al presionar boton */
@@ -1345,30 +1470,11 @@ background-color: #e5dfc3;
 background-color: #c0e0ff !important;
 }
 
-/* =====================================================
-   FIX TÍTULOS – ESTABLES AL ABRIR / CERRAR TABLA
-===================================================== */
 }
 
 
 
-/* Jugadores eliminados */
-.planilla tbody tr.eliminado {
-    background-color: #fc8e97 !important;  /* rojo suave */
-    color: #000000 !important;             /* texto en rojo oscuro */
-}
 
-/* Evitar que la zebra afecte filas eliminadas */
-.planilla tbody tr.eliminado:nth-child(odd),
-.planilla tbody tr.eliminado:nth-child(even) {
-    background-color: #f59ba3 !important;
-}
-
-/* Evitar hover sobre eliminados */
-.planilla tbody tr.eliminado:hover {
-    background-color: #ff747f !important;
-    cursor: default;
-}
 
 
 

@@ -41,8 +41,7 @@ function pick_default_otro_dia($days, $days_count)
 $otroDia = isset($_GET['otro']) ? intval($_GET['otro']) : pick_default_otro_dia($days, $days_count);
 if ($otroDia < 1 || $otroDia > $days_count) $otroDia = pick_default_otro_dia($days, $days_count);
 // Validar que el otroDia NO sea miércoles/sábado:
-if (in_array($otroDia, $days)) {
-    $otroDia = pick_default_otro_dia($days, $days_count);
+if  (in_array($otroDia, $days, true)) {    $otroDia = pick_default_otro_dia($days, $days_count);
 }
 
 $colspanDias = count($days) + 1; // +1 por "Otro juego"
@@ -226,7 +225,8 @@ $mesesEsp = [
 // Select de "Otro juego"
 $opcionesOtro = [];
 for ($d = 1; $d <= $days_count; $d++) {
-    if (!in_array($d, $days)) $opcionesOtro[] = $d;
+    if (!in_array($d, $days, true)) $opcionesOtro[] = $d;
+
 }
 $otroLabel = sprintf("%02d", $otroDia);
 
@@ -244,7 +244,7 @@ echo "
     </div>
 
     <div class='otro-juego-picker'>
-      <span>Otro juego:</span>
+      <span>Otro juego</span>
       <select id='selectOtroDia'>
 ";
 
@@ -346,7 +346,7 @@ foreach ($jugadores as $jug) {
            data-fecha='{$fecha}'
            type='number'
            placeholder='$'
-           value='" . ($cashCap > 0 ? $cashCap : "") . "'>
+           value='" . ($efectivo > 0 ? $efectivo : "") . "'>
     <span class='saldo-flag " . ($flag ? "show" : "") . "'>★</span>
 <!-- ✨ Símbolo cuando completó con saldo (persistente por data-saldo-uso) -->
 <span class='saldo-uso-flag " . ($consumo > 0 ? "show" : "") . "'>✚</span>
@@ -397,7 +397,7 @@ foreach ($jugadores as $jug) {
            data-fecha='{$fechaOtro}'
            type='number'
            placeholder='$'
-           value='" . ($cashCapO > 0 ? $cashCapO : "") . "'>
+          value='" . ($efectivoO > 0 ? $efectivoO : "") . "'>
     <span class='saldo-flag " . ($flagO ? "show" : "") . "'>★</span>
     <!-- ✨ Símbolo cuando completó con saldo (persistente por data-saldo-uso) -->
 <span class='saldo-uso-flag " . ($consumoO > 0 ? "show" : "") . "'>✚</span>
@@ -437,15 +437,17 @@ foreach ($jugadores as $jug) {
     $telefonoSafe = htmlspecialchars($jug['telefono'] ?? '', ENT_QUOTES, 'UTF-8');
 
     echo "<td class='acciones'>
-            <button class='btn-edit-player'
-                    data-id='{$jugId}'
-                    data-nombre='{$nombreSafe}'
-                    data-telefono='{$telefonoSafe}'
-                    title='Editar aportante'>✏️</button>
-            <button class='btn-del-player'
-                    data-id='{$jugId}'
-                    title='Eliminar aportante'>🗑️</button>
-          </td>";
+                <div class='acciones-buttons'>
+                    <button class='btn-edit-player'
+                            data-id='{$jugId}'
+                            data-nombre='{$nombreSafe}'
+                            data-telefono='{$telefonoSafe}'
+                            title='Editar aportante'>✏️</button>
+                    <button class='btn-del-player'
+                            data-id='{$jugId}'
+                            title='Eliminar aportante'>🗑️</button>
+                </div>
+            </td>";
 
 
 

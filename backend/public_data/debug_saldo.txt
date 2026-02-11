@@ -2,6 +2,6 @@ Array
 (
     [mes] => 2
     [anio] => 2026
-    [saldo_total_mes] => 10000
-    [saldo_total_anio] => 8000
+    [saldo_total_mes] => 20000
+    [saldo_total_anio] => 18000
 )
