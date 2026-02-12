@@ -4,72 +4,72 @@ require_once __DIR__ . "/../auth/auth.php";
 protegerAdmin();
 
 header("Content-Type: application/json; charset=utf-8");
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 
 $mes  = isset($_GET['mes'])  ? intval($_GET['mes'])  : intval(date('n'));
 $anio = isset($_GET['anio']) ? intval($_GET['anio']) : intval(date('Y'));
 
 $TOPE = 3000;
 
-// Subquery: saldo usado por aporte (por target_aporte_id)
-$sql = "
-SELECT 
-  t.fecha,
-  COUNT(*) AS jugadores,
-  SUM(t.real) AS real_total,
-  SUM(t.excedente) AS excedente_total,
-  SUM(t.saldo_target) AS saldo_usado_total,
-  SUM(t.efectivo) AS efectivo_total
-FROM (
-  SELECT 
-    a.id,
-    a.fecha,
-    IFNULL(a.aporte_principal,0) AS real,
-    GREATEST(IFNULL(a.aporte_principal,0) - ?, 0) AS excedente,
-    IFNULL(ms.saldo_target,0) AS saldo_target,
-    LEAST(LEAST(IFNULL(a.aporte_principal,0), ?) + IFNULL(ms.saldo_target,0), ?) AS efectivo
-  FROM aportes a
-  LEFT JOIN (
-    SELECT target_aporte_id, IFNULL(SUM(amount),0) AS saldo_target
-    FROM aportes_saldo_moves
-    GROUP BY target_aporte_id
-  ) ms ON ms.target_aporte_id = a.id
-  WHERE YEAR(a.fecha)=? AND MONTH(a.fecha)=?
-) t
-WHERE 
-  -- MySQL DAYOFWEEK: Sunday=1 ... Wednesday=4 ... Saturday=7
-  DAYOFWEEK(t.fecha) NOT IN (4,7) 
-  AND (t.real > 0 OR t.saldo_target > 0)
-GROUP BY t.fecha
-ORDER BY t.fecha ASC
-";
+/*
+  Queremos: días NO miércoles/sábado dentro del mes,
+  con total efectivo (lo que cuenta en tu planilla):
+  efectivo_por_aporte = LEAST( LEAST(aporte_principal,3000) + consumido_target, 3000 )
+*/
 
-$stmt = $conexion->prepare($sql);
-$stmt->bind_param("iiiii", $TOPE, $TOPE, $TOPE, $anio, $mes);
-$stmt->execute();
-$res = $stmt->get_result();
+try {
+  $sql = "
+    SELECT 
+      a.fecha,
+      SUM(
+        LEAST(
+          LEAST(IFNULL(a.aporte_principal,0), ?) + IFNULL(m.consumido,0),
+          ?
+        )
+      ) AS efectivo_total
+    FROM aportes a
+    LEFT JOIN (
+      SELECT target_aporte_id, IFNULL(SUM(amount),0) AS consumido
+      FROM aportes_saldo_moves
+      GROUP BY target_aporte_id
+    ) m ON m.target_aporte_id = a.id
+    WHERE MONTH(a.fecha) = ?
+      AND YEAR(a.fecha) = ?
+      -- MySQL DAYOFWEEK: 1=Dom,2=Lun,3=Mar,4=Mié,5=Jue,6=Vie,7=Sáb
+      AND DAYOFWEEK(a.fecha) NOT IN (4,7)
+    GROUP BY a.fecha
+    HAVING efectivo_total > 0
+    ORDER BY a.fecha ASC
+  ";
 
-$items = [];
-$totalGeneral = 0;
+  $stmt = $conexion->prepare($sql);
+  $stmt->bind_param("iiii", $TOPE, $TOPE, $mes, $anio);
+  $stmt->execute();
+  $res = $stmt->get_result();
 
-while ($row = $res->fetch_assoc()) {
-  $fecha = $row["fecha"]; // YYYY-MM-DD
-  $row["fecha_label"] = date("d-m-Y", strtotime($fecha));
+  $items = [];
+  $total_general = 0;
 
-  $row["jugadores"] = (int)$row["jugadores"];
-  $row["real_total"] = (int)$row["real_total"];
-  $row["excedente_total"] = (int)$row["excedente_total"];
-  $row["saldo_usado_total"] = (int)$row["saldo_usado_total"];
-  $row["efectivo_total"] = (int)$row["efectivo_total"];
+  while ($row = $res->fetch_assoc()) {
+    $fecha = $row["fecha"];
+    $val = (int)$row["efectivo_total"];
+    $total_general += $val;
 
-  $totalGeneral += $row["efectivo_total"];
-  $items[] = $row;
+    $items[] = [
+      "fecha" => $fecha,
+      "fecha_label" => date("d-m-Y", strtotime($fecha)),
+      "efectivo_total" => $val,
+    ];
+  }
+
+  $stmt->close();
+
+  echo json_encode([
+    "ok" => true,
+    "cantidad" => count($items),
+    "total_general" => $total_general,
+    "items" => $items
+  ]);
+} catch (Throwable $e) {
+  echo json_encode(["ok" => false, "msg" => "Error: " . $e->getMessage()]);
 }
-
-$stmt->close();
-
-echo json_encode([
-  "ok" => true,
-  "cantidad" => count($items),
-  "total_general" => $totalGeneral,
-  "items" => $items
-]);

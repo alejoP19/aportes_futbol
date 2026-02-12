@@ -116,6 +116,12 @@ $gastos_anio = $conexion->query("
 $month_total_final = (int)$month_total + (int)$otros_total - (int)$gastos_mes;
 $year_total_final  = (int)$year_total + (int)$otros_year - (int)$gastos_anio;
 
+$month_total_con_saldo = (int)$month_total_final + (int)$saldo_total;
+$year_total_con_saldo  = (int)$year_total_final  + (int)$saldo_total;
+
+
+if (ob_get_length()) { ob_clean(); }
+
 echo json_encode([
     'ok'          => true,
     'today'       => (int)$today,
@@ -124,5 +130,7 @@ echo json_encode([
     'otros_mes'   => (int)$otros_total,
     'gastos_mes'  => (int)$gastos_mes,
     'gastos_anio' => (int)$gastos_anio,
-    'saldo_mes'   => (int)$saldo_total
+    'saldo_mes'   => (int)$saldo_total,
+    "month_total_con_saldo" => (int)$month_total_con_saldo,
+    "year_total_con_saldo" => (int)$year_total_con_saldo,
 ]);

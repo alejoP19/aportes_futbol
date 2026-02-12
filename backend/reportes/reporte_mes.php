@@ -246,6 +246,54 @@ $total_anio_con_saldo = (int)$total_anio_real + (int)$saldo_total_anio;
 
 
 $obs = trim(get_obs($conexion, $mes, $anio));
+// =========================
+// OTROS PARTIDOS (info) - días NO miércoles/sábado con aportes
+// =========================
+$otros_partidos_items = [];
+$total_otros_partidos = 0;
+
+$sqlOtrosPartidos = "
+  SELECT 
+    a.fecha,
+    SUM(
+      LEAST(
+        LEAST(IFNULL(a.aporte_principal,0), ?) + IFNULL(m.consumido,0),
+        ?
+      )
+    ) AS efectivo_total
+  FROM aportes a
+  LEFT JOIN (
+    SELECT target_aporte_id, IFNULL(SUM(amount),0) AS consumido
+    FROM aportes_saldo_moves
+    GROUP BY target_aporte_id
+  ) m ON m.target_aporte_id = a.id
+  WHERE YEAR(a.fecha) = ?
+    AND MONTH(a.fecha) = ?
+    -- MySQL DAYOFWEEK: 1=Dom,2=Lun,3=Mar,4=Mié,5=Jue,6=Vie,7=Sáb
+    AND DAYOFWEEK(a.fecha) NOT IN (4,7)
+  GROUP BY a.fecha
+  HAVING efectivo_total > 0
+  ORDER BY a.fecha ASC
+";
+
+$stmtOP = $conexion->prepare($sqlOtrosPartidos);
+$stmtOP->bind_param("iiii", $TOPE, $TOPE, $anio, $mes);
+$stmtOP->execute();
+$resOP = $stmtOP->get_result();
+
+while ($row = $resOP->fetch_assoc()) {
+    $fecha = $row["fecha"];
+    $val = (int)$row["efectivo_total"];
+    $total_otros_partidos += $val;
+
+    $otros_partidos_items[] = [
+        "fecha" => $fecha,
+        "fecha_label" => date("d-m-Y", strtotime($fecha)),
+        "efectivo_total" => $val,
+    ];
+}
+$stmtOP->close();
+
 ?>
 
 <!DOCTYPE html>
@@ -371,20 +419,54 @@ $hayDeudaDia = !empty($deudas_mes[$jid][(int)$d]);
   <table class="totales-con-saldo-table">
     <tr>
       <td class="label"><strong>Total del mes (con saldos)</strong></td>
-      <td class="money">$ 36.000</td>
+      <td class="money">$ <?= number_format((int)$total_mes_con_saldo, 0, ',', '.') ?></td>
     </tr>
     <tr>
       <td class="label">
         <strong>Total del año (con saldos, hasta este mes)</strong>
       </td>
-      <td class="money">$ 111.000</td>
+      <td class="money">$ <?= number_format((int)$total_anio_con_saldo, 0, ',', '.') ?></td>
     </tr>
   </table>
 </div>
 
-
+<br>
 
 <br>
+
+<h3>Datos de Otros Partidos</h3>
+
+<?php if (empty($otros_partidos_items)): ?>
+  <div style="font-size:11pt; opacity:.85;">
+    No hay otros partidos (días no miércoles/sábado) con aportes en este mes.
+  </div>
+<?php else: ?>
+  <table class="otros-partidos-table" border="1" width="100%" cellspacing="0" cellpadding="4">
+    <thead>
+      <tr>
+        <th>Partido</th>
+        <th>Fecha</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($otros_partidos_items as $i => $it): ?>
+        <tr>
+          <td>Partido <?= (int)($i + 1) ?></td>
+          <td><?= htmlspecialchars($it["fecha_label"]) ?></td>
+          <td style="text-align:right;"><strong>$ <?= number_format((int)$it["efectivo_total"], 0, ',', '.') ?></strong></td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2"><strong>Total otros partidos</strong></td>
+        <td style="text-align:right;"><strong>$ <?= number_format((int)$total_otros_partidos, 0, ',', '.') ?></strong></td>
+      </tr>
+    </tfoot>
+  </table>
+<?php endif; ?>
+
 
 <div class="observaciones">
   <h3 class="observaciones-title">Observaciones del mes</h3>

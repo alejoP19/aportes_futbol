@@ -161,7 +161,21 @@ table.totales-con-saldo-table{
     white-space: nowrap; /* el valor no baja de línea */
 }
 
+/* ===========================
+   OTROS PARTIDOS (TABLA INFO)
+=========================== */
+table.otros-partidos-table{
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  table-layout: fixed;
+}
 
+table.otros-partidos-table td,
+table.otros-partidos-table th{
+  font-size: 10pt;
+  padding: 6px;
+}
 
 /* ===========================
    BLOQUES DE OBSERVACIONES Y TOTALES

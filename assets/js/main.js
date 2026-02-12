@@ -202,13 +202,19 @@ activarBusquedaJugadores();
     }
 
     // Click en filas
-    container.querySelectorAll("tr").forEach(r => {
-        r.addEventListener("click", () => {
-            container.querySelectorAll("tr.selected-row").forEach(rr => rr.classList.remove("selected-row"));
-            r.classList.add("selected-row");
-            selectedPlayerId = r.getAttribute("data-player");
-        });
-    });
+    container.querySelectorAll("tbody tr").forEach(r => {
+  r.addEventListener("click", (e) => {
+
+    // opcional: si clickeas en input/botón/checkbox, no cambies selección
+    if (e.target.closest("input, button, select, label")) return;
+
+    container.querySelectorAll("tbody tr.selected-row")
+      .forEach(rr => rr.classList.remove("selected-row"));
+
+    r.classList.add("selected-row");
+    selectedPlayerId = r.getAttribute("data-player");
+  });
+});
 
    // Inputs de aporte
 
@@ -516,9 +522,8 @@ async function loadTotals(mes, anio) {
     if (!j) return;
 
     // Ajustado a los IDs de tu HTML de administrador
-    document.getElementById('tDia').innerText = j.today
-        ? j.today.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
-        : '';
+    
+     
     document.getElementById('tMes').innerText = j.month_total
         ? j.month_total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
         : '';
@@ -545,6 +550,19 @@ document.getElementById('tSaldoMes').innerText = j.saldo_mes
     })
   : '';;
 
+const elMesConSaldo  = document.getElementById('tMesConSaldo');
+if (elMesConSaldo) {
+  elMesConSaldo.innerText = j.month_total_con_saldo
+    ? j.month_total_con_saldo.toLocaleString('es-CO', { style:'currency', currency:'COP', maximumFractionDigits:0 })
+    : '';
+}
+
+const elAnioConSaldo = document.getElementById('tAnioConSaldo');
+if (elAnioConSaldo) {
+  elAnioConSaldo.innerText = j.year_total_con_saldo
+    ? j.year_total_con_saldo.toLocaleString('es-CO', { style:'currency', currency:'COP', maximumFractionDigits:0 })
+    : '';
+}
 
         
 }
@@ -571,8 +589,8 @@ async function refreshSheet() {
 
     await loadSheet(mes, anio);
     await loadTotals(mes, anio);
-     await loadGastos();
-    //  await loadOtrosPartidosInfo(mes, anio); 
+    await loadGastos();
+    await loadOtrosPartidosInfo(mes, anio); 
     loadObservaciones(mes, anio);
 }
 
@@ -831,11 +849,10 @@ async function loadGastos() {
     
 
         li.innerHTML = `
-        <span>${g.nombre}: <strong class="totales-gastos-item-value">${g.valor.toLocaleString()}</strong><br>_____________________</span>
-         <div class="buttons-gastos-container">
+        <div class="buttons-gastos-container">
+        <span>${g.nombre}: <strong class="totales-gastos-item-value">${g.valor.toLocaleString()}</strong>_______________________</span>
          <button class="btnEditGasto" data-id="${g.id}" data-nombre="${g.nombre}" data-valor="${g.valor}">✏️</button>
          <button class="btnDeleteGasto" data-id="${g.id}">🗑️</button>
-        
          </div>  
         `;
 
@@ -1322,50 +1339,75 @@ function initSaldoFromHTML(container) {
 }
 
 
-// async function loadOtrosPartidosInfo(mes, anio) {
-//   const box = document.getElementById("otrosPartidosInfo");
-//   if (!box) return;
+async function loadOtrosPartidosInfo(mes, anio) {
+  const box = document.getElementById("otrosPartidosInfo");
+  if (!box) return;
 
-//   const j = await (await fetch(`${API}/aportes/get_otros_partidos_info.php?mes=${mes}&anio=${anio}`)).json();
-//   if (!j || !j.ok) {
-//     box.innerHTML = "";
-//     return;
-//   }
+  let j = null;
+  try {
+    const r = await fetch(`${API}/aportes/get_otros_partidos_info.php?mes=${mes}&anio=${anio}`);
+    j = await r.json();
+  } catch (e) {
+    box.innerHTML = "";
+    return;
+  }
 
-//   const totalGeneral = Number(j.total_general || 0).toLocaleString("es-CO");
-//   const cantidad = Number(j.cantidad || 0);
+  if (!j || !j.ok) {
+    box.innerHTML = "";
+    return;
+  }
 
-//   if (!cantidad) {
-//     box.innerHTML = `
-//       <div><strong>Otros partidos</strong></div>
-//       <div style="opacity:.8; margin-top:6px;">No hay registros en días no normales.</div>
-//     `;
-//     return;
-//   }
+  const cantidad = Number(j.cantidad || 0);
+  const totalGeneralFmt = Number(j.total_general || 0).toLocaleString("es-CO");
 
-//   const rows = (j.items || []).map(it => {
-//     const fecha = it.fecha_label;
-//     const val = Number(it.efectivo_total || 0).toLocaleString("es-CO");
-//     return `<li>${fecha}: <strong>${val}</strong></li>`;
-//   }).join("");
+  if (!cantidad) {
+    box.innerHTML = `
+      <div class='no-otros-partidos-alert'>
+        Sin Registros de Otros Partidos Jugados (Días NO miércoles/sábado).
+      </div>
+    `;
+    return;
+  }
 
-//   box.innerHTML = `
-//     <div><strong>Otros partidos (${cantidad})</strong></div>
-//     <ul style="margin:8px 0 0 18px; padding:0;">
-//       ${rows}
-//     </ul>
-//     <div style="margin-top:8px;">
-//       Total otros partidos: <strong>${totalGeneral}</strong>
-//     </div>
-//   `;
-// }
+  const rows = (j.items || []).map((it, idx) => {
+    const fecha = it.fecha_label || it.fecha;
+    const valFmt = Number(it.efectivo_total || 0).toLocaleString("es-CO");
+    return `
+      <tr>
+        <td style="padding:6px 8px;">Partido ${idx + 1}</td>
+        <td style="padding:6px 8px;">${fecha}</td>
+        <td style="padding:6px 8px; text-align:right;"><strong>${valFmt}</strong></td>
+      </tr>
+    `;
+  }).join("");
 
+  box.innerHTML = `
+    <div>
+      <div class='otros-partidos-title'">
+        <span>Otros partidos (${cantidad})<span>
+      </div>
 
+      <div class='otros-partidos-container-table'>
+        <table class='otros-partidos-table'>
+          <thead>
+            <tr>
+              <th style="text-align:left; padding:6px 8px; border-bottom:1px solid rgba(255,255,255,.15);">Partido</th>
+              <th style="text-align:left; padding:6px 8px; border-bottom:1px solid rgba(255,255,255,.15);">Fecha</th>
+              <th style="text-align:right; padding:6px 8px; border-bottom:1px solid rgba(255,255,255,.15);">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
 
-
-
-
-
+      <div class='otros-partidos-tfoot-table' style="margin-top:10px;">
+       <p>Total otros partidos: <span>${totalGeneralFmt}</span> </p>
+      </div>
+    </div>
+  `;
+}
 
 
 

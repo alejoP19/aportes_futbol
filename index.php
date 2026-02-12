@@ -142,7 +142,7 @@ include "conexion.php";
       </div>
 
 
-      <div class="gastos-regist-card">
+      <div class="gastos-registrados-card">
         <h4>Gastos Registrados</h4>
         <ul id="listaGastos"></ul>
       </div>
@@ -160,27 +160,36 @@ include "conexion.php";
         <div> <span>Gastos del Mes: <strong id="tGastosMes" class="totales-item-value">0</strong></span> </div>
         <div> <span> Gastos del Año: <strong id="tGastosAnio" class="totales-item-value">0</strong></span></div>
         <div> <span>Total Saldo Mes: <strong id="tSaldoMes" class="totales-item-value">0</strong></span></div>
-         <!-- <div> <span>Otros Partidos Info: <strong id="otrosPartidosInfo" class="totales-otros-card" ></strong></span></div> -->
- 
 
-        <div> <strong id="tDia">0</strong></div>
-      </div>
-   <div> <span>Otros Partidos Info: <strong id="otrosPartidosInfo" class="totales-otros-card" ></strong></span></div>
- 
-      <!-- Observaciones -->
-      <div class="observaciones-container" id="gastosWrapper">
-        <h3>Observaciones Del Mes</h3>
-        <textarea id="obsMes"></textarea>
+   
 
-        <button id="saveObsBtn" class="guardar-observaciones">Guardar Observaciones</button>
+        <hr style="opacity:.25; margin:10px 0;">
+
+        <div class="totales-con-saldo-mini">
+          <div>Total mes (con saldo): <strong id="tMesConSaldo">$ 0</strong></div>
+          <div>Total año (con saldo): <strong id="tAnioConSaldo">$ 0</strong></div>
+        </div>
+
 
       </div>
-      <div class="notes-card">
-        <h4>Reporte Actual Del Mes</h4>
-        <button class="export-pdf-butt">Generar PDF</button>
-      </div>
-
     </aside>
+      <div class="otros-partidos-info-card">
+        <h4>Datos de Otros Partidos</h4>
+        <div> <span><strong id="otrosPartidosInfo" class="totales-otros-card"></strong></span></div>
+      </div>
+
+    <!-- Observaciones -->
+    <div class="observaciones-container" id="gastosWrapper">
+      <h3>Observaciones Del Mes</h3>
+      <textarea id="obsMes"></textarea>
+
+      <button id="saveObsBtn" class="guardar-observaciones">Guardar Observaciones</button>
+
+    </div>
+    <div class="notes-card">
+      <h4>Reporte Actual Del Mes</h4>
+      <button class="export-pdf-butt">Generar PDF</button>
+    </div>
 
   </main>
 
