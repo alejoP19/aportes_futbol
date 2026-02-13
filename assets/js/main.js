@@ -849,8 +849,8 @@ async function loadGastos() {
     
 
         li.innerHTML = `
+        <span>${g.nombre}: <strong class="totales-gastos-item-value">${g.valor.toLocaleString()}</strong><p class="linea-span">___________________________</p></span>
         <div class="buttons-gastos-container">
-        <span>${g.nombre}: <strong class="totales-gastos-item-value">${g.valor.toLocaleString()}</strong>_______________________</span>
          <button class="btnEditGasto" data-id="${g.id}" data-nombre="${g.nombre}" data-valor="${g.valor}">✏️</button>
          <button class="btnDeleteGasto" data-id="${g.id}">🗑️</button>
          </div>  
@@ -1363,7 +1363,7 @@ async function loadOtrosPartidosInfo(mes, anio) {
   if (!cantidad) {
     box.innerHTML = `
       <div class='no-otros-partidos-alert'>
-        Sin Registros de Otros Partidos Jugados (Días NO miércoles/sábado).
+       Sin Registros de Otros Partidos Jugados (Días NO miércoles/sábado).
       </div>
     `;
     return;
@@ -1391,9 +1391,9 @@ async function loadOtrosPartidosInfo(mes, anio) {
         <table class='otros-partidos-table'>
           <thead>
             <tr>
-              <th style="text-align:left; padding:6px 8px; border-bottom:1px solid rgba(255,255,255,.15);">Partido</th>
-              <th style="text-align:left; padding:6px 8px; border-bottom:1px solid rgba(255,255,255,.15);">Fecha</th>
-              <th style="text-align:right; padding:6px 8px; border-bottom:1px solid rgba(255,255,255,.15);">Total</th>
+              <th>Partido</th>
+              <th>Fecha</th>
+              <th>Total</th>
             </tr>
           </thead>
           <tbody>

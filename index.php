@@ -166,8 +166,8 @@ include "conexion.php";
         <hr style="opacity:.25; margin:10px 0;">
 
         <div class="totales-con-saldo-mini">
-          <div>Total mes (con saldo): <strong id="tMesConSaldo">$ 0</strong></div>
-          <div>Total año (con saldo): <strong id="tAnioConSaldo">$ 0</strong></div>
+          <div>Total mes (con saldo): <strong id="tMesConSaldo" class="totales-item-value">$ 0</strong></div>
+          <div>Total año (con saldo): <strong id="tAnioConSaldo" class="totales-item-value">$ 0</strong></div>
         </div>
 
 

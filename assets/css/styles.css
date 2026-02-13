@@ -210,11 +210,11 @@ background: transparent !important;
 .add-aportante,form, .gastos-card,.totals-card, 
 .gastos-registrados-card,.otros-aportes-card,.otros-partidos-info-card,.observaciones-container,
 .notes-card{
-  background: linear-gradient(380deg,
-      rgba(202, 202, 202, 0.95), rgba(245, 245, 245, 0.95)
-      );
+  background: linear-gradient(180deg,
+  rgb(252, 252, 252),    
+  rgb(250, 250, 250));
       box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
-      border: 1px solid rgba(214, 214, 214, 0.521);
+      border: 1px solid rgba(206, 206, 206, 0.521);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -357,26 +357,23 @@ border: 1px solid rgba(219, 194, 194, 0.712);
 
 } */
 
-
-.gastos-registrados-card h4{
-  margin-bottom: 5% !important;
-}
-.gastos-registrados-card ul{
-list-style:none;
-padding-left:0;
-}
-.gastos-registrados-card-items {
+.gastos-regist-card-items {
   display: flex;
-  justify-content: space-around;
-  gap: 10px;
+  justify-content:space-between;
+  gap: 0px;
   align-items: center !important;
- 
-
-
+  margin: 1% 1%;
 
 }
- 
-.totales-gastos-item-value{
+.linea-span{
+  margin-top: -6%;
+color: #a7a7a780;
+
+width: 100% !important;
+}
+
+ .totales-gastos-item-value{
+
   display: block;
   width: 30px;
 color:#da000b;
@@ -387,14 +384,22 @@ text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
 
 }
 
+.gastos-registrados-card h4{
+  margin-bottom: 5% !important;
+}
+.gastos-registrados-card ul{
+list-style:none;
+padding-left:0;
+}
+
 /* BOTONES MOSTRAR GASTOS EDITAR - ELIMINAR  */
 
 .buttons-gastos-container {
-  display: flex;
+ display: flex;
   gap: 0px;
   flex-direction: row;
   align-items: center;
-  margin-left: 10%;
+  margin-left: 0%;
   gap: 7px;
   margin-bottom: 0%;
   
@@ -407,11 +412,12 @@ text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
   width: 2.3rem;
   height: 2.3rem;
   font-size: 1.1rem;
+  text-align: center !important;
+  margin: auto;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.979);
   background: rgba(107, 213, 255, 0.973);
   cursor: pointer;
-  display: grid;
   place-items: center;
   transition: transform .12s ease, background .12s ease;
   z-index: 3;
@@ -431,12 +437,13 @@ text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
   width: 2.3rem;
   height: 2.3rem;
   font-size: 1.1rem;
+  text-align: center !important;
+  margin: auto;
   border-radius: 999px;
   border: 1px solid rgba(255, 0, 55, 0.979);
   background: rgba(255, 226, 226, 0.973);
   color: #f50541;
   cursor: pointer;
-  display: grid;
   place-items: center;
   transition: transform .12s ease, background .12s ease;
   z-index: 3;
@@ -465,13 +472,13 @@ border: 1px solid   rgba(194, 198, 202, 0.95);
 .totales-item-value{
 color: #00c73c;
 font-weight:bold; 
-font-size: medium;
+font-size: 15px;
 text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
 
 }
 
 
-.totals-card span, #listaGastos span, .otros-partidos-title{
+.totals-card span, #listaGastos span, .otros-partidos-title,.totales-con-saldo-mini{
 font-style:italic; 
 color: #000000;
 font-weight:bold; 
@@ -495,8 +502,8 @@ border: 1px solid   rgba(194, 198, 202, 0.95);
 .totales-con-saldo-mini{
   padding: 8px 10px;
   border-radius: 12px;
-  background: rgba(0, 199, 60, 0.08);
-  border: 1px solid rgba(0, 199, 60, 0.25);
+  background: rgba(226, 240, 230, 0.774);
+  border: 1px solid rgba(0, 199, 60, 0.534);
   font-weight: bold;
   margin-bottom: 3%;
 }
@@ -521,7 +528,7 @@ overflow:auto;
 padding: 2%;
 color: #f1c500;
 font-weight:bold; 
-font-size: medium;
+font-size: 15px;
 text-shadow: -1px 1px 1px rgb(0, 0, 0),
  -1px 1px 1px rgb(0, 0, 0), -1px 1px 1px rgb(0, 0, 0);
 ;
@@ -532,30 +539,55 @@ font-style:italic;
   width:100%; 
   border-collapse:collapse; 
   font-size:13px;
-  border-radius: 5px !important;
   margin-top: 2%;
+justify-self: center;
  
 }
+ .otros-partidos-table  thead tr th{
+  text-align:center;
+  padding:6px 8px;
+  border-bottom:1px solid rgba(255,255,255,.15);
+  font-size: 15px !important;
+} 
+ .otros-partidos-table  thead tr th:first-child{
+  border-top-left-radius: 10px;
+
+} 
+ .otros-partidos-table  thead tr th:last-child{
+
+  border-top-right-radius: 10px;
+}
+
+
+.otros-partidos-tfoot-table{
+  padding: 1px 10px;
+  border-radius: 12px;
+  background: rgba(226, 240, 230, 0.774);
+  border: 1px solid rgba(0, 199, 60, 0.534);
+
+
+}
 .otros-partidos-tfoot-table p{
-  padding: 2%;
+padding: 0%;
 color: #f1c500;
 font-weight:bold; 
-font-size: large;
+font-size: 16px;
 text-shadow: -1px 1px 1px rgb(0, 0, 0),
  -1px 1px 1px rgb(0, 0, 0), -1px 1px 1px rgb(0, 0, 0);
 }
 .otros-partidos-tfoot-table span{
 color: #00c73c;
+font-size: 15px;
 
 }
 .no-otros-partidos-alert{
+  position: relative;
+  justify-self: center;
 opacity:.80; 
-margin-top:6px;
-color: #da000b;
-font-weight: lighter;
+color: #ffffff;
+font-weight: bold;
 font-size: medium;
-text-shadow: -1px 1px 1px rgb(0, 0, 0),
- -1px 1px 1px rgb(0, 0, 0), -1px 1px 1px rgb(0, 0, 0);
+text-shadow: -1px 1px 1px rgb(0, 0, 0);
 
 }
 
@@ -590,21 +622,36 @@ border-top-right-radius: 3px;
 border-bottom-left-radius: 3px;
 border-bottom-right-radius: 3px;
 }
-textarea{
+
+
+.observaciones-container textarea { 
+display: flex;
+flex-direction: column;
+gap: 10px;
 width: 100%;
-margin-top: -1%;
-color: rgb(0, 0, 0);
-font-weight:lighter !important; 
-font-size: large;
-text-shadow: -1px 1px 1px rgb(241, 241, 241),
--1px 1px 1px rgb(238, 238, 238),
--1px 1px 1px rgb(235, 235, 235);
-border:10px;
 min-height:180px;
-padding:8px;
-border:1px solid #ddd;
+justify-self: center;
+color: #020202f8;
+width:100%;
+padding:12px;
+margin-bottom:5%;
+font-weight: bold;
+font-size:15px;
+font-family: "Lucida Sans Unicode", sans-serif;
+margin-top: 0%;
+text-shadow: -1px 1px 1px rgb(255, 255, 255);
+border-radius:12px;
+border:1px solid #bbb;
+background: linear-gradient(180deg,
+rgba(248, 248, 248, 0.95),
+rgba(247, 247, 247, 0.95));
+box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+transition: transform .15s ease, box-shadow .15s ease;
+border: 1px solid rgba(199, 199, 199, 0.712);
 
 }
+
+
 
 .guardar-observaciones { 
 background: linear-gradient(180deg,
@@ -681,7 +728,7 @@ text-shadow: -1px 1px 1px rgb(255, 255, 255) !important;
 
 /* ESTILOS  INPUTS DE CARDS */
 .date-selectors select,.add-aportante input, .otros-aportes-card input,.gastos-card input,
-.otros-aportes-card > select,.observaciones-container textarea,.otro-juego-picker > select  { 
+.otros-aportes-card > select,.otro-juego-picker >select{ 
 display: flex;
 flex-direction: column;
 gap: 10px;
@@ -966,7 +1013,7 @@ background-color: #237a6b !important;
 
 /* Columna activa */
 .planilla .col-activa {
-  background: rgba(128, 253, 176, 0.658) !important;
+  background: rgba(158, 231, 186, 0.658) !important;
   box-shadow: inset 2px 0 0 #007736, inset -2px 0 0 #beddd1;
 }
 .planilla thead th.col-activa {
@@ -1291,16 +1338,15 @@ background-color: #b9b9b9 !important;  /* beige más oscuro */
 
 /* fila seleccionada tabla */
 .planilla tbody tr.selected-row{
-  background-color: #72e9bb88 !important;
+  background-color: #aff3e862 !important;
   color: #000000 !important;
    text-shadow: -1px 1px 1px rgb(255, 255, 255) !important;
-   font-weight: lighter !important;
-   font-size: 13px;
+   font-size: 14px;
   border-left: 4px solid var(--primary-blue);
 }
 
 .planilla tbody tr.selected-row:hover{
-  background-color: #7cfdb2a1 !important;
+  background-color: #78f1d762 !important;
 }
 
 .planilla tbody tr.eliminado.selected-row{
@@ -1503,11 +1549,44 @@ grid-row: 2  /  span 1;
 grid-column: 1 / span 1;
 grid-row: 2  /  span 1;
 }
+
+.totales-item-value{
+font-size: 14px;
+}
+
+
+.totals-card span, #listaGastos span, .otros-partidos-title,.totales-con-saldo-mini{
+font-size: 14px;
+
+}
+
+/* SECCION DE OTROS PARTIDO INFO */
+
+
 .otros-partidos-info-card{
 
  grid-column: 2 / span 1;
 grid-row: 2  /  span 1; 
 }
+.otros-partidos-info-card h4{
+margin-bottom: 10% !important;
+}
+.otros-partidos-title span,.otros-partidos-tfoot-table span{
+padding: 2%;
+font-size: 14px;
+}
+.otros-partidos-table{
+  font-size:13px;
+}
+.otros-partidos-tfoot-table p{
+  padding: 2%;
+font-size: 16px;
+
+}
+.otros-partidos-tfoot-table span{
+font-size: 14px;
+}
+
 
 
     /* <<<<<<< PROPIEDADES COMUNES EN BOTONES >>>>>>> */
@@ -1569,22 +1648,21 @@ text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
 
 /* BOTONES MOSTRAR GASTOS EDITAR - ELIMINAR  */
 
-.buttons-gastos-container {
-  align-items: flex-start;
-  margin-left: 5%;
-  margin-bottom: 0%; 
-}
-
 .btnEditGasto{
-  width: 2.rem;
-  height: 2.rem;
-  font-size: 1.1rem;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.8rem;
 }
 
 .btnDeleteGasto {
-  width: 2.rem;
-  height: 2.rem;
-  font-size: 1.1rem;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.8rem;
+}
+
+
+.observaciones-container textarea { 
+font-size:14px;
 }
 
 /* ===== MUY IMPORTANTE ===== */
@@ -1739,15 +1817,6 @@ margin-bottom:5%;
 margin-top: 0%;
 }
 
-
-/* zebra desktop */
-.planilla tbody tr:nth-child(odd) {
-background-color: #f3efdb;
-}
-
-.planilla tbody tr:nth-child(even) {
-background-color: #e5dfc3;
-}
 
 }
 
