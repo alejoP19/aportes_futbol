@@ -173,6 +173,46 @@ body {
   -1px 1px 1px #000;
 }
 
+/* SELECTOR DE OTRO PARTIDO */
+
+.otro-juego-public-picker{
+display:inline; 
+gap:6px;
+align-items:center;
+}
+.otro-juego-public-picker label{
+
+display: flex;
+color: #fffb03;
+font-weight:bold; 
+text-shadow: -1px 1px 1px rgba(0,0,0,0.7);
+justify-self: flex-end;
+margin-right: 13%;
+margin-top: 20%;
+}
+.otro-juego-public-picker select  {
+ padding:3px 16px !important; 
+ width: 45%;
+ margin: 0% 2% 3% 2%;
+justify-self: flex-end;
+border-radius: 18px;
+text-align: center;
+font-weight:bold !important; 
+color: #ffffff;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
+border:1px solid #02ffab !important;
+background: linear-gradient(380deg,
+rgb(64, 212, 138),
+rgba(0, 88, 52, 0.973)) !important;
+box-shadow: 0 0 2px rgba(255, 255, 255, 0.966);
+}
+option{
+
+background-color: #ace9d1;
+color: rgb(0, 0, 0);
+
+
+}
 /* =======================================================
    TABLA — CONTENEDOR
    ======================================================= */
@@ -195,6 +235,7 @@ body {
 position: static;  /* se queda arriba cuando scrolleas el contenedor */
 z-index: 200;
 border-bottom: 1px solid rgba(0,0,0,0.08);
+border:1px solid #00583bb2 !important;
 width: 354px;
 min-width: 354px;
 max-width: max-content;
@@ -202,7 +243,8 @@ margin: 10px;
 justify-self: flex-start;
 gap: 8px;
 padding: 7px ;
-background: linear-gradient(135deg, #00694f, #028f6b);
+background: linear-gradient(135deg, rgb(53, 187, 120),
+rgba(0, 88, 52, 0.973));
 border-radius: 10px;
 box-shadow: 0 6px 16px rgba(0,0,0,0.15);
 z-index: 90;
@@ -226,7 +268,7 @@ margin: 2%;
   flex: 1;
   border: none;
   outline: none;
-  background: #59a08257;
+  background: #61bd9785;
   color: #ffffff;
   text-shadow: -1px 1px 1px #000000;
   font-size: 14px;
@@ -237,12 +279,15 @@ margin: 2%;
 
 
 .public-search-input::placeholder {
- color: rgba(254, 255, 184, 0.89);
+ color: rgba(255, 255, 255, 0.952);
   font-size: 14px;
   font-weight: lighter;
   text-shadow: -1px 1px 1px #000000;
 }
-
+.public-search-input:focus-within::placeholder{
+   color: #ffffffd0;
+     font-size: 12px;
+}
 .public-search-input:focus {
 color: #ffffff;
 border-radius: 18px;
@@ -254,7 +299,7 @@ outline: none;
 }
 /* botón limpiar */
 .public-search-clear{ 
-  background: rgba(221, 77, 113, 0.856);
+  background: rgba(245, 73, 73, 0.856);
   border: none;
   border-radius: 50%;
   width: 28px;
@@ -294,23 +339,6 @@ outline: none;
 }
 
 
-.planilla thead th {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  
-  
-}
-.planilla .col-activa{
-  background: rgba(255, 235, 59, 0.25) !important;
-  box-shadow: inset 2px 0 0 #f4c400, inset -2px 0 0 #f4c400;
-}
-.planilla .col-especial{
-  background: rgba(255, 105, 180, 0.18) !important;
-  box-shadow: inset 2px 0 0 #ff4fa3, inset -2px 0 0 #ff4fa3;
-}
-
-
 /* =======================================================
    TABLA — ESTRUCTURA
    ======================================================= */
@@ -319,10 +347,29 @@ outline: none;
   min-width: 90%;
   border-collapse: collapse;
   background: #f1f1f1;
+  border:1px solid #02ffab !important;
   box-shadow: -1px 1px 10px white;
   border-radius: 0;
   overflow: hidden;
   table-layout: auto !important;
+}
+
+/* Encabezados */
+.planilla thead th {
+background: linear-gradient(380deg,
+rgb(53, 189, 121),
+rgba(0, 85, 50, 0.973)) !important;
+  color: #ffffff;
+  font-weight: bold;
+  font-size: medium;
+  text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
+}
+
+.planilla thead tr:nth-child(2) th {
+background: linear-gradient(380deg,
+rgb(53, 189, 121),
+rgba(0, 85, 50, 0.973)) !important;
+  opacity:0.95;
 }
 
 /* Celdas */
@@ -354,6 +401,7 @@ outline: none;
   position: sticky;
   top: 0;
   z-index: 10;
+  
 }
 
 
@@ -412,19 +460,7 @@ outline: none;
   font-weight: 600;
 }
 
-/* Encabezados */
-.planilla thead th {
-  background: var(--verde-medio);
-  color: #ffffff;
-  font-weight: bold;
-  font-size: medium;
-  text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
-}
 
-.planilla thead tr:nth-child(2) th {
-  background:#237a5a;
-  opacity:0.95;
-}
 
 /* Alternancia filas */
 .planilla tbody tr:nth-child(even) {
@@ -482,7 +518,9 @@ outline: none;
 /* Footers */
 .total-footer-dias,
 table tfoot {
-  background-color:#237a5a;
+background: linear-gradient(380deg,
+rgb(53, 189, 121),
+rgba(0, 85, 50, 0.973)) !important;
   padding: 1% 0% !important;
   font-weight: lighter;
    color: #ffd900;
@@ -599,7 +637,7 @@ margin-top: 12%;
 margin-bottom: 8%;
 font-weight: bold;
   color: #ffd900;
-font-size: 25px;
+font-size: 20px;
 text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
  
 }
@@ -636,7 +674,7 @@ border: 1px solid rgba(199, 199, 199, 0.849);
 .lista-gastos label{
   color: #00c95a;
   font-weight: bold;
-  font-size: 20px;
+  font-size: 17px;
   text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
   margin-bottom: 0% !important;
 }
@@ -646,6 +684,7 @@ font-weight: bold;
 text-align: center;
 justify-self: center;
 color: #000;
+ font-size: 15px;
 text-shadow: -1px -1px 1px #ffffff, -1px 1px 1px #ffffff;
 
 }
@@ -666,7 +705,7 @@ border: 1px solid rgba(194, 194, 194, 0.849);
 .totales-gastos .gastos-valor-label{
   font-weight: bold;
   color: #ff0224;
-  font-size: 20px;
+  font-size: 18px;
   text-shadow: -1px 1px 1px #000000,-1px 1px 1px #000000;
   margin-top: -3%;
   bottom: 0%;
@@ -674,7 +713,7 @@ border: 1px solid rgba(194, 194, 194, 0.849);
 .totales-gastos .gastos-valor-valor{
   color: #000000;
   font-weight: bold;
-  font-size: 20px;
+  font-size: 15px;
   text-shadow: -1px 1px 1px #ffffff,-1px 1px 1px #ffffff;
     top: 0%;
   margin-bottom: -1%;
@@ -699,13 +738,13 @@ border: 1px solid rgba(194, 194, 194, 0.849);
   border: 1px solid rgba(196, 196, 196, 0.65);
 }
 
-.titulo-otros{
+.titulo-otros-aportes{
 align-self: center; 
 margin-top: 12%;
 margin-bottom: 8%;
 font-weight: bold;
   color: #ffd900;
-font-size: 25px;
+font-size: 20px;
 text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
 
 }
@@ -745,7 +784,7 @@ text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
 .lista-otros label{
   color: #00c95a;
   font-weight: bold;
-  font-size: 18px;
+  font-size: 17px;
   text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
   margin-bottom: 0% !important;
 }
@@ -755,6 +794,7 @@ text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
   font-weight: bold;
   text-align: center;
   justify-self: center;
+    font-size: 15px;
   color: #000;
   text-shadow: -1px -1px 1px #ffffff, -1px 1px 1px #ffffff;
 }
@@ -767,15 +807,14 @@ text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
 }
 
 .totals-items.extra label{
-  font-size: 16px;
+  font-size: 18px;
   opacity: .90;
 }
 
 .totals-items.extra p{
-  font-size: 16px;
+  font-size: 15px;
   opacity: .95;
 }
-
 
 
 /* =======================================================
@@ -818,7 +857,7 @@ margin-top: 4%;
 margin-bottom: 5%;
 font-weight: bold;
 color: #ffd900;
-font-size: 25px;
+font-size: 20px;
 text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
 }
 
@@ -842,6 +881,175 @@ text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
   text-shadow: -1px -1px 1px #ffffff, -1px 1px 1px #ffffff;
 }
 
+
+/* ==============================
+   OTROS PARTIDOS (TABLA PEQUEÑA)
+   ============================== */
+.otros-partidos-card {
+  
+  width: 99%;
+  justify-self: center;
+  justify-content: space-around;
+  padding: 12px;
+  margin-bottom: 2%;
+  background: #f5f5f2b7;
+ border: 1px solid rgba(218, 218, 218, 0.849);
+  font-weight: bold !important;
+  border-radius: 8px;
+  white-space: pre-line;
+  color: #000000;
+  
+}
+#otrosPartidosPublico .partidos-extra-titulo{
+  padding: 13px 8px;
+  margin: 10px 0 -20px 0;
+  text-align: center;
+  color: #f1c500;
+  font-weight: 800;
+  font-size: 20px;
+  font-style: italic;
+  text-shadow: -1px 1px 1px #000, -1px 1px 1px #000, -1px 1px 1px #000;
+}
+
+#otrosPartidosPublico .partidos-extra-subtitle{
+  margin: 0 0 3px 0;
+}
+#otrosPartidosPublico .partidos-extra-subtitle span{
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(10, 122, 42, 0.12);
+  border: 1px solid rgba(10, 122, 42, 0.25);
+  color: #f1c500;
+  font-weight: 800;
+  font-size: 16px;
+  text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
+}
+
+/* Contenedor: clave para bordes redondos */
+#otrosPartidosPublico .partidos-extra-container-table{
+  overflow: hidden;              /* ✅ para que se vean las esquinas */
+  background: rgba(10, 122, 42, 0.12);
+  border-radius: 12px;
+ border: 1px solid #edf7f0cc;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+}
+
+/* Tabla */
+#otrosPartidosPublico table.partidos-extra-table{
+  width: 97%;
+  border-collapse: collapse;
+  margin: auto;                     /* ✅ quita el -7% que te puede tapar el thead */
+  font-size: 15px;
+}
+
+
+/* THEAD: pon el fondo en TH (no en TR) */
+#otrosPartidosPublico table.partidos-extra-table thead tr th,
+#otrosPartidosPublico tbody tr td{
+text-align: center;
+}
+
+#otrosPartidosPublico table.partidos-extra-table thead th{
+background: linear-gradient(380deg,
+rgb(53, 189, 121),
+rgba(0, 85, 50, 0.973)) !important;
+  color: #ffffff !important;
+  text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
+  font-weight: 800;
+  padding: 10px 10px;
+ 
+
+}
+
+#otrosPartidosPublico thead tr th:first-child{ 
+  border-top-left-radius: 10px;
+}
+#otrosPartidosPublico thead tr th:last-child{ 
+  border-top-right-radius: 10px;
+}
+#otrosPartidosPublico tbody tr:last-child td:first-child{ 
+  border-bottom-left-radius: 10px;
+}
+
+#otrosPartidosPublico tbody tr:last-child td:first-child{ 
+  border-bottom-left-radius: 10px;
+}
+#otrosPartidosPublico tbody tr:last-child td:last-child{ 
+  border-bottom-right-radius: 10px;
+}
+
+
+#otrosPartidosPublico
+.partidos-extra-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+
+
+
+/* Body cells */
+#otrosPartidosPublico table.partidos-extra-table tbody td{
+  padding: 9px 10px;
+  border-bottom: 1px solid rgba(10, 122, 42, 0.18);
+  color: #0b1b12;
+  font-weight: bold;
+  text-shadow: -1px 1px 1px #fcfcfc, -1px 1px 1px #ffffff;
+}
+
+/* Zebra */
+#otrosPartidosPublico table.partidos-extra-table tbody tr:nth-child(even){
+  background: rgba(243, 243, 243, 0.952);
+}
+#otrosPartidosPublico table.partidos-extra-table tbody tr:nth-child(odd){
+  background: rgba(239, 245, 243, 0.637);
+}
+
+/* Hover */
+#otrosPartidosPublico table.partidos-extra-table tbody tr:hover{
+  background: rgba(180, 243, 164, 0.507);
+}
+
+/* Columna Total alineada a la derecha */
+#otrosPartidosPublico .partidos-extra-total{
+  text-align: center;
+  font-weight: bold;
+    background-color: #eef0eed2;
+  font-weight: 900;
+  text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
+}
+.partidos-extra-table tbody tr td :last-child {
+  color: #00c73c;
+  font-weight: bold;
+  text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
+}
+
+/* “tfoot” visual (tu div) */
+#otrosPartidosPublico .partidos-extra-tfoot-table{
+  padding: 10px 12px;
+  background: rgba(236, 236, 236, 0.918);
+   border: 1px solid #c0d6c7cc;
+  border-radius: 10px;
+  margin: 0% 2%;
+}
+
+#otrosPartidosPublico .partidos-extra-tfoot-table p{
+  margin: 0;
+  padding: 0;
+  color: #f1c500;
+  font-weight: 800;
+  font-size: 16px;
+  text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
+}
+
+#otrosPartidosPublico .partidos-extra-tfoot-table span{
+  color: #00c73c;
+  font-weight: 900;
+  text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
+}
+
+/* OBSERVACIONES CARD */
+
 .box-container-observ{
 flex-direction: column;
 align-items: center;
@@ -861,7 +1069,7 @@ margin-top: 8%;
 margin-bottom: 6%;
 font-weight: bold;
 color: #ffd900;
-font-size: 25px;
+font-size: 20px;
 text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
 }
 
@@ -935,6 +1143,24 @@ font-weight:lighter;
 }
 
 
+.otro-juego-public-picker label{
+margin-right: 8%;
+margin-top: 20%;
+}
+.otro-juego-public-picker select  {
+ padding:4px 15px !important; 
+ width: 15%;
+ margin: 0% 4% 1% 2%;
+ font-size: 13px;
+ 
+}
+.otro-juego-public-picker select:hover  {
+ border:1px solid #00ffb3 !important;
+background: linear-gradient(380deg,
+rgb(255, 255, 255),
+rgba(0, 143, 76, 0.973)) !important;
+
+}
   /* Tabla */
   #contenedorTabla{
     /* 🔥 CLAVE: que el contenedor abrace la tabla y el scroll no quede “salido” */

@@ -8,7 +8,19 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("selectAnio").addEventListener("change", cargarDatos);
   document.getElementById("selectMes").addEventListener("change", cargarDatos);
 
+  const selOtro = document.getElementById("selectOtroDia");
+  if (selOtro) {
+    selOtro.addEventListener("change", () => {
+      const mes  = document.getElementById("selectMes").value;
+      const anio = document.getElementById("selectAnio").value;
+      const d = parseInt(selOtro.value, 10);
+      if (Number.isFinite(d)) setStoredOtroDia(mes, anio, d);
+      cargarDatos(); // ✅ fuerza recarga y header sincroniza
+    });
+  }
+
   cargarDatos();
+  
 });
 
 function cargarSelects() {
@@ -40,8 +52,11 @@ function cargarSelects() {
 async function cargarDatos() {
   const mes  = document.getElementById("selectMes").value;
   const anio = document.getElementById("selectAnio").value;
+   const storedOtro = getStoredOtroDia(mes, anio);
+  const otroParam = storedOtro ? `&otro=${storedOtro}` : "";
 
-  const url = `${API_JSON}?mes=${mes}&anio=${anio}`;
+  
+  const url = `${API_JSON}?mes=${mes}&anio=${anio}${otroParam}`;
   const r = await fetch(url);
 
   if (!r.ok) {
@@ -50,6 +65,9 @@ async function cargarDatos() {
   }
 
   const data = await r.json();
+
+  // ✅ pintar selector (después de tener data.otro_dia y days)
+  renderSelectOtroDia(data, mes, anio);
 
   renderTablaPublic(data);
 
@@ -63,7 +81,12 @@ async function cargarDatos() {
   renderObservaciones(data.observaciones);
   renderGastos(data, mes, anio);
   renderOtrosAportesPublico(data, mes, anio);
+  renderOtrosPartidosPublico(data);
 }
+
+
+
+
 
 /* ==========================================================
     TABLA PRINCIPAL
@@ -78,6 +101,7 @@ function renderTablaPublic(data) {
   const totalCols = dias.length + 7;
 
   let html = `
+  
     <div class="public-search-bar">
       <div class="public-search-wrap">
         <span class="icono-buscar">🔍</span>
@@ -478,7 +502,7 @@ function renderGastos(data, mes, anio) {
   const detalle = Array.isArray(data.otros_detalle) ? data.otros_detalle : [];
   const t = data.totales || {};
 
-  let html = `<h3 class="titulo-otros">Otros Aportes</h3>`;
+  let html = `<h3 class="titulo-otros-aportes">Otros Aportes</h3>`;
 
   if (detalle.length){
     html += `<ul class="lista-otros">`;
@@ -534,6 +558,20 @@ document.addEventListener("DOMContentLoaded", () => {
 /* ==========================================================
    HELPERS
 ========================================================== */
+
+
+function normMes(m){ return String(parseInt(m, 10)); }
+function normAnio(a){ return String(parseInt(a, 10)); }
+function getOtroKey(mes, anio){ return `public_otroDia_${normAnio(anio)}_${normMes(mes)}`; }
+
+function getStoredOtroDia(mes, anio){
+  const v = parseInt(localStorage.getItem(getOtroKey(mes, anio)) || "", 10);
+  return Number.isFinite(v) ? v : null;
+}
+function setStoredOtroDia(mes, anio, dia){
+  localStorage.setItem(getOtroKey(mes, anio), String(dia));
+}
+
 
 function formatMoney(v) {
   if (v === null || v === undefined || v === "") return "";
@@ -676,3 +714,86 @@ document.addEventListener("mouseout", (e) => {
   const leavingPlus = e.target.closest(".saldo-plus-public");
   if (leavingExc || leavingPlus) hideTooltip();
 });
+
+
+function renderSelectOtroDia(data, mes, anio){
+  const sel = document.getElementById("selectOtroDia");
+  if (!sel) return;
+
+  const diasValidos = Array.isArray(data.dias_validos) ? data.dias_validos : [];
+  const daysInMonth = new Date(Number(anio), Number(mes), 0).getDate();
+
+  // candidatos = todos los días que NO son miércoles/sábado (no están en dias_validos)
+  const candidatos = [];
+  for (let d = 1; d <= daysInMonth; d++){
+    if (!diasValidos.includes(d)) candidatos.push(d);
+  }
+
+  sel.innerHTML = "";
+  candidatos.forEach(d => {
+    const op = document.createElement("option");
+    op.value = String(d);
+    op.textContent = `Día ${String(d).padStart(2,"0")}`;
+    sel.appendChild(op);
+  });
+
+  // Seleccionar el guardado o el backend
+  const stored = getStoredOtroDia(mes, anio);
+  const target = stored || data.otro_dia;
+  if (target) sel.value = String(target);
+}
+
+
+
+function renderOtrosPartidosPublico(data){
+  const box = document.getElementById("otrosPartidosPublico");
+  if (!box) return;
+
+  const info = data.otros_partidos_info || {};
+  const cantidad = Number(info.cantidad || 0);
+  const total = Number(info.total_general || 0);
+  const items = Array.isArray(info.items) ? info.items : [];
+
+  let html = `<h3 class="partidos-extra-titulo">Otros Partidos (no Mié/Sáb)</h3>`;
+
+  if (!cantidad){
+    html += `<p class="no-otros-partidos-alert">Sin Registros de Otros Partidos Jugados (Días NO miércoles/sábado).</p>`;
+    box.innerHTML = html;
+    return;
+  }
+
+  
+  html += `
+    <div>
+      <div class="partidos-extra-subtitle">
+          <span>Cantidad(${cantidad})</span>
+      </div>
+      <div class="partidos-extra-container-table">
+        <table class="partidos-extra-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Fecha</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map((it, i) => `
+              <tr>
+                <td>${i+1}</td>
+                <td>${escapeHtml(it.fecha_label || it.fecha)}</td>
+                <td class="partidos-extra-total"><strong>${formatMoney(it.efectivo_total || 0)}</strong></td>
+              </tr>
+            `).join("")}
+          </tbody>
+          </table>
+          <div class="partidos-extra-tfoot-table">
+             <p>Total otros partidos: <span>${formatMoney(total)}</span> </p>
+          </div>
+      </div>
+        
+    </div>
+  `;
+
+  box.innerHTML = html;
+}

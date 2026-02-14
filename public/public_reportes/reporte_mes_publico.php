@@ -41,6 +41,45 @@ function pick_default_otro_dia($days, $days_count) {
 $otroDia = pick_default_otro_dia($days, $days_count);
 
 // =========================
+// OTROS PARTIDOS (no mié/sáb) - resumen por fecha
+// =========================
+$otrosDias = [];
+for ($d=1; $d<=$days_count; $d++){
+  if (!in_array($d, $days, true)) $otrosDias[] = $d;
+}
+
+$otrosItems = [];
+$totalOtrosPartidos = 0;
+
+foreach ($otrosDias as $d){
+  $fecha = sprintf("%04d-%02d-%02d", $anio, $mes, (int)$d);
+
+  $efectivoTotal = (int)$conexion->query("
+      SELECT IFNULL(SUM(
+          LEAST(a.aporte_principal + IFNULL(t.consumido,0), $TOPE)
+      ),0) AS s
+      FROM aportes a
+      LEFT JOIN (
+          SELECT target_aporte_id, SUM(amount) AS consumido
+          FROM aportes_saldo_moves
+          GROUP BY target_aporte_id
+      ) t ON t.target_aporte_id = a.id
+      WHERE a.fecha = '$fecha'
+  ")->fetch_assoc()['s'] ?? 0;
+
+  if ($efectivoTotal > 0){
+    $otrosItems[] = [
+      "fecha" => $fecha,
+      "label" => date("d-m-Y", strtotime($fecha)),
+      "total" => $efectivoTotal
+    ];
+    $totalOtrosPartidos += $efectivoTotal;
+  }
+}
+
+
+
+// =========================
 // JUGADORES
 // =========================
 // NOTA: Mantengo tu UNION ALL original (si tu proyecto real usa "activo=0" en jugadores,
@@ -263,7 +302,7 @@ $obs = trim(get_obs($conexion, $mes, $anio));
 <tr>
   <th>Jugador</th>
   <?php foreach ($days as $d): ?><th><?= (int)$d ?></th><?php endforeach; ?>
-  <th>Especial (<?= str_pad((string)$otroDia, 2, "0", STR_PAD_LEFT) ?>)</th>
+  <th>Otra Fecha (<?= str_pad((string)$otroDia, 2, "0", STR_PAD_LEFT) ?>)</th>
   <th>Otros</th>
   <th>Total</th>
   <th>Saldo</th>
@@ -351,6 +390,37 @@ $hayDeudaDia = !empty($deudas_mes[$jid][(int)$d]);
 </table>
 
 <br>
+<?php if (!empty($otrosItems)): ?>
+  <h3>Otros Partidos (no Miércoles/Sábado)</h3>
+  <table border="1" width="60%" cellspacing="0" cellpadding="4">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Fecha</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($otrosItems as $i => $it): ?>
+        <tr>
+          <td><?= (int)($i+1) ?></td>
+          <td><?= htmlspecialchars($it["label"]) ?></td>
+          <td>$ <?= number_format((int)$it["total"], 0, ',', '.') ?></td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2"><strong>Total</strong></td>
+        <td><strong>$ <?= number_format((int)$totalOtrosPartidos, 0, ',', '.') ?></strong></td>
+      </tr>
+    </tfoot>
+  </table>
+<?php else: ?>
+  <h3>Otros Partidos (no Miércoles/Sábado)</h3>
+  <p><em>Sin registros este mes.</em></p>
+<?php endif; ?>
+<br>
 
 <h3>Resumen General</h3>
 <table border="1" width="60%" cellspacing="0" cellpadding="4">
@@ -384,6 +454,7 @@ $hayDeudaDia = !empty($deudas_mes[$jid][(int)$d]);
 
 
 <br>
+
 
 <div class="observaciones">
   <h3 class="observaciones-title">Observaciones del mes</h3>

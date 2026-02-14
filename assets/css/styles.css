@@ -150,7 +150,7 @@ grid-area: month;
 }
 .date-selectors label { 
 color:white; 
-font-weight:lighter; 
+font-weight:bold; 
 text-shadow: -1px 1px 1px rgba(0,0,0,0.7), -1px 1px 1px rgba(0,0,0,0.7);
  
 }
@@ -973,7 +973,7 @@ align-items:center;
 
 .otro-juego-picker span { 
 color:rgb(0, 180, 75); 
-font-weight:lighter; 
+font-weight:bold; 
 text-shadow: -1px 1px 1px rgba(0,0,0,0.7), -1px 1px 1px rgba(8, 7, 7, 0.7);
 margin-left: 13%;
  

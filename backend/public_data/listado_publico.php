@@ -449,13 +449,57 @@ $resObs = $qObs->get_result()->fetch_assoc();
 $observaciones = $resObs['texto'] ?? "";
 $qObs->close();
 
-// DEBUG temporal
-file_put_contents(__DIR__."/debug_saldo.txt", print_r([
-  "mes"=>$mes, "anio"=>$anio,
-  "saldo_total_mes"=>$saldo_total_mes,
-  "saldo_total_anio"=>$saldo_total_anio,
-], true));
 
+// =======================================
+// OTROS PARTIDOS INFO (no miércoles/sábado)
+// =======================================
+$otros_dias = [];
+for ($d = 1; $d <= $daysInMonth; $d++) {
+    if (!in_array($d, $dias_validos, true)) $otros_dias[] = $d;
+}
+
+$otros_items = [];
+$total_general = 0;
+
+if (!empty($playerIds) && !empty($otros_dias)) {
+    $in = implode(",", $playerIds);
+
+    foreach ($otros_dias as $d) {
+        $fecha = sprintf("%04d-%02d-%02d", $anio, $mes, $d);
+
+        // suma efectivo del día = LEAST(aporte_principal + consumido_target, TOPE)
+        $efectivo_total = $conexion->query("
+            SELECT IFNULL(SUM(
+                LEAST(a.aporte_principal + IFNULL(t.consumido,0), $TOPE)
+            ),0) AS s
+            FROM aportes a
+            LEFT JOIN (
+                SELECT target_aporte_id, SUM(amount) AS consumido
+                FROM aportes_saldo_moves
+                GROUP BY target_aporte_id
+            ) t ON t.target_aporte_id = a.id
+            WHERE a.fecha = '$fecha'
+              AND a.id_jugador IN ($in)
+        ")->fetch_assoc()['s'] ?? 0;
+
+        $efectivo_total = (int)$efectivo_total;
+
+        if ($efectivo_total > 0) {
+            $otros_items[] = [
+                "fecha" => $fecha,
+                "fecha_label" => date("d-m-Y", strtotime($fecha)),
+                "efectivo_total" => $efectivo_total
+            ];
+            $total_general += $efectivo_total;
+        }
+    }
+}
+
+$otros_partidos_info = [
+    "cantidad" => count($otros_items),
+    "total_general" => (int)$total_general,
+    "items" => $otros_items
+];
 
 
 echo json_encode([
@@ -469,9 +513,9 @@ echo json_encode([
     "rows"          => $rows,
     "observaciones" => $observaciones,
     "gastos_detalle"=> $gastos_detalle,
-
-       // ✅ AQUÍ, a nivel raíz:
     "otros_detalle" => $otros_detalle,
+       // ✅ AQUÍ EN RAÍZ:
+    "otros_partidos_info" => $otros_partidos_info,
 
     "totales" => [
         "month_total"       => (int)$month_total_final,
@@ -486,6 +530,9 @@ echo json_encode([
 
         // (si quieres conservarlo también aquí no pasa nada)
         "otros_mes_total"   => (int)$otros_mes,
+    
+
+        
     ]
 ]);
 exit;
