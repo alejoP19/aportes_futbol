@@ -128,7 +128,7 @@ function renderTablaPublic(data) {
   html += `<th>Deudas</th>`;
   html += `</tr>`;
 
-  html += `<tr><th></th>`;
+  html += `<tr class="encabezado-dos" ><th></th>`;
   dias.forEach(d => html += `<th>${d}</th>`);
   html += `<th>Otra Fecha (${fechaEspecial})</th>`;
   html += `<th>Tipo</th><th>Valor</th>`;
@@ -467,7 +467,7 @@ function renderGastos(data, mes, anio) {
   if (detalle.length) {
     html += `<ul class="lista-gastos">`;
     detalle.forEach(g => {
-      html += `<li><label>* ${escapeHtml(g.nombre)}</label><p>${formatMoney(g.valor)}</p></li>`;
+      html += `<li><label> ${escapeHtml(g.nombre)}</label><p>${formatMoney(g.valor)}</p></li>`;
     });
     html += `</ul>`;
   } else {

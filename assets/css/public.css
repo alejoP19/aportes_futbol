@@ -181,18 +181,20 @@ gap:6px;
 align-items:center;
 }
 .otro-juego-public-picker label{
-
 display: flex;
-color: #fffb03;
+color: #ffdb0e;
 font-weight:bold; 
-text-shadow: -1px 1px 1px rgba(0,0,0,0.7);
+text-shadow: -1px 1px 1px rgba(0,0,0,0.7),-1px 1px 1px rgba(0,0,0,0.7);
 justify-self: flex-end;
-margin-right: 13%;
+margin-right: 8%;
 margin-top: 20%;
 }
+
+
 .otro-juego-public-picker select  {
- padding:3px 16px !important; 
- width: 45%;
+ padding:4px 15px !important; 
+ width: 35%;
+ font-size: 12px;
  margin: 0% 2% 3% 2%;
 justify-self: flex-end;
 border-radius: 18px;
@@ -354,6 +356,8 @@ outline: none;
   table-layout: auto !important;
 }
 
+
+
 /* Encabezados */
 .planilla thead th {
 background: linear-gradient(380deg,
@@ -361,7 +365,7 @@ rgb(53, 189, 121),
 rgba(0, 85, 50, 0.973)) !important;
   color: #ffffff;
   font-weight: bold;
-  font-size: medium;
+   font-size: 14px;
   text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
 }
 
@@ -370,24 +374,22 @@ background: linear-gradient(380deg,
 rgb(53, 189, 121),
 rgba(0, 85, 50, 0.973)) !important;
   opacity:0.95;
+   font-size: 12px;
 }
 
 /* Celdas */
 .planilla th,
 .planilla td {
-  padding: 8px 10px;
   border: 1px solid var(--gris-borde);
   text-align: center;
-  font-size: 14px;
   vertical-align: middle;
   white-space: normal;
   word-break: break-word;
-  min-width: 70px;
-  
+  padding: 5px 7px;
+  font-size: 12px;
+  min-width: 10px; 
    
 }
-
-
 
 /* Contenedor con scroll vertical + horizontal (clave para sticky) */
 .table-scroll {
@@ -447,19 +449,20 @@ rgba(0, 85, 50, 0.973)) !important;
 
 /* Celdas aporte */
 .celda-aporte {
+  padding: 3px 6px !important;
+  font-weight: bold;
+  font-size: 11px !important;
   background: rgba(255,255,255,0.6);
   border-radius: 3px;
-  padding: 8px 6px;
   text-align: center;
 }
 
 /* Celdas excedentes */
 .aporte-excedente {
   cursor: help;
-  background-color: rgba(166, 255, 0, 0.12);
+  background-color: rgba(14, 228, 110, 0.178);
   font-weight: 600;
 }
-
 
 
 /* Alternancia filas */
@@ -480,14 +483,16 @@ rgba(0, 85, 50, 0.973)) !important;
 .player-name {
   text-align:left !important;
   padding-left: 10px !important;
-  font-size: medium !important;
   font-style: italic;
   color: #000000;
   font-weight: bold;
   text-shadow: -1px 1px 1px #ffffff,
   -1px 1px 1px #ffffff,
   -1px 1px 1px #ffffff,-1px 1px 1px #f1f1f1;
-  width: 220px;
+    min-width: 170px;
+  width: 170px;
+  font-size: 16px!important;
+  text-transform: lowercase;
 
 }
 
@@ -495,11 +500,14 @@ rgba(0, 85, 50, 0.973)) !important;
   text-align:left;
   padding-left:10px;
   white-space:pre-line;
-  font-weight: lighter;
-  font-size: medium;
+  font-size: 13px;
   color: #000;
   text-shadow:-1px 1px 1px #fff;
+  overflow-wrap: break-word;
+  width: 120px;
+  font-weight: bold;
 }
+
 
 /* Totales por jugador */
 .otros-valor {
@@ -515,16 +523,19 @@ rgba(0, 85, 50, 0.973)) !important;
   text-shadow:-1px 1px 1px #000,-1px 1px 1px #000;
 }
 
+
+
+
 /* Footers */
 .total-footer-dias,
 table tfoot {
 background: linear-gradient(380deg,
 rgb(53, 189, 121),
 rgba(0, 85, 50, 0.973)) !important;
-  padding: 1% 0% !important;
-  font-weight: lighter;
-   color: #ffd900;
-      font-size: 17px !important;
+padding: 1% 0% !important;
+font-weight: lighter;
+color: #ffd900;
+font-size: 13px !important;
  text-shadow:-1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
 }
  .tfoot-totals-names{
@@ -534,7 +545,7 @@ rgba(0, 85, 50, 0.973)) !important;
   font-weight: lighter;
   justify-self: center;
   color: #ffffff;
-  font-size: large;
+  font-size: 15px; 
   text-shadow:-1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
 }
 /* Jugadores eliminados en tabla pública */
@@ -557,6 +568,14 @@ rgba(0, 85, 50, 0.973)) !important;
     color: red;
     text-shadow: -1px 1px 1px #000;
 }
+.deuda-fecha-item{
+  
+  margin: 2px 0;
+  color: #000000;
+  font-weight: bold !important;
+  text-shadow: -1px 1px 1px #ffffff, -1px 1px 1px #ffffff;
+  font-size: 10px !important;
+}
 
 .columna-deuda.sin-deuda {
     color: #008c2c;
@@ -574,6 +593,67 @@ rgba(0, 85, 50, 0.973)) !important;
     color: red;
     margin-right: 4px;
 }
+
+
+/* ================================
+   SCROLL BONITO DENTRO DE CELDAS (LAPTOP)
+   Solo afecta desktop/laptop
+================================ */
+
+/* 1) el TD no debe volverse "contenedor scroll" */
+
+.planilla td.columna-deuda {
+  vertical-align: top;         
+} 
+
+/* 2) el DIV interno es el que scrollea */
+ .planilla .cell-scroll{
+  display: block;
+  max-height: 25px; 
+  height: 25px;        
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px; 
+  margin: 5px;        
+  box-sizing: border-box;
+  scrollbar-gutter: stable;
+
+} 
+
+/* 3) Scrollbar delgado (Chrome/Edge/Safari) */
+.planilla .cell-scroll::-webkit-scrollbar{
+  width: 12px;
+}
+
+.planilla .cell-scroll::-webkit-scrollbar-track{
+  background: rgba(0,0,0,0.08);
+  border-radius: 10px;
+}
+
+.planilla .cell-scroll::-webkit-scrollbar-thumb{
+  background: rgba(36,90,75,0.65);   /* verde oscuro de tu paleta */
+  border-radius: 10px;
+  border: 2px solid rgba(0,0,0,0.08); /* “padding visual” */
+}
+
+.planilla .cell-scroll::-webkit-scrollbar-thumb:hover{
+  background: rgba(36, 90, 50, 0.85);
+}
+
+/* quita flechas (las de arriba/abajo) */
+.planilla .cell-scroll::-webkit-scrollbar-button{
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* 4) Firefox */
+.planilla .cell-scroll{
+  scrollbar-width: thin;
+  scrollbar-color: rgba(36,90,75,0.75) rgba(0,0,0,0.10);
+}
+
+
 
 /* =======================================================
    TOOOL TIP APORTE
@@ -600,7 +680,7 @@ rgba(0, 85, 50, 0.973)) !important;
 /* =======================================================
    GASTOS / OBSERVACIONES
    ======================================================= */
-.gastos-observaciones {
+.gast-tot-obs-container {
 display: flex;
 flex-direction: column;
 align-items: center;
@@ -651,18 +731,16 @@ padding: 0;
  }
 
 .lista-gastos li {
-display: flex;
 flex-direction: column;
 align-items: center;
 justify-content: center;
 align-self: center;
 width: 100% !important;
-padding: 15px 0px 0px 0px;
+padding: 0px;
 font-weight: bold;
 font-size: 18px;
-text-align: center;
-gap: 8px;
 color: #000;
+  list-style: none !important;
 text-shadow: -1px -1px 1px #ffffff, -1px 1px 1px #ffffff;
 background-color: rgb(243, 243, 243);
 border-radius: 10px;
@@ -672,11 +750,16 @@ border: 1px solid rgba(199, 199, 199, 0.849);
 }
 
 .lista-gastos label{
+  display: flex;
   color: #00c95a;
   font-weight: bold;
   font-size: 17px;
   text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
-  margin-bottom: 0% !important;
+  margin-bottom: 1% !important;
+  margin-top: 5%;
+  justify-self: center;
+
+
 }
 .lista-gastos p{
 padding: 0px;
@@ -1142,16 +1225,16 @@ font-weight:lighter;
  font-size: large;
 }
 
-
 .otro-juego-public-picker label{
-margin-right: 8%;
-margin-top: 20%;
+margin-right: 8.5%;
+margin-top: 0%;
 }
+
 .otro-juego-public-picker select  {
  padding:4px 15px !important; 
- width: 15%;
- margin: 0% 4% 1% 2%;
- font-size: 13px;
+ width: 12%;
+ margin: 0% 6% 1% 2%;
+ font-size: 12px;
  
 }
 .otro-juego-public-picker select:hover  {
@@ -1163,11 +1246,10 @@ rgba(0, 143, 76, 0.973)) !important;
 }
   /* Tabla */
   #contenedorTabla{
-    /* 🔥 CLAVE: que el contenedor abrace la tabla y el scroll no quede “salido” */
     width: fit-content;
-    max-width: 94%;
-    margin: 0 auto 3% auto;
-    padding-top: 10px;   /* opcional */
+    max-width: 90%;
+    padding: 10px 20px 10px 5px;   /* opcional */
+    margin-bottom: 30px;
     overflow: auto;                 /* X + Y */
     max-height: calc(100vh - 100px);/* ajusta si quieres */
     box-shadow: none;
@@ -1179,8 +1261,6 @@ rgba(0, 143, 76, 0.973)) !important;
   }
 
  
-
-
  /* Scrollbar bonito para el contenedor de la tabla */
   #contenedorTabla::-webkit-scrollbar{
     width: 30px;   /* scroll Y */
@@ -1193,7 +1273,7 @@ rgba(0, 143, 76, 0.973)) !important;
   }
 
   #contenedorTabla::-webkit-scrollbar-thumb{
-    background: rgba(22, 160, 109, 0.85); /* tu verde */
+    background: rgba(160, 100, 22, 0.85); /* tu verde */
     border-radius: 12px;
     border: 2px solid rgba(241,241,241,.88); /* “inset” */
   }
@@ -1204,171 +1284,176 @@ rgba(0, 143, 76, 0.973)) !important;
 
 
 
-
 .public-search-bar{
-width: 40%;
-min-width: 40%;
-max-width: max-content;
-margin: 22px;
-justify-self: flex-end;
-padding: 10px ;
+gap: 6px;
+padding: 6px ;
+}
 
+/* contenedor del input */
+.public-search-wrap{
+  gap:10px; 
+}
+
+/* input */
+.public-search-input{
+  font-size: 13px;
+  padding: 2px 10px;
+}
+
+.public-search-input::placeholder {
+  font-size: 13px;
+}
+.public-search-input:focus-within::placeholder{
+     font-size: 10px;
+}
+
+/* botón limpiar */
+.public-search-clear{ 
+  width: 23px;
+  height: 23px; 
+}
+
+
+/* =======================================================
+   TABLA — ESTRUCTURA
+   ======================================================= */
+.planilla {
+  min-width: 90%;
+}
+
+/* Encabezados */
+.planilla thead th {
+  font-size: 14px;
+
+}
+
+.planilla thead tr:nth-child(2) th {
+ font-size: 12px;
+
+}
+
+/* Celdas */
+.planilla th,
+.planilla td {
+  padding: 5px 7px;
+  font-size: 12px;
+  min-width: 10px;  
+ 
+}
+
+  .planilla td.player-name{
+  min-width: 170px;
+  width: 170px;
+  font-size: 15px!important;
+  text-transform: lowercase;
+  }
+
+/* Celdas aporte */
+.celda-aporte {
+  padding: 3px 6px !important;
+  font-weight: bold;
+  font-size: 11px !important;
+}
+
+/* Celdas excedentes */
+.aporte-excedente {
+  cursor: help;
+  font-weight: bold;
+}
+
+.otros-tipos {
+  text-align:left;
+  padding-left:10px;
+  white-space:pre-line;
+   overflow-wrap: break-word;
+  font-weight: lighter;
+  font-size: 14px;
+  color: #000;
+  text-shadow:-1px 1px 1px #fff;
+  width: 120px;
+}
+
+
+/* Jugadores eliminados en tabla pública */
+.planilla tbody tr.eliminado {
+    background-color: #fc8e97 !important; /* rosado suave */
+    color: #000000 !important;
+}
+
+.planilla tbody tr.eliminado:nth-child(odd),
+.planilla tbody tr.eliminado:nth-child(even) {
+    background-color: #f7a6ad !important;
+}
+
+.planilla tbody tr.eliminado:hover {
+    background-color: #ff8993 !important;
+    cursor: default;
+}
+.columna-deuda {
+    font-weight: bold;
+    color: red;
+      font-size: 11px;
+    text-shadow: -1px 1px 1px #000;
+}
+
+.columna-deuda.sin-deuda {
+    color: #8c7700;
+    text-shadow: -1px 1px 1px #000;
+}.x-deuda {
+    color: red;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.deuda-x-publica {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: bold;
+    color: red;
+    margin-right: 4px;
 }
 
 
 /* opcional: que se vea más compacto */
-.deuda-fechas-public{
+ .deuda-fechas-public{
   margin-top: 6px;
-  font-size: 12px;
-  line-height: 14px;
+  line-height:30px;
 }
 .deuda-fecha-item{
-  margin: 2px 0;
-}
-
-
-  .planilla {
-    width: 100%;
-    min-width: 100%;
-    margin-top: 0;          /* ✅ antes 4% */
-    margin-bottom: 2%;
-
-  border-collapse: separate;  /* ✅ en vez de collapse */
-  border-spacing: 0;
-  border-radius: 10px;
-  overflow: hidden;
-  }
-
-
-
-/* NO tocar el display del TD */
-.planilla td.otros-tipos{
-  display: table-cell; /* o simplemente quita display */
-  padding-top: 6px;
-  padding-bottom: 6px;
-  vertical-align: top;
-}
+  font-size: 11px !important;
+} 
 
 /* Si quieres que el strong de deuda sea bloque, SOLO él */
-.planilla td.columna-deuda strong{
+ .planilla td.columna-deuda strong{
   display: block;
-  margin-bottom: 6px;
+  margin: 2px;
+  text-align: center;
+  border-radius: 15px;
+  padding: 2px 12px;
+  font-size: 11px;
+  background-color: #e7e7e7cb;
+} 
+/* Footers */
+.total-footer-dias,
+table tfoot {
+ font-size: 13px !important;
 }
-
- .planilla th,
-  .planilla td{
-    min-width: 90px;   /* un poco más anchas */
-
-  }
-
-  .planilla td.player-name{
-    min-width: 170px;  /* para nombres */
-  }
-
-  .planilla td.otros-tipos{
-    min-width: 160px;  /* para que no se “aplane” */
-  }
-  .planilla  td.otros-valor{
-    min-width: 100px;  /* para que no se “aplane” */
-  }
-  .planilla td.columna-deuda{
-    min-width: 120px;  /* para deuda */
-  }
-
-
-  
-/* Opcional: que el texto no se “pegue” */
-.planilla td.columna-deuda strong{
-  display:block;
-  margin-bottom: 6px;
+ .tfoot-totals-names{
+  font-size: 15px; 
 }
 
 
-/* ================================
-   SCROLL BONITO DENTRO DE CELDAS (LAPTOP)
-   Solo afecta desktop/laptop
-================================ */
-
-/* 1) el TD no debe volverse "contenedor scroll" */
-.planilla td.otros-tipos,
-.planilla td.columna-deuda {
-  vertical-align: top;         /* no centre el bloque, queda más natural */
-}
-
-/* 2) el DIV interno es el que scrollea */
-.planilla .cell-scroll{
-  display: block;
-  max-height: 35px;            /* ajusta: 30/45/60/80 según gusto */
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 8px;          /* espacio para scrollbar */
-  box-sizing: border-box;
-
-  /* opcional: evita que “salte” el layout cuando aparece scrollbar */
-  scrollbar-gutter: stable;
-}
-
-/* 3) Scrollbar delgado (Chrome/Edge/Safari) */
-.planilla .cell-scroll::-webkit-scrollbar{
-  width: 8px;
-}
-
-.planilla .cell-scroll::-webkit-scrollbar-track{
-  background: rgba(0,0,0,0.08);
-  border-radius: 10px;
-}
-
-.planilla .cell-scroll::-webkit-scrollbar-thumb{
-  background: rgba(36,90,75,0.65);   /* verde oscuro de tu paleta */
-  border-radius: 10px;
-  border: 2px solid rgba(0,0,0,0.08); /* “padding visual” */
-}
-
-.planilla .cell-scroll::-webkit-scrollbar-thumb:hover{
-  background: rgba(36,90,75,0.85);
-}
-
-/* quita flechas (las de arriba/abajo) */
-.planilla .cell-scroll::-webkit-scrollbar-button{
-  display: none;
-  width: 0;
-  height: 0;
-}
-
-/* 4) Firefox */
-.planilla .cell-scroll{
-  scrollbar-width: thin;
-  scrollbar-color: rgba(36,90,75,0.75) rgba(0,0,0,0.10);
-}
-
-
-
-
-  /* opcional: que no se vea enorme el texto del listado */
-  .deuda-fechas-public{
-    margin-top: 6px;
-    font-size: 12px;
-    line-height: 14px;
-  }
-
-
-
-  .player-name {
-    padding-left: 14px;
-    font-size: 14px !important;
-   
-  }
-
+/* <<<<<<<<<<<<< SECCION CARD >>>>>>>>>>>>>>>  */
 
 
   /* Gastos / observaciones */
-.gastos-observaciones {
+.gast-tot-obs-container {
 display: grid;
 grid-template-columns: repeat(2,1fr);
 grid-template-rows:repeat(2,fit-content); ;
 padding: 8px;
 flex-direction: row;
-width: 94%;
+width: 90%;
 margin: auto;
 margin-bottom: 7%;
 gap: 10px;
@@ -1378,7 +1463,7 @@ gap: 10px;
 /*Gastos*/
 
 #gastosMesPublico{
-  grid-column: 1 / span 2;
+  grid-column: 1 / span 1;
   grid-row: 1 / span 1 ;
   flex-direction: row !important;
   flex-wrap: wrap;
@@ -1386,24 +1471,66 @@ gap: 10px;
   align-self: flex-start;
 
 }
-.titulo-gastos{
-margin-top: 1%;
-margin-bottom: 4%;
-font-size: 27px; 
-}
-.lista-gastos{
-flex-direction: row;
-gap: 5px;
-justify-content:center ;
-padding: 0;
 
- }
+
+.titulo-gastos{
+margin-top: 5%;
+margin-bottom: 6%;
+font-size: 22px; 
+}
+
+/* UL */
+.lista-gastos{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;              /* por si no caben en una línea */
+  width: 100% !important;
+  padding: 0;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: stretch;         /* ✅ todos con misma altura */
+  list-style: none;
+  margin: 0;
+}
+
+/* LI = “tarjetas” iguales */
+.lista-gastos li{
+  flex: 1 1 160px;              /* ✅ mismo ancho por “columna”, responsive */
+  min-width: 120px; 
+           /* ajusta a gusto */
+  height: 80px;                /* ✅ misma altura SIEMPRE (ajústala) */
+
+  display: flex;                /* ✅ para centrar contenido */
+  flex-direction: column;
+  justify-content: center;      /* ✅ label + p al centro vertical */
+  align-items: center;          /* ✅ centro horizontal */
+  text-align: center;
+
+  padding: 10px;
+  margin: 0 !important;
+  border-radius: 12px;          /* si quieres */
+}
+
+/* texto */
+.lista-gastos label{
+  font-size: 14px;
+  margin: 0;
+}
+
+.lista-gastos p{
+  font-weight: bold;
+  font-size: 12px;
+  margin: 6px 0 0 0;            /* espacio controlado */
+}
+
+
+
 
 
 /* Desktop/Laptop: Otros Aportes dentro del grid SIN desbordarse */
 #otrosAportesPublico{
-  grid-column: 1 / span 2;
-  grid-row: 2 / span 1;
+  grid-column: 2 / span 1;
+  grid-row: 1 / span 1;
   flex-direction: row !important;
   flex-direction: row;
   flex-wrap: wrap;
@@ -1455,8 +1582,8 @@ margin-bottom: 1%;
   /* Totales */
  
 .totales-card {
-grid-column: 1 / span 1;
-grid-row: 3 / span 1 ;
+grid-column: 2 / span 1;
+grid-row: 2 / span 1 ;
 align-self: flex-start;
 margin-top: -2%;
 margin-bottom: 1%;
@@ -1484,7 +1611,7 @@ font-size: 27px;
 }
 
 .box-container-observ{
-grid-column: 2 / span 1;
+grid-column: 1 / span 2;
 grid-row: 3 / span 1 ;
 justify-items: center;
 min-height: 100%;

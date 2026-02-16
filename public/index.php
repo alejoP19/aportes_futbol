@@ -43,7 +43,7 @@
   <section id="contenedorTabla">
   </section>
 
-  <div class="gastos-observaciones">
+  <div class="gast-tot-obs-container">
     <!-- Nueva sección para mostrar gastos del mes / año -->
     <section id="gastosMesPublico" class="observaciones-box"></section>
     <section id="otrosAportesPublico" class="observaciones-box"></section>
