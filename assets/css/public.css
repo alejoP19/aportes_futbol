@@ -595,6 +595,28 @@ font-size: 13px !important;
 }
 
 
+/* ✚ saldo usado (público) */
+.saldo-plus-public{
+  display:inline-block;
+  margin-right:6px;
+  font-weight:700;
+  color:#1f9d55;   /* verde */
+  font-size:14px;
+  line-height:14px;
+  cursor:default;
+}
+
+/* lista de fechas de deuda */
+.deuda-fechas-public{
+  margin-top:4px;
+  font-size:12px;
+  color:#0a7a2a;
+}
+.deuda-fecha-item{
+  line-height:14px;
+}
+
+
 /* ================================
    SCROLL BONITO DENTRO DE CELDAS (LAPTOP)
    Solo afecta desktop/laptop
@@ -703,7 +725,7 @@ box-shadow: -1px -1px 4px #feffb1, -1px 1px 4px #fff8b8;
   justify-content: space-around;
   align-items: center;
   flex-wrap: wrap;
-  background-color: #f5f5f5e8;
+  background-color: rgba(217, 232, 235, 0.7) !important;
   gap: 3px;
   margin: 0%;
   padding: 2%;
@@ -785,7 +807,7 @@ background-color: rgba(241, 241, 241, 0.897);
 border: 1px solid rgba(194, 194, 194, 0.849);
 
 }
-.totales-gastos .gastos-valor-label{
+.gastos-valor-label{
   font-weight: bold;
   color: #ff0224;
   font-size: 18px;
@@ -793,7 +815,7 @@ border: 1px solid rgba(194, 194, 194, 0.849);
   margin-top: -3%;
   bottom: 0%;
 }
-.totales-gastos .gastos-valor-valor{
+ .gastos-valor-valor{
   color: #000000;
   font-weight: bold;
   font-size: 15px;
@@ -868,6 +890,7 @@ text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
   color: #00c95a;
   font-weight: bold;
   font-size: 17px;
+  margin-top: 5%;
   text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
   margin-bottom: 0% !important;
 }
@@ -882,22 +905,38 @@ text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
   text-shadow: -1px -1px 1px #ffffff, -1px 1px 1px #ffffff;
 }
 
-/* Totales “extra” (menos importantes) dentro de la card Totales */
-.totals-items.extra{
-  opacity: .90;
-  filter: saturate(.85);
-  border-style: dashed;
-}
 
-.totals-items.extra label{
+.totales-otros-aportes{
+flex-direction: column;
+align-items: center;
+justify-content: center;
+align-self: center;
+width: 100% !important;
+padding:0px;
+text-align: center;
+gap: 0px;
+border-radius: 10px;
+background-color: rgba(241, 241, 241, 0.897);
+border: 1px solid rgba(194, 194, 194, 0.849);
+
+}
+.total-otros-label{
+  font-weight: bold;
+  color: #ff0224;
   font-size: 18px;
-  opacity: .90;
+  text-shadow: -1px 1px 1px #000000,-1px 1px 1px #000000;
+  margin-top: -3%;
+  bottom: 0%;
+}
+ .total-otros-valor{
+  color: #000000;
+  font-weight: bold;
+  font-size: 15px;
+  text-shadow: -1px 1px 1px #ffffff,-1px 1px 1px #ffffff;
+    top: 0%;
+  margin-bottom: -1%;
 }
 
-.totals-items.extra p{
-  font-size: 15px;
-  opacity: .95;
-}
 
 
 /* =======================================================
@@ -927,7 +966,7 @@ text-align: center;
 border-radius: 10px;
 border: 1px solid rgba(218, 218, 218, 0.849);
 background-color: #f1f1f1;
-padding: 18px 0px 5px 0px;
+padding: 10px 0px 3px 0px;
 margin: 0% 0%;
 width: 105%;
 
@@ -942,40 +981,61 @@ font-weight: bold;
 color: #ffd900;
 font-size: 20px;
 text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
+
 }
 
 .totales-card label {
-  color: #00c95a;
+  color: #fcfa7c !important;
   font-weight: bold;
   font-size: 18px;
-  text-shadow: -1px 1px 1px #000000, -1px 1px 1px #000000, -1px 1px 1px #000000;
+  text-shadow: -1px 1px 1px #000000,
+   -1px 1px 1px #000000,
+    -1px 1px 1px #000000,
+     -1px 1px 1px #000000;
   margin-top: 1%;
   margin-bottom: 0%;
+   
 }
 
 .totales-card p {
   font-weight: bold;
-  font-size: 18px;
+  font-size: 15px;
   text-align: center;
   justify-self: center;
   padding: 0%;
   margin-top: 5%;
   color: #000;
   text-shadow: -1px -1px 1px #ffffff, -1px 1px 1px #ffffff;
+ 
 }
 
+
+/* Totales “extra” (menos importantes) dentro de la card Totales */
+.totals-items.extra{
+  filter: saturate(.85);
+  border-style: dashed;
+}
+
+.totals-items.extra label{
+  font-size: 18px;
+    color: #00c95a !important;
+}
+
+.totals-items.extra p{
+  font-size: 15px;
+}
 
 /* ==============================
    OTROS PARTIDOS (TABLA PEQUEÑA)
    ============================== */
 .otros-partidos-card {
-  
+  display: flex;
+  flex-direction: column;
   width: 99%;
   justify-self: center;
-  justify-content: space-around;
   padding: 12px;
   margin-bottom: 2%;
-  background: #f5f5f2b7;
+  background-color: rgba(217, 232, 235, 0.7) !important;
  border: 1px solid rgba(218, 218, 218, 0.849);
   font-weight: bold !important;
   border-radius: 8px;
@@ -987,11 +1047,12 @@ text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
   padding: 13px 8px;
   margin: 10px 0 -20px 0;
   text-align: center;
-  color: #f1c500;
-  font-weight: 800;
+color: #ffd900;
+text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
+  font-weight: bold;
   font-size: 20px;
   font-style: italic;
-  text-shadow: -1px 1px 1px #000, -1px 1px 1px #000, -1px 1px 1px #000;
+
 }
 
 #otrosPartidosPublico .partidos-extra-subtitle{
@@ -1003,10 +1064,10 @@ text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
   border-radius: 999px;
   background: rgba(10, 122, 42, 0.12);
   border: 1px solid rgba(10, 122, 42, 0.25);
-  color: #f1c500;
+color: #ffd900;
+text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
   font-weight: 800;
   font-size: 16px;
-  text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
 }
 
 /* Contenedor: clave para bordes redondos */
@@ -1119,16 +1180,40 @@ rgba(0, 85, 50, 0.973)) !important;
 #otrosPartidosPublico .partidos-extra-tfoot-table p{
   margin: 0;
   padding: 0;
-  color: #f1c500;
-  font-weight: 800;
+  font-weight: bold;
+color: #f8d301;
+text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
   font-size: 16px;
-  text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
+  
 }
 
 #otrosPartidosPublico .partidos-extra-tfoot-table span{
   color: #00c73c;
-  font-weight: 900;
+  font-weight: bold;
   text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
+}
+
+.alert-no-otros-partidos{
+
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+margin-bottom: 10%;
+width: 100% !important;
+padding:14px 4px 10px 4px;
+text-align: center;
+gap: 0px;
+border-radius: 10px;
+background-color: rgba(204, 214, 214, 0.897);
+border: 1px solid rgba(199, 199, 199, 0.61);
+
+}
+.alert-no-otros-partidos-label{
+  font-weight: bold;
+  color: #ecececfa;
+  font-size: 15px;
+  text-shadow: -1px 1px 1px #000000,-1px 1px 1px #000000,-1px 1px 1px #000000;
 }
 
 /* OBSERVACIONES CARD */
@@ -1143,7 +1228,7 @@ padding:0px;
 text-align: center;
 gap: 0px;
 border-radius: 10px;
-background: #e4edee85;
+background-color: #e4e3e3d5;
 border: 1px solid rgba(204, 204, 204, 0.849);
 }
  #title-observaciones{
@@ -1152,8 +1237,9 @@ margin-top: 8%;
 margin-bottom: 6%;
 font-weight: bold;
 color: #ffd900;
+text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
 font-size: 20px;
-text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
+
 }
 
 .observaciones-box {
@@ -1469,6 +1555,7 @@ gap: 10px;
   flex-wrap: wrap;
   margin-bottom: 1% !important;
   align-self: flex-start;
+  min-height: 100%;
 
 }
 
@@ -1486,7 +1573,8 @@ font-size: 22px;
   flex-wrap: wrap;              /* por si no caben en una línea */
   width: 100% !important;
   padding: 0;
-  gap: 10px;
+  gap: 3px;
+  border-radius: 5px !important;
   justify-content: space-between;
   align-items: stretch;         /* ✅ todos con misma altura */
   list-style: none;
@@ -1513,7 +1601,7 @@ font-size: 22px;
 
 /* texto */
 .lista-gastos label{
-  font-size: 14px;
+  font-size: 15px;
   margin: 0;
 }
 
@@ -1524,59 +1612,121 @@ font-size: 22px;
 }
 
 
+.totales-gastos{
+display: inline-flex;
+flex-direction: row !important;
+max-height: 110px;
+height: fit-content;
+padding:10px;
+}
+
+
+.totales-gastos-item{
+ flex: 1 1 160px;              /* ✅ mismo ancho por “columna”, responsive */
+  min-width: 120px;         /* ajusta a gusto */
+  height: 80px;                /* ✅ misma altura SIEMPRE (ajústala) */
+  display: flex;                /* ✅ para centrar contenido */
+  flex-direction: column;
+  justify-content: center;      /* ✅ label + p al centro vertical */
+  align-items: center;          /* ✅ centro horizontal */
+  text-align: center;
+  padding: 10px;
+  margin: 0 !important;
+  border-radius: 12px;          /* si quieres */
+}
+.totales-gastos .gastos-valor-label{
+  font-size: 16px;
+}
+.totales-gastos .gastos-valor-valor{
+  font-size: 13px;
+  margin-bottom: -1%;
+}
 
 
 
-/* Desktop/Laptop: Otros Aportes dentro del grid SIN desbordarse */
+/* Desktop/Laptop: Otros Aportes */
 #otrosAportesPublico{
   grid-column: 2 / span 1;
   grid-row: 1 / span 1;
   flex-direction: row !important;
-  flex-direction: row;
   flex-wrap: wrap;
   max-width: 100%;          /* ✅ NO fit-content */
+  min-height: 100%;
+  justify-content: center;
   box-sizing: border-box;   /* ✅ respeta padding/bordes */
   overflow: hidden;         /* ✅ evita que se salga visualmente */
-
-  background-color: #008c2c;
   align-self: flex-start;
-  margin-bottom: 1% !important;
+  margin-bottom: 0% !important;
   padding: 12px;            /* opcional */
 }
 
-.titulo-otros{
-margin-top: 1%;
-margin-bottom: 1%;
-font-size: 27px; 
-
+.titulo-otros-aportes{
+margin-top: 3%;
+margin-bottom: 3%;
+font-size: 22px;
 }
-
 
 /* El UL debe ser el que maneje el wrap */
 .lista-otros{
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;          /* ✅ */
-  width: 100%;              /* ✅ */
-  max-width: 100%;
-  box-sizing: border-box;
-  margin-top: 4%;
-margin-bottom: 1%;
-
-  justify-content: flex-start;
-  gap: 10px;
-
-  padding: 0;
-
-  list-style: none;
+display: flex;
+flex-direction: row;
+flex-wrap: wrap;          /* ✅ */
+width: 100%;              /* ✅ */
+max-width: 100%;
+box-sizing: border-box;
+margin-top: 0%;
+margin-bottom: 0%;
+justify-content: flex-start;
+align-self: flex-end;
+gap: 3px;
+padding: 0;
+list-style: none;
 }
 
 /* Cada “tarjetica” con un ancho controlado para que quepan */
 .lista-otros li{
-  flex: 0 1 140px;          /* ✅ se adapta y baja de línea */
-  max-width: 160px;
-  box-sizing: border-box;
+    flex: 1 1 160px;              /* ✅ mismo ancho por “columna”, responsive */
+  min-width: 120px;  /* ajusta a gusto */
+  height: 80px;                /* ✅ misma altura SIEMPRE (ajústala) */
+  display: flex;                /* ✅ para centrar contenido */
+  flex-direction: column;
+  justify-content: center;      /* ✅ label + p al centro vertical */
+  align-items: center;          /* ✅ centro horizontal */
+  text-align: center;
+
+  padding: 10px;
+  margin: 0 !important;
+  border-radius: 12px;          /* si quieres */
 }
+
+.lista-otros label{
+  font-size: 15px;
+  margin-top: 7%;
+}
+
+.lista-otros p{
+    font-size: 12px;
+}
+.totales-otros-aportes{
+  align-self: flex-start;
+  margin-bottom: 10%;
+}
+.total-otros-label{
+  font-size: 16px;
+  margin-top: 0%;
+
+}
+ .total-otros-valor{
+  color: #000000;
+  font-weight: bold;
+  font-size: 15px;
+  text-shadow: -1px 1px 1px #ffffff,-1px 1px 1px #ffffff;
+    top: 0%;
+  margin-bottom: -1%;
+}
+
+
+
 
 
   /* Totales */
@@ -1585,22 +1735,31 @@ margin-bottom: 1%;
 grid-column: 2 / span 1;
 grid-row: 2 / span 1 ;
 align-self: flex-start;
-margin-top: -2%;
-margin-bottom: 1%;
+margin-top: 0%;
+margin-bottom: 0%;
+min-height: 100%;
+align-items: center;
+
+}
+
+.totals-items{
+padding: 5px 0px 3px 0px;
+margin: 0% 0%;
+width: 100%;
 }
  
 .totales-card h2 {
 margin: auto !important;
-margin-top: 0% !important;
-padding: 10px 0px 25px 0px !important;
+margin-top: 10% !important;
+padding: 12px 0px 25px 0px !important;
 margin-bottom: 0%;
-font-size: 27px;
+font-size:23px !important;
 }
 
 .totales-card label {
-  color: #00c95a;
+
   font-weight: bold;
-  font-size: 20px;
+  font-size: 16px;
   margin-top: 1%;
   margin-bottom: 0%;
 }
@@ -1608,7 +1767,84 @@ font-size: 27px;
 .totales-card p {
   padding: 0% 5%;
   margin-top: 1%;
+   font-size: 13px;
 }
+
+
+/* Totales “extra” (menos importantes) dentro de la card Totales */
+.totales-card :nth-child(6){
+  margin-bottom: 15%;
+}
+.totals-items.extra label{
+  font-size: 17px;
+
+}
+
+.totals-items.extra p{
+  font-size: 14px;
+}
+
+/* ==============================
+   OTROS PARTIDOS (TABLA PEQUEÑA)
+   ============================== */
+.otros-partidos-card {
+  
+  width: 99%;
+  min-height: 100%;
+  margin-bottom: 0%; 
+}
+#otrosPartidosPublico .partidos-extra-titulo{
+  padding: 18px 8px;
+  margin: 38px 0 -20px 0;
+  font-size: 22px;
+
+}
+
+#otrosPartidosPublico .partidos-extra-subtitle{
+  margin: 30px 0 -30px 0;
+}
+#otrosPartidosPublico .partidos-extra-subtitle span{
+  font-size: 15px;
+}
+
+/* Contenedor: clave para bordes redondos */
+#otrosPartidosPublico .partidos-extra-container-table{
+margin-top: 5%;
+}
+
+/* Tabla */
+#otrosPartidosPublico table.partidos-extra-table{
+  width: 95%;                     
+  font-size: 13px;
+}
+
+
+/* THEAD: pon el fondo en TH (no en TR) */
+#otrosPartidosPublico table.partidos-extra-table thead tr th,
+#otrosPartidosPublico tbody tr td{
+text-align: center;
+}
+
+#otrosPartidosPublico table.partidos-extra-table thead th{
+font-size: 15px;
+}
+
+
+/* “tfoot” visual (tu div) */
+#otrosPartidosPublico .partidos-extra-tfoot-table{
+  padding: 2px 12px 2px 26px;
+}
+
+#otrosPartidosPublico .partidos-extra-tfoot-table p{
+font-size: 16px;
+}
+
+#otrosPartidosPublico .partidos-extra-tfoot-table span{
+ font-size: 15px;
+}
+
+
+/* OBSERVACIONES CARD */
 
 .box-container-observ{
 grid-column: 1 / span 2;
@@ -1616,29 +1852,28 @@ grid-row: 3 / span 1 ;
 justify-items: center;
 min-height: 100%;
 height: fit-content;
-margin-top: -3%;
-
+margin-top: 0%;
 
 }
+
  #title-observaciones{
-margin: auto !important;
-margin-top: 0% !important;
-padding: 20px 0px 25px 0px !important;
+margin-top: 5% !important;
+padding: 10px 0px 25px 0px !important;
 margin-bottom: 0% !important;
-font-size: 27px;
-
+font-size: 22px;
 }
 
-.observaciones-box {
-  height: auto;
+
+.observaciones-box { 
+width: 95%;
+margin: 5%; 
+min-height: 120px;
+height: auto;
+padding: 20px; 
 }
 
-  .observaciones-box {
-    padding: 20px;
-  }
-
-   
-
+ 
+  
 }
 
 
@@ -1666,24 +1901,4 @@ font-size: 27px;
 }
 
 
-/* ✚ saldo usado (público) */
-.saldo-plus-public{
-  display:inline-block;
-  margin-right:6px;
-  font-weight:700;
-  color:#1f9d55;   /* verde */
-  font-size:14px;
-  line-height:14px;
-  cursor:default;
-}
-
-/* lista de fechas de deuda */
-.deuda-fechas-public{
-  margin-top:4px;
-  font-size:12px;
-  color:#0a7a2a;
-}
-.deuda-fecha-item{
-  line-height:14px;
-}
 

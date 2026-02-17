@@ -480,11 +480,14 @@ function renderGastos(data, mes, anio) {
 
   html += `
     <div class="totales-gastos">
+       <div class="totales-gastos-item">
       <label class="gastos-valor-label">Gastos Totales de ${nombreMes}</label>
       <p class="gastos-valor-valor">${formatMoney(t.gastos_mes || 0)}</p>
-
+     </div>
+      <div class="totales-gastos-item">
       <label class="gastos-valor-label">Gastos Totales del ${anio}</label>
       <p class="gastos-valor-valor">${formatMoney(t.gastos_anio || 0)}</p>
+       </div>
     </div>
   `;
 
@@ -511,7 +514,7 @@ function renderGastos(data, mes, anio) {
       const valor = Number(o.valor ?? 0);
       html += `
         <li>
-          <label>* ${escapeHtml(tipo)}</label>
+          <label> ${escapeHtml(tipo)}</label>
           <p>${formatMoney(valor)}</p>
         </li>
         
@@ -523,9 +526,9 @@ function renderGastos(data, mes, anio) {
   }
 
   html += `
-    <div class="totales-gastos">
-      <label class="gastos-valor-label">Total Otros Aportes de este mes</label>
-      <p class="gastos-valor-valor">${formatMoney(t.otros_mes_total || 0)}</p>
+    <div class="totales-otros-aportes">
+      <label class="total-otros-label">Total Otros Aportes de este mes</label>
+      <p class="total-otros-valor">${formatMoney(t.otros_mes_total || 0)}</p>
     </div>
   `;
 
@@ -744,7 +747,6 @@ function renderSelectOtroDia(data, mes, anio){
 }
 
 
-
 function renderOtrosPartidosPublico(data){
   const box = document.getElementById("otrosPartidosPublico");
   if (!box) return;
@@ -756,13 +758,6 @@ function renderOtrosPartidosPublico(data){
 
   let html = `<h3 class="partidos-extra-titulo">Otros Partidos (no Mié/Sáb)</h3>`;
 
-  if (!cantidad){
-    html += `<p class="no-otros-partidos-alert">Sin Registros de Otros Partidos Jugados (Días NO miércoles/sábado).</p>`;
-    box.innerHTML = html;
-    return;
-  }
-
-  
   html += `
     <div>
       <div class="partidos-extra-subtitle">
@@ -794,6 +789,13 @@ function renderOtrosPartidosPublico(data){
         
     </div>
   `;
-
+ if (!cantidad){
+    html += `
+      <div class="alert-no-otros-partidos">
+    <p class="alert-no-otros-partidos-label">No Hay Registros de Otros Partidos Jugados (Días NO miércoles/sábado).</p>
+     </div>
+    `;
+    
+  }
   box.innerHTML = html;
 }

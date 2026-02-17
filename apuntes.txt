@@ -483,3 +483,8 @@ input[type="text"]:focus {
 
     outline: none; /* Quita el borde por defecto del navegador */
 }
+
+29.539.418
+25/06/1981
+3227122977
+marialiliaperezdiaz@gmail.com
