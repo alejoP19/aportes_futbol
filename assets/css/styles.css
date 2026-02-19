@@ -104,11 +104,11 @@ box-shadow:0 0 4px rgba(0, 218, 109, 0.842);
 }
 .logout-button:hover {
 background: linear-gradient(180deg,
-     rgba(124, 204, 151, 0.95),
-      rgba(111, 192, 154, 0.829));
-color: #fff783 !important;
+     rgba(51, 128, 76, 0.95),
+      rgba(99, 240, 174, 0.829));
+color: #ffffff !important;
 text-shadow: -1px 1px 1px rgba(0,0,0,0.7), -1px 1px 1px rgba(0,0,0,0.7) !important;
-box-shadow:0 0 5px #fff783 !important;
+box-shadow:0 0 5px #83ff9e !important;
 outline:1px solid rgba(255, 255, 255, 0.904); 
 
 }
@@ -472,25 +472,26 @@ border: 1px solid   rgba(194, 198, 202, 0.95);
 .totales-item-value{
 color: #00c73c;
 font-weight:bold; 
-font-size: 15px;
+font-size: 14px;
 text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
 
 }
 
 
-.totals-card span, #listaGastos span, .otros-partidos-title,.totales-con-saldo-mini{
+.totals-card span, #listaGastos span, .otros-partidos-title,.totales-gastos-mini,.totales-finales-mini{
 font-style:italic; 
 color: #000000;
 font-weight:bold; 
 text-shadow: -1px 1px 1px rgb(255, 255, 255);
 list-style: none;
+font-size: 15px;
 
 }
 
 /*  MOSTRAR TOTALES CON SALDO MINI CARD     */
 
 
-/* .totales-con-saldo-mini{
+/* .totales-finales-mini{
 background: linear-gradient(180deg,
       rgba(231, 231, 231, 0.95),
       rgba(183, 192, 201, 0.95));
@@ -499,21 +500,287 @@ border: 1px solid   rgba(194, 198, 202, 0.95);
 
 } */
 
-.totales-con-saldo-mini{
-  padding: 8px 10px;
-  border-radius: 12px;
-  background: rgba(226, 240, 230, 0.774);
-  border: 1px solid rgba(0, 199, 60, 0.534);
-  font-weight: bold;
-  margin-bottom: 3%;
-}
-.totales-con-saldo-mini div{
+.totales-estimado-mini div,.totales-finales-mini div, .totales-gastos-mini div{
   display:flex;
   justify-content: space-between;
   gap: 10px;
   padding: 4px 0;
   margin: auto;
 }
+.totales-estimado-mini,.totales-gastos-mini,.totales-finales-mini{
+padding: 8px 10px;
+border-radius: 12px;
+font-weight: bold;
+margin-bottom: 3%;
+}
+
+
+.parcial-totals-mini-help{
+display: flex;
+  font-size:12px; 
+text-align: center;
+  opacity:.95;
+   margin:4% 2% 10% 2%; 
+color: rgb(0, 0, 0);
+text-shadow: -1px 1px 1px rgb(255, 255, 255),-1px 1px 1px rgb(255, 255, 255);
+background-color: #ffffff85;
+padding:10px;
+border-radius: 12px;
+font-weight: bold;
+border: 1px dotted rgba(199, 199, 199, 0.788);
+font-style: oblique;
+}
+
+
+.total-parcial-mini{
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+ width: 100%;
+ height: 100%;
+background-color: #dddfdd6b;
+padding: 29px;
+border-radius: 5px;
+font-weight: bold;
+
+}
+
+.otros-saldo-mini{
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+ width: 100%;
+ height: 100%;
+background-color: #dddfdd6b;
+padding: 20px;
+border-radius: 5px;
+font-weight: bold;
+
+}
+
+
+.totales-aportantes-eliminados{
+position: relative;
+display: flex;
+justify-content: center !important;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+gap: 5px;
+padding: 4px ;
+border-radius: 12px;
+margin-bottom: 2%;
+background: rgba(238, 238, 238, 0.644);
+border: 1px solid rgba(250, 237, 116, 0.308);
+}
+
+.totales-aportantes-eliminados h4{
+font-size:17px !important;
+font-style:italic; 
+color: #f3db02;
+font-weight:bold; 
+text-shadow: -1px 1px 1px rgb(0, 0, 0), -1px 1px 1px rgb(0, 0, 0), -1px 1px 1px rgb(0, 0, 0);
+align-self: center;
+margin-top: 10%;
+margin-bottom: 2% !important; 
+}
+.eliminados-div-button{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin: 1% 2%;
+  gap: 2px;
+  
+}
+
+.mini-help{ 
+ display: flex;
+  font-size:12px; 
+text-align: center;
+  opacity:.95;
+   margin:4% 2% 25% 2%; 
+color: rgb(0, 0, 0);
+text-shadow: -1px 1px 1px rgb(255, 255, 255),-1px 1px 1px rgb(255, 255, 255);
+background-color: #ffffff67;
+padding:10px;
+border-radius: 12px;
+font-weight: bold;
+border: 1px dotted rgba(199, 199, 199, 0.788);
+font-style: oblique;
+
+  
+  }
+
+
+.totales-aportantes-eliminados span{
+  position: absolute;
+  display: flex;
+color: #00c73c;
+font-weight:bold; 
+font-size: 15px;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
+align-self: center;
+bottom: 35%;
+
+}
+
+.btn-ver-eliminados{
+  
+position:relative;
+align-self: center !important;
+bottom: 15% !important;
+width: 70% !important;
+right: 0% !important;
+ padding:6px 40px;
+    border-radius:10px; 
+    cursor:pointer; 
+background: linear-gradient(180deg,
+     rgba(211, 216, 214, 0.829),
+     rgba(153, 250, 185, 0.95));
+border: 1px solid rgb(0, 167, 111);
+box-shadow:0 0 4px rgba(0, 218, 109, 0.842);
+font-weight: bold;
+color: #000000 !important;
+text-shadow: -1px 1px 1px rgba(255, 255, 255, 0.986), -1px 1px 1px rgb(255, 255, 255) !important;
+
+}
+.btn-ver-eliminados:hover {
+background: linear-gradient(180deg,
+     rgba(51, 128, 76, 0.95),
+      rgba(99, 240, 174, 0.829));
+color: #ffffff !important;
+text-shadow: -1px 1px 1px rgba(0,0,0,0.7), -1px 1px 1px rgba(0,0,0,0.7) !important;
+box-shadow:0 0 5px #83ff9e !important;
+outline:1px solid rgba(255, 255, 255, 0.904); 
+
+}
+
+
+
+.totales-estimado-mini{
+ background: rgba(238, 238, 238, 0.644);
+  border: 1px solid rgba(0, 199, 60, 0.534);
+}
+
+.totales-gastos-mini{
+  background: rgba(253, 113, 132, 0.144);
+  border: 1px solid rgba(170, 103, 107, 0.363);
+}
+ .gastos-item{
+  color: red !important;
+}
+.totales-finales-mini{
+ background-color: #93ac9950;
+  border: 1px solid rgba(2, 184, 57, 0.39);
+}
+
+
+
+
+/* ===== Modal Eliminados (mejorado) ===== */
+.modal.hidden{ display:none; }
+
+.modal{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,.55);
+  display:flex; align-items:center; justify-content:center;
+  z-index:9999;
+  padding:14px;
+}
+
+/* overlay + tarjeta con animación */
+.modal-card{
+  width:min(920px, 96vw);
+  max-height:82vh;
+  overflow:auto;
+
+  background:#ffffff;
+  color:#1b1f24;
+
+  border-radius:16px;
+  border:1px solid rgba(0,0,0,.12);
+  box-shadow:0 18px 60px rgba(0,0,0,.30);
+
+  padding:14px;
+
+  /* animación entrada */
+  transform: translateY(10px) scale(.98);
+  opacity: 0;
+  animation: modalIn 1s ease-out forwards;
+}
+
+@keyframes modalIn{
+  to{ transform: translateY(0) scale(1); opacity:1; }
+}
+
+/* salida (la activamos con clase .closing desde JS) */
+.modal.closing .modal-card{
+  animation: modalOut 1s ease-in forwards;
+}
+@keyframes modalOut{
+  to{ transform: translateY(10px) scale(.98); opacity:0; }
+}
+
+.modal-head{
+  display:flex; justify-content:space-between; align-items:center;
+  gap:10px;
+  padding-bottom:10px;
+  border-bottom:1px solid rgba(0,0,0,.08);
+  margin-bottom:10px;
+}
+
+.modal-head button{
+  cursor:pointer;
+  border:1px solid rgba(0,0,0,.15);
+  background:#f3f5f7;
+  border-radius:10px;
+  padding:6px 10px;
+}
+
+/* Tabla mini más clara con bordes */
+.table-mini{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  border:1px solid rgba(0,0,0,.14);
+  border-radius:12px;
+  overflow:hidden;
+  font-size: 13px;
+}
+
+.table-mini thead th{
+  position:sticky; top:0;
+  background:#0a83b3;
+  color:#fff;
+  padding:10px 10px;
+  border-bottom:1px solid rgba(255,255,255,.25);
+  text-align:left;
+}
+
+.table-mini th, .table-mini td{
+  border-right:1px solid rgba(0,0,0,.08);
+}
+
+.table-mini th:last-child, .table-mini td:last-child{
+  border-right:none;
+}
+
+.table-mini tbody td{
+  padding:9px 10px;
+  border-top:1px solid rgba(0,0,0,.08);
+  background:#fff;
+}
+
+.table-mini tbody tr:nth-child(even) td{
+  background:#f7f9fb;
+}
+
+.table-mini td.right{ text-align:right; white-space:nowrap; }
 
 
 /* SECCION DE OTROS PARTIDO INFO */
@@ -560,23 +827,34 @@ justify-self: center;
 
 
 .otros-partidos-tfoot-table{
-  padding: 1px 10px;
+
+ display: block;
+ flex-direction: row;
+ left: 9%;
+ width: 100%;
+ min-height:fit-content;
+ height: 35px !important;
+align-content: center;
+  padding: 7px 5px;
   border-radius: 12px;
   background: rgba(226, 240, 230, 0.774);
   border: 1px solid rgba(0, 199, 60, 0.534);
 
 
 }
-.otros-partidos-tfoot-table p{
-padding: 0%;
+.otros-general-total-label-span{
+  display: block;
+  flex-direction: row;
+padding: 0 !important;
 color: #f1c500;
 font-weight:bold; 
 font-size: 16px;
+margin-left: 13%;
 text-shadow: -1px 1px 1px rgb(0, 0, 0),
  -1px 1px 1px rgb(0, 0, 0), -1px 1px 1px rgb(0, 0, 0);
 }
-.otros-partidos-tfoot-table span{
-color: #00c73c;
+.otros-general-total-value-span{
+color: #00c73c !important;
 font-size: 15px;
 
 }
@@ -709,9 +987,9 @@ box-shadow:0 0 20px rgba(245, 76, 90, 0.842);
 .otros-partidos-info-card h4, .notes-card h4{
 font-size:18px;
 font-style:italic; 
-color: #000000;
+color: #f3db02;
 font-weight:bold; 
-text-shadow: -1px 1px 1px rgb(255, 255, 255);
+text-shadow: -1px 1px 1px rgb(0, 0, 0), -1px 1px 1px rgb(0, 0, 0), -1px 1px 1px rgb(0, 0, 0);
 align-self: center;
 margin-bottom: 10%;
 }
@@ -1555,10 +1833,14 @@ font-size: 14px;
 }
 
 
-.totals-card span, #listaGastos span, .otros-partidos-title,.totales-con-saldo-mini{
+.totals-card span, #listaGastos span, .otros-partidos-title,.totales-finales-mini{
 font-size: 14px;
 
 }
+
+  .modal-card{ padding:12px; }
+  .table-mini{ font-size:12px; }
+  .table-mini thead th, .table-mini tbody td{ padding:8px;}
 
 /* SECCION DE OTROS PARTIDO INFO */
 
@@ -1795,8 +2077,9 @@ font-size: large;
 
 .add-aportante h4,.otros-aportes-card h4,.gastos-card h4,.gastos-registrados-card h4,.totals-card h4, 
 .otros-partidos-info-card h4, .notes-card h4{
-font-size:16px;
-margin-bottom: 15%;
+font-size:17px;
+margin-top: 16%;
+margin-bottom: 18%;
 }
 
 /* ESTILOS LABELS DE CARDS */
@@ -1816,6 +2099,88 @@ padding:8px;
 margin-bottom:5%;
 margin-top: 0%;
 }
+
+
+
+/* <<<<<<<<<<<<< CARDS TOTALS SECTION  >>>>>>>>>>>>>>>> */
+
+/* TOTALES PARCIALES SECTION */
+
+.parcial-tot-title{
+  margin-top: 7% !important;
+  margin-bottom: 4% !important;
+  font-size: large !important;
+}
+
+
+
+/* APORTANTES ELIMINADOS CARD */
+.otros-saldo-mini{
+ 
+  flex-direction: row;
+  gap: 5px;
+}
+.otros-span{
+ margin-left: 22% !important;
+}
+
+/* APORTANTES ELIMINADOS CARD */
+.totales-aportantes-eliminados{
+align-items: center;
+gap: 5px;
+padding: 4px ;
+
+}
+
+
+.totales-aportantes-eliminados h4{
+font-size:15px !important;
+margin-top: 4%;
+margin-bottom: 4% !important; 
+}
+
+.eliminados-div-button{
+  position: relative;
+  display: flex;
+  flex-direction: row;
+ top: 0 !important;
+  margin: 0% 2%;
+  gap: 3px !important;
+ 
+}
+
+.mini-help{ 
+top: 0;
+font-size:13px; 
+text-align: left;
+width: 60%;
+margin:2%  0% 4% 0%;  
+  }
+
+
+.totales-aportantes-eliminados span{
+position: absolute;
+color: #00c73c;
+right: 10%;
+margin-bottom: 4%;
+font-weight:bold; 
+font-size: 15px;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
+align-self: center;
+}
+
+.btn-ver-eliminados{
+  
+  position:absolute;
+justify-self: flex-end !important;
+bottom: 23% !important;
+width: 35% !important;
+right: 0% !important;
+
+}
+
+
+
 
 
 }

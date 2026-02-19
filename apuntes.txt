@@ -484,7 +484,428 @@ input[type="text"]:focus {
     outline: none; /* Quita el borde por defecto del navegador */
 }
 
+
+
+No sé pero se generó un enredo en los totales;
+ etonces te voy poner el contexto de cómo deben mostrarse los totales para que
+  se vea clara la información ya que de esta misma manera se deberá ver tanto 
+  en el pdf de reortes como en la interfaz d eusuario;
+   entonces los totales deben ser así,
+    vamos a hacer una especie de secciones de sumas y restas para que se alo más claro posible
+     para el usuario que necesit verificar la inforacion de cada mes podemos poner un mensajito 
+     debajo o al lado de cada item que diga cómo s eestá haciendo laopreción: 
+     
+Total Parcial del mes (sin saldos , sin otros aportes , sin aportes de los jugadores eliminados) 
+Total Parcial del Año (sin saldos , sin otros aportes , sin aportes de los jugadores eliminados) 
+Total Otros Aportes del mes
+ Total Otros Aportes del año
+
+Total Saldo Actual Hasta Mes: (el saldo vienen de otros meses hasta que no sea tomado del todo)
+Total Estimado Del Mes : (con saldo , con otros aportes, con total de aportes jugadores eliminados;
+ pero sin restar aun gastos del mes) 
+ Total Estimado Del Año : (con saldo ,con otros aportes con total de aportes jugadores eliminados;
+  pero sin restar gastos del año)
+  
+  
+   Total Final del mes (con saldo + otros aportes+eliminados -gastos ): 
+  
+  Total Final del año (con saldo + otros aportes + eliminados - gastos):
+
+
+
+
+
 29.539.418
 25/06/1981
 3227122977
 marialiliaperezdiaz@gmail.com
+
+
+
+
+
+
+/* ===========================
+   BASE COMPATIBLE DOMPDF
+=========================== */
+body {
+    font-family: DejaVu Sans, sans-serif;
+    margin-top: 160px;   /* deja espacio entre encabezado y tabla */
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    font-size: 12pt;
+}
+
+.section-title {
+    margin-top: 10px;
+    margin-bottom: 12px;
+    font-size: 12pt;
+}
+
+th, td {
+    font-size: 10pt;
+}
+
+/* ===========================
+   TABLAS
+=========================== */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+    word-wrap: break-word;
+    margin-bottom: 25px;
+      padding: 0px;
+    padding-right: 10px;
+    max-width: 110%;   /* antes ocupaba todo el ancho; ahora será más angosto */
+    min-width: 110%;
+    margin: auto; /* centrado */
+        margin-bottom: 25px;
+ 
+}
+.table-otros{
+    page-break-inside: auto;
+    padding: 0px;
+    padding-right: 10px;
+    max-width: 110%;   /* antes ocupaba todo el ancho; ahora será más angosto */
+    min-width: 110%;
+    margin: auto; /* centrado */
+        margin-bottom: 25px;
+}
+tr {
+    page-break-inside: avoid;
+}
+tr.eliminado td { background: #f7a6ad; }
+
+th {
+    background: #0a83b3;
+    color: white;
+    padding: 6px;
+    border: 1px solid #444;
+}
+
+td {
+    padding: 6px;
+    border: 1px solid #444;
+}
+
+tr:nth-child(even) {
+    background: #f2f2f2;
+}
+
+.right {
+    font-weight: bold;
+    font-size: 11px;
+    text-align: center;
+    page-break-inside: auto;
+    padding: 0px;
+    padding-right: 10px;
+    max-width: 110%;   /* antes ocupaba todo el ancho; ahora será más angosto */
+    min-width: 110%;
+    margin: auto; /* centrado */
+}
+
+.small {
+    text-align: center;
+}
+
+/* Para evitar que las filas se partan */
+tr, td, th {
+    page-break-inside: avoid;
+}
+
+/* ===========================
+   LOGO
+=========================== */
+.logo {
+    width: 80px;
+    max-width: 15%;
+    height: auto;
+}
+
+/* ===========================
+   PAGE BREAKS
+=========================== */
+.page-break {
+    page-break-before: always;
+}
+
+.page-spacer {
+    height: 40px;
+}
+
+
+
+/* ===========================
+   TOTALES CON SALDO (BLOQUE EXTRA)
+=========================== */
+.totales-con-saldo{
+    background-color: #d7f2e3; /* verde suave */
+    border: 1px solid #2e8b57;
+    padding: 12px;
+    margin: 18px auto 25px auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.totales-con-saldo-title{
+    margin: 0 0 10px 0;
+    font-size: 13pt;
+}
+
+/* 👇 AQUÍ está la corrección clave */
+table.totales-con-saldo-table{
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+
+    border-collapse: collapse;
+    table-layout: fixed;     /* evita que una celda empuje la tabla */
+}
+
+/* celdas */
+.totales-con-saldo-table td{
+    border: 1px solid rgba(0,0,0,0.25);
+    padding: 8px;
+    font-size: 11pt;
+    box-sizing: border-box;
+}
+
+/* columna texto */
+.totales-con-saldo-table td.label{
+    width: 75%;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
+
+/* columna dinero */
+.totales-con-saldo-table td.money{
+    width: 25%;
+    text-align: right;
+    font-weight: bold;
+    color: #0b5a2a;
+    white-space: nowrap; /* el valor no baja de línea */
+}
+
+/* ===========================
+   OTROS PARTIDOS (TABLA INFO)
+=========================== */
+table.otros-partidos-table{
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  table-layout: fixed;
+}
+
+table.otros-partidos-table td,
+table.otros-partidos-table th{
+  font-size: 10pt;
+  padding: 6px;
+}
+
+/* ===========================
+   BLOQUES DE OBSERVACIONES Y TOTALES
+=========================== */
+.observaciones {
+    background-color: #c6d3e0;
+    padding: 12px;
+    max-width: 100%;   /* antes ocupaba todo el ancho; ahora será más angosto */
+    margin: 40px auto; /* centrado */
+    
+}
+
+.observaciones-title {
+    margin-top: 0;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.obs {
+    font-size: 12px;
+    padding: 10px 20px;
+}
+
+.total-box {
+    margin-top: 14px;
+    background-color: #b4e7c7;
+    padding: 12px;
+}
+
+/* fila de totales de día (verde) */
+.total-dia {
+    background: #9cf1bb;
+    color: white;
+    font-weight: lighter;
+}
+
+/* para marcar filas "apagadas" si algún día lo necesitas */
+tr[style*="color:#999;"] {
+    background-color: #f5f5f5;
+}
+
+/* ===========================
+   ESCALA AUTOMÁTICA 
+   SI HAY MUCHOS JUGADORES
+=========================== */
+
+table {
+    font-size: 12px;
+}
+
+td, th {
+    padding: 3px;
+}
+
+/* muchos jugadores */
+body.many-rows table {
+    font-size: 10px;
+    transform: scale(0.92);
+    transform-origin: top left;
+}
+
+body.many-rows td,
+body.many-rows th {
+    padding: 2px;
+}
+
+/* demasiados jugadores */
+body.too-many-rows table {
+    font-size: 9px;
+    transform: scale(0.85);
+    transform-origin: top left;
+}
+
+/* acercar la tabla al encabezado sin que lo tape */
+section, table {
+    margin-top: 10px !important;
+    padding-top: 0 !important;
+}
+
+body.many-rows table,
+body.too-many-rows table {
+    margin-top: 5px !important;
+}
+
+section {
+    margin-top: 0 !important;
+}
+
+
+/* Paginación automática para la tabla de gastos */
+table.gastos-table {
+    page-break-inside: auto;
+    padding: 0px;
+    padding-right: 10px;
+    max-width: 110%;   /* antes ocupaba todo el ancho; ahora será más angosto */
+    min-width: 110%;
+    margin: auto; /* centrado */
+        margin-bottom: 25px;
+
+}
+
+table.gastos-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+}
+
+table.gastos-table thead {
+    display: table-header-group;
+}
+
+table.gastos-table tfoot {
+    display: table-footer-group;
+}
+
+
+/* =========================
+   TOTALES (MISMA ESTRUCTURA ADMIN)
+   Compatible DOMPDF (sin flex)
+========================= */
+.totales-sub{
+  font-size: 10pt;
+  margin-top: -6px;
+  margin-bottom: 8px;
+  color: #444;
+}
+
+.totales-box{
+  border: 1px solid rgba(0,0,0,.25);
+  background: #f7f9fb;
+  padding: 10px;
+  margin: 10px 0 18px 0;
+}
+
+.sep{
+  height: 1px;
+  background: rgba(0,0,0,.15);
+  margin: 10px 0;
+}
+
+table.totales-table{
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin: 0;
+}
+
+table.totales-table td{
+  border: 1px solid rgba(0,0,0,.18);
+  padding: 8px;
+  font-size: 10.5pt;
+  vertical-align: top;
+}
+
+table.totales-table td.label{
+  width: 72%;
+}
+
+table.totales-table td.money{
+  width: 28%;
+  text-align: right;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+table.totales-table td.money.strong{
+  font-size: 11.5pt;
+}
+
+table.totales-table td.money.neg{
+  color: #b00020;
+}
+
+.note{
+  font-size: 9pt;
+  color: #555;
+  margin-top: 2px;
+}
+
+table.totales-table.final td{
+  background: #e8f5ee;
+  border-color: rgba(0,0,0,.22);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+BUG --> Al eliminar un aportante con saldos, el saldo no se actualiza en el informativo 
+la seccion aportantes eliminados de ste mes sin refrescar la página
+BUG --> La tabla de nuevo juego no refresca y coloca la nueva fila sin recargar la pagina
+BUG --> Pregintar a la IA sobre la falla de cargar el chat 

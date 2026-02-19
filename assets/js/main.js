@@ -44,6 +44,26 @@ async function postJSON(url, data) {
     try { return await r.json(); } catch (e) { return null; }
 }
 
+// ----------- UTILS (agrega esto) -----------------
+function formatMoney(value) {
+  const n = Number(value || 0);
+  return n.toLocaleString("es-CO", {
+    style: "currency",
+    currency: "COP",
+    maximumFractionDigits: 0
+  });
+}
+
+function escapeHtml(str) {
+  return String(str ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
 
 // ----------- JUGADORES -----------------
 async function loadPlayersList() {
@@ -516,56 +536,151 @@ return;
 }
 
 // ----------- TOTALES -----------------
+function formatMoney(n){
+  return Number(n || 0).toLocaleString("es-CO", {
+    style: "currency",
+    currency: "COP",
+    maximumFractionDigits: 0
+  });
+}
+
 async function loadTotals(mes, anio) {
-    const res = await fetch(`${API}/aportes/get_totals.php?mes=${mes}&anio=${anio}`);
-    const j = await res.json();
-    if (!j) return;
+  const res = await fetch(`${API}/aportes/get_totals.php?mes=${mes}&anio=${anio}`, { cache:"no-store" });
+  const j = await res.json();
+  if (!j || !j.ok) return;
 
-    // Ajustado a los IDs de tu HTML de administrador
-    
-     
-    document.getElementById('tMes').innerText = j.month_total
-        ? j.month_total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
-        : '';
-    document.getElementById('tAnio').innerText = j.year_total
-        ? j.year_total.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
-        : '';
+  // Parciales
+  document.getElementById("tParcialMes").innerText  = formatMoney(j.parcial_mes);
+  document.getElementById("tParcialAnio").innerText = formatMoney(j.parcial_anio);
 
-        // otros aportes
-document.getElementById('tOtros').innerText = j.otros_mes
-    ? j.otros_mes.toLocaleString('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 })
-    : '';
- document.getElementById("tGastosMes").innerText =
-        j.gastos_mes ? j.gastos_mes.toLocaleString('es-CO') : "0";
+  // Otros + Saldo
+  document.getElementById("tOtrosMes").innerText  = formatMoney(j.otros_mes);
+  document.getElementById("tOtrosAnio").innerText = formatMoney(j.otros_anio);
+  document.getElementById("tSaldoTotal").innerText = formatMoney(j.saldo_total);
 
-    document.getElementById("tGastosAnio").innerText =
-        j.gastos_anio ? j.gastos_anio.toLocaleString('es-CO') : "0";
-      
+  // Estimados
+  document.getElementById("tEstimadoMes").innerText  = formatMoney(j.estimado_mes);
+  document.getElementById("tEstimadoAnio").innerText = formatMoney(j.estimado_anio);
 
-document.getElementById('tSaldoMes').innerText = j.saldo_mes
-  ? j.saldo_mes.toLocaleString('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      maximumFractionDigits: 0
-    })
-  : '';;
+  // Finales
+  document.getElementById("tFinalMes").innerText  = formatMoney(j.final_mes);
+  document.getElementById("tFinalAnio").innerText = formatMoney(j.final_anio);
 
-const elMesConSaldo  = document.getElementById('tMesConSaldo');
-if (elMesConSaldo) {
-  elMesConSaldo.innerText = j.month_total_con_saldo
-    ? j.month_total_con_saldo.toLocaleString('es-CO', { style:'currency', currency:'COP', maximumFractionDigits:0 })
-    : '';
+  // (opcional) si quieres seguir mostrando gastos
+  const gMes = document.getElementById("tGastosMes");
+  if (gMes) gMes.innerText = formatMoney(j.gastos_mes);
+
+  const gAnio = document.getElementById("tGastosAnio");
+  if (gAnio) gAnio.innerText = formatMoney(j.gastos_anio);
+
+  // tarjeta eliminados del mes (si la usas)
+  const el = document.getElementById("totalEliminadosMes");
+  if (el) el.innerText = formatMoney(j.eliminados_mes_total || 0);
 }
 
-const elAnioConSaldo = document.getElementById('tAnioConSaldo');
-if (elAnioConSaldo) {
-  elAnioConSaldo.innerText = j.year_total_con_saldo
-    ? j.year_total_con_saldo.toLocaleString('es-CO', { style:'currency', currency:'COP', maximumFractionDigits:0 })
-    : '';
+
+let __eliminadosMesCache = null;  // cache global (arriba del todo o cerca de la función)
+
+async function cargarEliminadosMes(mes, anio){
+  const el    = document.getElementById("totalEliminadosMes");
+  const btn   = document.getElementById("btnVerEliminados");
+  const modal = document.getElementById("modalEliminados");
+  const body  = document.getElementById("modalEliminadosBody");
+  const close = document.getElementById("closeModalEliminados");
+
+  // Si el bloque no existe en este HTML, salir sin romper nada
+  if (!btn || !modal || !body || !close) return;
+
+  // ✅ Bind del click SOLO una vez
+  if (!btn.dataset.bound) {
+    btn.dataset.bound = "1";
+
+    btn.addEventListener("click", () => {
+      const data = __eliminadosMesCache;
+
+      if (!data || !data.ok) {
+        body.innerHTML = `<div style="opacity:.85;">No hay información disponible de eliminados para este mes.</div>`;
+        modal.classList.remove("hidden");
+        return;
+      }
+
+      const items = Array.isArray(data.items) ? data.items : [];
+
+      if(!items.length){
+        body.innerHTML = `<div style="opacity:.85;">No hubo eliminados en este mes.</div>`;
+      } else {
+        body.innerHTML = `
+          <table class="table-mini">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Fecha baja</th>
+                <th class="right">Total mes</th>
+                <th class="right">Total año</th>
+                <th class="right">Saldo</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${items.map(it => `
+                <tr>
+                  <td>${escapeHtml(it.nombre || "")}</td>
+                  <td>${escapeHtml(it.fecha_baja || "")}</td>
+                  <td class="right"><strong>${formatMoney(it.total_mes || 0)}</strong></td>
+                  <td class="right">${formatMoney(it.total_anio || 0)}</td>
+                  <td class="right">${formatMoney(it.saldo || 0)}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+          <div style="margin-top:10px; opacity:.9;">
+            <strong>Totales eliminados:</strong>
+            Mes ${formatMoney(data.totales?.eliminados_mes || 0)} ·
+            Año ${formatMoney(data.totales?.eliminados_anio || 0)} ·
+            Saldo ${formatMoney(data.totales?.saldo_eliminados || 0)}
+          </div>
+        `;
+      }
+
+      modal.classList.remove("hidden");
+    });
+
+    function closeModal(){
+  modal.classList.add("closing");
+  // esperar a que termine la animación
+  setTimeout(() => {
+    modal.classList.add("hidden");
+    modal.classList.remove("closing");
+  }, 180);
 }
 
-        
+close.onclick = closeModal;
+modal.onclick = (e) => { if(e.target === modal) closeModal(); };
+
+// opcional: ESC para cerrar
+document.addEventListener("keydown", (ev) => {
+  if(ev.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+});
+
+  }
+
+  // ✅ Cargar data (con try/catch para que no se muera silenciosamente)
+  try {
+    const r = await fetch(`${API}/aportantes/get_eliminados_mes.php?mes=${mes}&anio=${anio}`, { cache:"no-store" });
+    const data = await r.json();
+
+    __eliminadosMesCache = data;
+
+    // total en la tarjeta (aunque no haya ok)
+    const totalMes = data?.totales?.eliminados_mes || 0;
+    if (el) el.textContent = formatMoney(totalMes);
+
+  } catch (err) {
+    __eliminadosMesCache = { ok:false };
+    if (el) el.textContent = formatMoney(0);
+    console.warn("No se pudo leer eliminados_mes:", err);
+  }
 }
+
 
 function getOtroKey(mes, anio) {
   return `otroDia_${anio}_${mes}`;
@@ -589,6 +704,7 @@ async function refreshSheet() {
 
     await loadSheet(mes, anio);
     await loadTotals(mes, anio);
+    await cargarEliminadosMes(mes, anio);   // ✅ AQUÍ
     await loadGastos();
     await loadOtrosPartidosInfo(mes, anio); 
     loadObservaciones(mes, anio);
@@ -1403,12 +1519,15 @@ async function loadOtrosPartidosInfo(mes, anio) {
       </div>
 
       <div class='otros-partidos-tfoot-table' style="margin-top:10px;">
-       <p>Total otros partidos: <span>${totalGeneralFmt}</span> </p>
+          <div>
+            <span class="otros-general-total-label-span">Total otros partidos:
+            <span class="otros-general-total-value-span">${totalGeneralFmt}</span></span>
+      
+          </div>
+      
       </div>
     </div>
   `;
 }
 
 
-
- 

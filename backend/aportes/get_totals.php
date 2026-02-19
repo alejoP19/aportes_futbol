@@ -1,5 +1,5 @@
 <?php
-header("Content-Type: application/json");
+header("Content-Type: application/json; charset=utf-8");
 include "../../conexion.php";
 require_once __DIR__ . "/../auth/auth.php";
 protegerAdmin();
@@ -7,23 +7,13 @@ protegerAdmin();
 $mes  = intval($_GET['mes']  ?? date('n'));
 $anio = intval($_GET['anio'] ?? date('Y'));
 
-$fechaCorte = date('Y-m-t', strtotime("$anio-$mes-01"));
+$fechaInicio = date('Y-m-01', strtotime("$anio-$mes-01"));
+$fechaCorte  = date('Y-m-t', strtotime("$anio-$mes-01"));
 
 // ========================
-// APORTES BASE
+// APORTES EFECTIVOS (con cap 3000 + consumido_target)
 // ========================
-$today = $conexion->query("
-    SELECT IFNULL(SUM(aporte_principal),0)
-    FROM aportes
-    WHERE fecha = CURDATE()
-")->fetch_row()[0];
-
-/*
-  ✅ TOTAL MES:
-  Para cada aporte del mes:
-  aporte_efectivo = MIN(aporte_principal + consumido_en_ese_target, 3000)
-*/
-$month_total = $conexion->query("
+$month_total = (int)($conexion->query("
     SELECT IFNULL(SUM(
         LEAST(a.aporte_principal + IFNULL(t.consumido,0), 3000)
     ),0) AS total_mes
@@ -35,12 +25,9 @@ $month_total = $conexion->query("
     ) t ON t.target_aporte_id = a.id
     WHERE MONTH(a.fecha) = $mes
       AND YEAR(a.fecha)  = $anio
-")->fetch_assoc()['total_mes'] ?? 0;
+")->fetch_assoc()['total_mes'] ?? 0);
 
-/*
-  ✅ TOTAL AÑO (enero..mes):
-*/
-$year_total = $conexion->query("
+$year_total = (int)($conexion->query("
     SELECT IFNULL(SUM(
         LEAST(a.aporte_principal + IFNULL(t.consumido,0), 3000)
     ),0) AS total_anio
@@ -52,29 +39,42 @@ $year_total = $conexion->query("
     ) t ON t.target_aporte_id = a.id
     WHERE YEAR(a.fecha) = $anio
       AND MONTH(a.fecha) <= $mes
-")->fetch_assoc()['total_anio'] ?? 0;
+")->fetch_assoc()['total_anio'] ?? 0);
 
 // ========================
 // OTROS APORTES
 // ========================
-$otros_total = $conexion->query("
+$otros_mes = (int)$conexion->query("
     SELECT IFNULL(SUM(valor),0)
     FROM otros_aportes
-    WHERE mes  = $mes
-      AND anio = $anio
+    WHERE mes=$mes AND anio=$anio
 ")->fetch_row()[0];
 
-$otros_year = $conexion->query("
+$otros_anio = (int)$conexion->query("
     SELECT IFNULL(SUM(valor),0)
     FROM otros_aportes
-    WHERE anio = $anio
-      AND mes <= $mes
+    WHERE anio=$anio AND mes<=$mes
 ")->fetch_row()[0];
 
 // ========================
-// SALDO TOTAL (INFORMATIVO)
+// GASTOS
 // ========================
-$saldo_total = $conexion->query("
+$gastos_mes = (int)$conexion->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM gastos
+    WHERE mes=$mes AND anio=$anio
+")->fetch_row()[0];
+
+$gastos_anio = (int)$conexion->query("
+    SELECT IFNULL(SUM(valor),0)
+    FROM gastos
+    WHERE anio=$anio AND mes<=$mes
+")->fetch_row()[0];
+
+// ========================
+// SALDO TOTAL HASTA FECHA CORTE (incluye eliminados)
+// ========================
+$saldo_total = (int)($conexion->query("
     SELECT IFNULL(SUM(
         GREATEST(IFNULL(ex.excedente,0) - IFNULL(co.consumido,0), 0)
     ),0) AS saldo
@@ -91,46 +91,145 @@ $saldo_total = $conexion->query("
         WHERE fecha_consumo <= '$fechaCorte'
         GROUP BY id_jugador
     ) co ON co.id_jugador = j.id
-")->fetch_assoc()['saldo'] ?? 0;
+")->fetch_assoc()['saldo'] ?? 0);
 
 // ========================
-// GASTOS
+// ELIMINADOS (ids)
 // ========================
-$gastos_mes = $conexion->query("
-    SELECT IFNULL(SUM(valor),0)
-    FROM gastos
-    WHERE mes  = $mes
-      AND anio = $anio
-")->fetch_row()[0];
+function build_in_clause($ids){
+    if (empty($ids)) return "NULL";
+    return implode(",", array_map("intval", $ids));
+}
 
-$gastos_anio = $conexion->query("
-    SELECT IFNULL(SUM(valor),0)
-    FROM gastos
-    WHERE anio = $anio
-      AND mes <= $mes
-")->fetch_row()[0];
+// eliminados ESTE MES (para info del modal y para separar “parcial”)
+$elimIdsMes = [];
+$stmt = $conexion->prepare("
+    SELECT id
+    FROM jugadores
+    WHERE activo=0
+      AND fecha_baja IS NOT NULL
+      AND fecha_baja >= ?
+      AND fecha_baja <= ?
+");
+$stmt->bind_param("ss", $fechaInicio, $fechaCorte);
+$stmt->execute();
+$res = $stmt->get_result();
+while($r = $res->fetch_assoc()) $elimIdsMes[] = (int)$r['id'];
+$stmt->close();
+
+// eliminados HASTA FECHA CORTE (para saldo eliminados y total año eliminados)
+$elimIdsHasta = [];
+$stmt = $conexion->prepare("
+    SELECT id
+    FROM jugadores
+    WHERE activo=0
+      AND fecha_baja IS NOT NULL
+      AND fecha_baja <= ?
+");
+$stmt->bind_param("s", $fechaCorte);
+$stmt->execute();
+$res = $stmt->get_result();
+while($r = $res->fetch_assoc()) $elimIdsHasta[] = (int)$r['id'];
+$stmt->close();
+
+$inMes   = build_in_clause($elimIdsMes);
+$inHasta = build_in_clause($elimIdsHasta);
+
+// aportes efectivos de eliminados (mes)
+$eliminados_mes_total = (int)($conexion->query("
+    SELECT IFNULL(SUM(
+        LEAST(a.aporte_principal + IFNULL(t.consumido,0), 3000)
+    ),0) AS total
+    FROM aportes a
+    LEFT JOIN (
+        SELECT target_aporte_id, SUM(amount) AS consumido
+        FROM aportes_saldo_moves
+        GROUP BY target_aporte_id
+    ) t ON t.target_aporte_id = a.id
+    WHERE YEAR(a.fecha)=$anio AND MONTH(a.fecha)=$mes
+      AND a.id_jugador IN ($inMes)
+")->fetch_assoc()['total'] ?? 0);
+
+// aportes efectivos de eliminados (año hasta mes)
+$eliminados_anio_total = (int)($conexion->query("
+    SELECT IFNULL(SUM(
+        LEAST(a.aporte_principal + IFNULL(t.consumido,0), 3000)
+    ),0) AS total
+    FROM aportes a
+    LEFT JOIN (
+        SELECT target_aporte_id, SUM(amount) AS consumido
+        FROM aportes_saldo_moves
+        GROUP BY target_aporte_id
+    ) t ON t.target_aporte_id = a.id
+    WHERE YEAR(a.fecha)=$anio AND MONTH(a.fecha) <= $mes
+      AND a.id_jugador IN ($inHasta)
+")->fetch_assoc()['total'] ?? 0);
+
+// saldo de eliminados (hasta corte)
+$saldo_eliminados_total = (int)($conexion->query("
+    SELECT IFNULL(SUM(
+        GREATEST(IFNULL(ex.excedente,0) - IFNULL(co.consumido,0), 0)
+    ),0) AS saldo
+    FROM (
+        SELECT id
+        FROM jugadores
+        WHERE id IN ($inHasta)
+    ) j
+    LEFT JOIN (
+        SELECT id_jugador, SUM(GREATEST(aporte_principal - 3000, 0)) AS excedente
+        FROM aportes
+        WHERE fecha <= '$fechaCorte'
+        GROUP BY id_jugador
+    ) ex ON ex.id_jugador = j.id
+    LEFT JOIN (
+        SELECT id_jugador, SUM(amount) AS consumido
+        FROM aportes_saldo_moves
+        WHERE fecha_consumo <= '$fechaCorte'
+        GROUP BY id_jugador
+    ) co ON co.id_jugador = j.id
+")->fetch_assoc()['saldo'] ?? 0);
 
 // ========================
-// TOTALES
+// TOTALES SEGÚN TU DEFINICIÓN
 // ========================
-$month_total_final = (int)$month_total + (int)$otros_total - (int)$gastos_mes;
-$year_total_final  = (int)$year_total + (int)$otros_year - (int)$gastos_anio;
 
-$month_total_con_saldo = (int)$month_total_final + (int)$saldo_total;
-$year_total_con_saldo  = (int)$year_total_final  + (int)$saldo_total;
+// Parciales: “sin saldos, sin otros, sin eliminados”
+$parcial_mes  = (int)($month_total - $eliminados_mes_total);
+$parcial_anio = (int)($year_total  - $eliminados_anio_total);
 
+// Estimados: “con saldo + otros + eliminados, sin gastos”
+$estimado_mes  = (int)($month_total + $otros_mes + $saldo_total);
+$estimado_anio = (int)($year_total  + $otros_anio + $saldo_total);
 
+// Finales: “estimado - gastos”
+$final_mes  = (int)($estimado_mes  - $gastos_mes);
+$final_anio = (int)($estimado_anio - $gastos_anio);
+
+// Limpieza de buffer por si algo imprimió espacios
 if (ob_get_length()) { ob_clean(); }
 
 echo json_encode([
-    'ok'          => true,
-    'today'       => (int)$today,
-    'month_total' => (int)$month_total_final,
-    'year_total'  => (int)$year_total_final,
-    'otros_mes'   => (int)$otros_total,
-    'gastos_mes'  => (int)$gastos_mes,
-    'gastos_anio' => (int)$gastos_anio,
-    'saldo_mes'   => (int)$saldo_total,
-    "month_total_con_saldo" => (int)$month_total_con_saldo,
-    "year_total_con_saldo" => (int)$year_total_con_saldo,
-]);
+    "ok" => true,
+
+    // base (incluye eliminados)
+    "month_total" => $month_total,
+    "year_total"  => $year_total,
+
+    // tu estructura clara
+    "parcial_mes"  => $parcial_mes,
+    "parcial_anio" => $parcial_anio,
+    "otros_mes"    => $otros_mes,
+    "otros_anio"   => $otros_anio,
+    "saldo_total"  => $saldo_total,
+    "estimado_mes" => $estimado_mes,
+    "estimado_anio"=> $estimado_anio,
+    "gastos_mes"   => $gastos_mes,
+    "gastos_anio"  => $gastos_anio,
+    "final_mes"    => $final_mes,
+    "final_anio"   => $final_anio,
+
+    // info eliminados (para modal y para explicar)
+    "eliminados_mes_total"   => $eliminados_mes_total,
+    "eliminados_anio_total"  => $eliminados_anio_total,
+    "saldo_eliminados_total" => $saldo_eliminados_total,
+], JSON_UNESCAPED_UNICODE);

@@ -47,7 +47,16 @@ if  (in_array($otroDia, $days, true)) {    $otroDia = pick_default_otro_dia($day
 $colspanDias = count($days) + 1; // +1 por "Otro juego"
 
 // --- obtener todos los jugadores (activos y eliminados)
-$jug_res = $conexion->query("SELECT id, nombre, telefono, activo FROM jugadores ORDER BY nombre ASC");
+$fechaCorteMes = date('Y-m-t', strtotime("$anio-$mes-01")); // último día del mes seleccionado
+$jug_res = $conexion->query("
+    SELECT id, nombre, telefono, activo, fecha_baja
+    FROM jugadores
+    WHERE
+      activo = 1
+      OR (activo = 0 AND (fecha_baja IS NULL OR fecha_baja > '$fechaCorteMes'))
+    ORDER BY nombre ASC
+");
+
 $jugadores = [];
 while ($r = $jug_res->fetch_assoc()) $jugadores[] = $r;
 

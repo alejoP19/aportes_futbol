@@ -153,30 +153,83 @@ include "conexion.php";
     <!-- PANEL DERECHO: TOTALES + OTROS APORTES + PDF -->
     <aside class="right-panel">
       <div class="totals-card">
-        <h4>Totales (COP)</h4>
-        <div> <span> Mes: <strong id="tMes" class="totales-item-value">0</strong></span> </div>
-        <div> <span> Año: <strong id="tAnio" class="totales-item-value">0</strong></span></div>
-        <div> <span>Otros Aportes: <strong id="tOtros" class="totales-item-value">0</strong></span> </div>
-        <div> <span>Gastos del Mes: <strong id="tGastosMes" class="totales-item-value">0</strong></span> </div>
-        <div> <span> Gastos del Año: <strong id="tGastosAnio" class="totales-item-value">0</strong></span></div>
-        <div> <span>Total Saldo Mes: <strong id="tSaldoMes" class="totales-item-value">0</strong></span></div>
+        <h4 class="parcial-tot-title">Totales (COP)</h4>
+        <div class="total-parcial-mini">
+          <small  class="parcial-totals-mini-help">Incluyen Valores de Cada Día de la Columna Otro Juego</small>
+            <div><span>Total Parcial Mes <small>(Sin Otros Aportes/Saldo/Eliminados) </small>
+                <strong id="tParcialMes" class="totales-item-value">$ 0</strong></span>
+            </div>
 
-   
-
-        <hr style="opacity:.25; margin:10px 0;">
-
-        <div class="totales-con-saldo-mini">
-          <div>Total mes (con saldo): <strong id="tMesConSaldo" class="totales-item-value">$ 0</strong></div>
-          <div>Total año (con saldo): <strong id="tAnioConSaldo" class="totales-item-value">$ 0</strong></div>
+            <div><span>Total Parcial Año <small>(Sin Otros Aportes/Saldo/Eliminados)</small>
+              <strong id="tParcialAnio"  class="totales-item-value">$ 0</strong></span>
+            </div>
         </div>
 
 
+        <hr style="opacity:.25; margin:1px 0;">
+        <div class="otros-saldo-mini">
+          <div><span>Otros Aportes Mes <strong id="tOtrosMes" class="totales-item-value otros-span">$ 0</strong></span>
+          </div>
+          <div><span>Otros Aportes Año <strong id="tOtrosAnio" class="totales-item-value otros-span">$ 0</strong></span>
+          </div>
+          <div><span> Saldo Actual Hasta Mes <strong id="tSaldoTotal" class="totales-item-value otros-span">$ 0</strong></span>
+          </div>
+        </div>
+
+        <hr style="opacity:.25; margin:1px 0;">
+        <div class="totales-aportantes-eliminados">
+          <h4>Aportantes Eliminados Este Mes</h4>
+          <div class="eliminados-div-button">
+            <div class="mini-help">No Aparecen en Planilla, Pero sus Aportes y Saldos Siguen Sumando en Totales.</div>
+            <span id="totalEliminadosMes">$ 0</span>
+            <button type="button" id="btnVerEliminados" class="btn-ver-eliminados">Ver detalle</button>
+          </div>
+        </div>
+
+        <hr style="opacity:.25; margin:1px 0;">
+        <div class="totales-estimado-mini">
+          <div><span>Total Estimado Mes <small>( + Otros Aportes + Saldos + Eliminados, Sin gastos)</small>
+              <strong id="tEstimadoMes" class="totales-item-value">$ 0</strong></span>
+          </div>
+          <div> <span>Total Estimado Año <small>( + Otros Aportes + Saldos + Eliminados, Sin gastos)</small>
+              <strong id="tEstimadoAnio" class="totales-item-value">$ 0</strong></span>
+          </div>
+        </div>
+
+        <hr style="opacity:.25; margin:1px 0;">
+        <div class="totales-gastos-mini">
+          <div>
+            <span>Gastos del Mes: <strong id="tGastosMes" class="totales-item-value gastos-item">0</strong></span>
+          </div>
+          <div>
+            <span>Gastos del Año: <strong id="tGastosAnio" class="totales-item-value  gastos-item">0</strong></span>
+          </div>
+        </div>
+
+        <hr style="opacity:.25; margin:1px 0;">
+        <div class="totales-finales-mini">
+          <div>Total Final Mes <small>(estimado - gastos)</small> <strong id="tFinalMes" class="totales-item-value">$ 0</strong></div>
+          <div>Total Final Año <small>(estimado - gastos)</small> <strong id="tFinalAnio" class="totales-item-value">$ 0</strong></div>
+        </div>
+
+
+
+
+        <div id="modalEliminados" class="modal hidden">
+          <div class="modal-card">
+            <div class="modal-head">
+              <strong>Eliminados este mes</strong>
+              <button type="button" id="closeModalEliminados">✕</button>
+            </div>
+            <div id="modalEliminadosBody"></div>
+          </div>
+        </div>
       </div>
     </aside>
-      <div class="otros-partidos-info-card">
-        <h4>Datos de Otros Partidos</h4>
-        <div> <span><strong id="otrosPartidosInfo" class="totales-otros-card"></strong></span></div>
-      </div>
+    <div class="otros-partidos-info-card">
+      <h4>Datos Columna Otro Juego</h4>
+      <div> <span><strong id="otrosPartidosInfo" class="totales-otros-card"></strong></span></div>
+    </div>
 
     <!-- Observaciones -->
     <div class="observaciones-container" id="gastosWrapper">

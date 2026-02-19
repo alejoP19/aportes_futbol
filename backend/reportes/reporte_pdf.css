@@ -1,291 +1,190 @@
 /* ===========================
    BASE COMPATIBLE DOMPDF
 =========================== */
-body {
-    font-family: DejaVu Sans, sans-serif;
-    margin-top: 160px;   /* deja espacio entre encabezado y tabla */
-    margin-left: 20px;
-    margin-right: 20px;
-    margin-bottom: 20px;
-    font-size: 12pt;
+body{
+  font-family: DejaVu Sans, sans-serif;
+  margin-top: 160px;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  font-size: 12pt;
 }
 
-.section-title {
-    margin-top: 10px;
-    margin-bottom: 12px;
-    font-size: 12pt;
+h3{
+  margin: 0 0 10px 0;
 }
 
-th, td {
-    font-size: 10pt;
+/* Evita que un título quede solo al final (Dompdf lo respeta a medias),
+   por eso además en el PHP forzamos page-break antes de "Resumen General". */
+.keep-title{
+  page-break-after: avoid;
 }
 
-/* ===========================
-   TABLAS
-=========================== */
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: auto;
-    word-wrap: break-word;
-    margin-bottom: 25px;
-      padding: 0px;
-    padding-right: 10px;
-    max-width: 110%;   /* antes ocupaba todo el ancho; ahora será más angosto */
-    min-width: 110%;
-    margin: auto; /* centrado */
-        margin-bottom: 25px;
- 
-}
-.table-otros{
-    page-break-inside: auto;
-    padding: 0px;
-    padding-right: 10px;
-    max-width: 110%;   /* antes ocupaba todo el ancho; ahora será más angosto */
-    min-width: 110%;
-    margin: auto; /* centrado */
-        margin-bottom: 25px;
-}
-tr {
-    page-break-inside: avoid;
-}
-
-th {
-    background: #0a83b3;
-    color: white;
-    padding: 6px;
-    border: 1px solid #444;
-}
-
-td {
-    padding: 6px;
-    border: 1px solid #444;
-}
-
-tr:nth-child(even) {
-    background: #f2f2f2;
-}
-
-.right {
-    font-weight: bold;
-    font-size: 11px;
-    text-align: center;
-    page-break-inside: auto;
-    padding: 0px;
-    padding-right: 10px;
-    max-width: 110%;   /* antes ocupaba todo el ancho; ahora será más angosto */
-    min-width: 110%;
-    margin: auto; /* centrado */
-}
-
-.small {
-    text-align: center;
-}
-
-/* Para evitar que las filas se partan */
-tr, td, th {
-    page-break-inside: avoid;
+/* Forzar salto de página cuando lo necesites */
+.page-break{
+  page-break-before: always;
 }
 
 /* ===========================
-   LOGO
+   TABLAS PDF UNIFICADAS
 =========================== */
-.logo {
-    width: 80px;
-    max-width: 15%;
-    height: auto;
-}
 
-/* ===========================
-   PAGE BREAKS
-=========================== */
-.page-break {
-    page-break-before: always;
-}
-
-.page-spacer {
-    height: 40px;
-}
-
-
-
-/* ===========================
-   TOTALES CON SALDO (BLOQUE EXTRA)
-=========================== */
-.totales-con-saldo{
-    background-color: #d7f2e3; /* verde suave */
-    border: 1px solid #2e8b57;
-    padding: 12px;
-    margin: 18px auto 25px auto;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.totales-con-saldo-title{
-    margin: 0 0 10px 0;
-    font-size: 13pt;
-}
-
-/* 👇 AQUÍ está la corrección clave */
-table.totales-con-saldo-table{
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-
-    border-collapse: collapse;
-    table-layout: fixed;     /* evita que una celda empuje la tabla */
-}
-
-/* celdas */
-.totales-con-saldo-table td{
-    border: 1px solid rgba(0,0,0,0.25);
-    padding: 8px;
-    font-size: 11pt;
-    box-sizing: border-box;
-}
-
-/* columna texto */
-.totales-con-saldo-table td.label{
-    width: 75%;
-    word-wrap: break-word;
-    overflow-wrap: anywhere;
-}
-
-/* columna dinero */
-.totales-con-saldo-table td.money{
-    width: 25%;
-    text-align: right;
-    font-weight: bold;
-    color: #0b5a2a;
-    white-space: nowrap; /* el valor no baja de línea */
-}
-
-/* ===========================
-   OTROS PARTIDOS (TABLA INFO)
-=========================== */
-table.otros-partidos-table{
+.pdf-table{
   width: 100% !important;
-  min-width: 100% !important;
-  max-width: 100% !important;
-  table-layout: fixed;
+  border-collapse: collapse;
+  table-layout: fixed;          /* ✅ CLAVE */
+  margin: 10px 0 18px 0;
 }
 
-table.otros-partidos-table td,
-table.otros-partidos-table th{
-  font-size: 10pt;
+.pdf-table th,
+.pdf-table td{
+  border: 1px solid #444;
   padding: 6px;
+  font-size: 9.5pt;
+  vertical-align: top;
+}
+
+.pdf-table th{
+  background: #0a83b3;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Filas alternas */
+.pdf-table tbody tr:nth-child(even){
+  background: #f2f2f2;
+}
+
+tr.eliminado td{
+  background: #f7a6ad;
 }
 
 /* ===========================
-   BLOQUES DE OBSERVACIONES Y TOTALES
+   TABLA APORTES - CELDAS
 =========================== */
-.observaciones {
-    background-color: #c6d3e0;
-    padding: 12px;
-    max-width: 100%;   /* antes ocupaba todo el ancho; ahora será más angosto */
-    margin: 40px auto; /* centrado */
-    
+
+/* Jugador: NO partir letra por letra */
+.td-jugador{
+  font-weight: 700;
+  white-space: normal;
+  word-break: normal;           /* ✅ evita ALEJ / AND / RO */
+  overflow-wrap: break-word;    /* corta si hay palabra MUY larga */
+  line-height: 1.15;
 }
 
-.observaciones-title {
-    margin-top: 0;
-    font-size: 14px;
-    margin-bottom: 8px;
+/* Números centrados */
+.td-num{
+  text-align: center;
+  white-space: nowrap;
 }
 
-.obs {
-    font-size: 12px;
-    padding: 10px 20px;
+/* Total un poco más fuerte */
+.td-total{
+  text-align: center;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
-.total-box {
-    margin-top: 14px;
-    background-color: #b4e7c7;
-    padding: 12px;
+/* Deuda: darle aire y permitir saltos */
+.td-deuda{
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
-/* fila de totales de día (verde) */
-.total-dia {
-    background: #9cf1bb;
-    color: white;
-    font-weight: lighter;
-}
-
-/* para marcar filas "apagadas" si algún día lo necesitas */
-tr[style*="color:#999;"] {
-    background-color: #f5f5f5;
+.deuda-list{
+  margin-top: 3px;
+  color: #2e8b57;
+  font-size: 8.5pt;
+  line-height: 10pt;
 }
 
 /* ===========================
-   ESCALA AUTOMÁTICA 
-   SI HAY MUCHOS JUGADORES
+   TOTALES (MISMA ESTRUCTURA ADMIN)
 =========================== */
-
-table {
-    font-size: 12px;
+.totales-sub{
+  font-size: 10pt;
+  margin-top: -6px;
+  margin-bottom: 8px;
+  color: #444;
 }
 
-td, th {
-    padding: 3px;
+.totales-box{
+  border: 1px solid rgba(0,0,0,.25);
+  background: #f7f9fb;
+  padding: 10px;
+  margin: 10px 0 18px 0;
+  page-break-inside: avoid;
 }
 
-/* muchos jugadores */
-body.many-rows table {
-    font-size: 10px;
-    transform: scale(0.92);
-    transform-origin: top left;
+.sep{
+  height: 1px;
+  background: rgba(0,0,0,.15);
+  margin: 10px 0;
 }
 
-body.many-rows td,
-body.many-rows th {
-    padding: 2px;
+table.totales-table{
+  width: 100% !important;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin: 0;
 }
 
-/* demasiados jugadores */
-body.too-many-rows table {
-    font-size: 9px;
-    transform: scale(0.85);
-    transform-origin: top left;
+table.totales-table td{
+  border: 1px solid rgba(0,0,0,.18);
+  padding: 8px;
+  font-size: 10.5pt;
+  vertical-align: top;
 }
 
-/* acercar la tabla al encabezado sin que lo tape */
-section, table {
-    margin-top: 10px !important;
-    padding-top: 0 !important;
+table.totales-table td.label{ width: 72%; }
+table.totales-table td.money{
+  width: 28%;
+  text-align: right;
+  white-space: nowrap;
+  font-weight: 700;
+}
+table.totales-table td.money.strong{ font-size: 11.5pt; }
+table.totales-table td.money.neg{ color: #b00020; }
+
+.note{
+  font-size: 9pt;
+  color: #555;
+  margin-top: 2px;
 }
 
-body.many-rows table,
-body.too-many-rows table {
-    margin-top: 5px !important;
+table.totales-table.final td{
+  background: #e8f5ee;
+  border-color: rgba(0,0,0,.22);
 }
 
-section {
-    margin-top: 0 !important;
+/* ===========================
+   OBSERVACIONES
+=========================== */
+.observaciones{
+  background-color: #c6d3e0;
+  padding: 12px;
+  margin: 25px 0 0 0;
 }
 
-
-/* Paginación automática para la tabla de gastos */
-table.gastos-table {
-    page-break-inside: auto;
-    padding: 0px;
-    padding-right: 10px;
-    max-width: 110%;   /* antes ocupaba todo el ancho; ahora será más angosto */
-    min-width: 110%;
-    margin: auto; /* centrado */
-        margin-bottom: 25px;
-
+.observaciones-title{
+  margin: 0 0 8px 0;
+  font-size: 12pt;
 }
 
-table.gastos-table tr {
-    page-break-inside: avoid;
-    page-break-after: auto;
+.obs{
+  font-size: 10pt;
+  padding: 6px 10px;
 }
 
-table.gastos-table thead {
-    display: table-header-group;
+/* ===========================
+   TABLA OTROS PARTIDOS
+=========================== */
+.pdf-table--otros th,
+.pdf-table--otros td{
+  font-size: 10pt;
 }
-
-table.gastos-table tfoot {
-    display: table-footer-group;
+.section-block{
+  page-break-inside: avoid;
 }

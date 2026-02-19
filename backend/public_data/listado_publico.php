@@ -392,49 +392,6 @@ while ($o = $resOD->fetch_assoc()) {
 $qOtrosDet->close();
 
 
-// // detalle de otros aportes (agrupado por tipo)
-// $otros_detalle = [];
-// $qOtrosDet = $conexion->prepare("
-//     SELECT tipo, valor
-//     FROM otros_aportes
-//     WHERE mes = ? AND anio = ?
-//     ORDER BY id ASC
-// ");
-// $qOtrosDet->bind_param("ii", $mes, $anio);
-// $qOtrosDet->execute();
-// $resOtrosDet = $qOtrosDet->get_result();
-// while ($o = $resOtrosDet->fetch_assoc()) {
-//     $otros_detalle[] = 
-//     [
-//         "tipo" => $o["tipo"], 
-//         "valor" => (int)$o["valor"]
-
-//     ];
-// }
-// $qOtrosDet->close();
-
-
-
-// detalle de otros aportes del mes (SIN agrupar, trae cada fila)
-// $otros_detalle = [];
-// $qOtrosDet = $conexion->prepare("
-//     SELECT tipo, valor
-//     FROM otros_aportes
-//     WHERE mes = ? AND anio = ?
-//     ORDER BY id ASC
-// ");
-// $qOtrosDet->bind_param("ii", $mes, $anio);
-// $qOtrosDet->execute();
-// $resOD = $qOtrosDet->get_result();
-// while ($o = $resOD->fetch_assoc()) {
-//     $otros_detalle[] = [
-//         "tipo"  => $o["tipo"],
-//         "valor" => (int)$o["valor"],
-//     ];
-// }
-// $qOtrosDet->close();
-
-
 
 // observaciones
 $qObs = $conexion->prepare("
