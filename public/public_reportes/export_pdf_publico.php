@@ -28,13 +28,14 @@ function pick_default_otro_dia_pdf($days, $days_count) {
 $otroDiaPdf = pick_default_otro_dia_pdf($days, $days_count);
 $otroLabelPdf = str_pad((string)$otroDiaPdf, 2, "0", STR_PAD_LEFT);
 
+
 // --- renderizar HTML del reporte ---
 ob_start();
 include __DIR__ . "/reporte_mes_publico.php";
 $html = ob_get_clean();
 
 // --- Dompdf ---
-require_once realpath(__DIR__ . "/../../dompdf_2-0-3/dompdf/autoload.inc.php");
+require_once __DIR__ . "/../../dompdf_2-0-3/dompdf/vendor/autoload.php";
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -47,7 +48,7 @@ $options->set("defaultFont", "DejaVu Sans");
 $dompdf = new Dompdf($options);
 
 // CSS del reporte
-$cssPath =realpath(__DIR__ . "/../../backend/reportes/reporte_pdf.css");
+$cssPath = __DIR__ . '/../../backend/reportes/reporte_pdf.css';
 $css     = file_get_contents($cssPath);
 
 $html = "<style>{$css}</style>" . $html;
@@ -58,11 +59,10 @@ $dompdf->render();
 
 // ============ ENCABEZADO Y PIE EN TODAS LAS PÁGINAS ============
 $canvas   = $dompdf->get_canvas();
-$logoPath = realpath(__DIR__ . "/../../assets/img/reliquias_logo.jpg");
+$logoPath = __DIR__ . "/../../assets/img/reliquias_logo.jpg";
 
 if (!file_exists($logoPath)) {
-       $logoPath = realpath(__DIR__ . "/../../assets/img/reliquias_logo.jpg");
-
+    $logoPath = __DIR__ . "/../../assets/img/default_logo.png";
 }
 
 $logoWidth = 80;

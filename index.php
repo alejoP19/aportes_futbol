@@ -23,7 +23,7 @@ include "conexion.php";
     </div>
 
     <!-- BOTÓN APORTANTES -->
-    
+
     <button class="toggle-left-panel" id="btnVerAportantes">
       Ver Aportantes
     </button>
@@ -222,9 +222,6 @@ include "conexion.php";
           <div>Total Final Mes <small>(estimado - gastos)</small> <strong id="tFinalMes" class="totales-item-value">$ 0</strong></div>
           <div>Total Final Año <small>(estimado - gastos)</small> <strong id="tFinalAnio" class="totales-item-value">$ 0</strong></div>
         </div>
-
-
-
 
         <div id="modalEliminados" class="modal hidden">
           <div class="modal-card">

@@ -1,7 +1,0 @@
-Array
-(
-    [mes] => 2
-    [anio] => 2026
-    [saldo_total_mes] => 37000
-    [saldo_total_anio] => 35000
-)

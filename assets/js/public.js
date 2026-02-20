@@ -1,6 +1,7 @@
 // public/public.js
 const API_JSON = "/APORTES_FUTBOL/backend/public_data/listado_publico.php";
 const API_PDF  = "../public/public/public_reportes/reporte_mes_publico.php";
+const API_ELIMINADOS_PUBLICO = "/APORTES_FUTBOL/backend/public_data/get_eliminados_mes_publico.php";
 
 document.addEventListener("DOMContentLoaded", () => {
   cargarSelects();
@@ -82,6 +83,8 @@ async function cargarDatos() {
   renderGastos(data, mes, anio);
   renderOtrosAportesPublico(data, mes, anio);
   renderOtrosPartidosPublico(data);
+  await cargarEliminadosMes(mes, anio);
+
 }
 
 
@@ -602,32 +605,37 @@ function escapeHtml(str) {
 
 function renderTotales(data) {
   if (!data) return;
-
   const t = data.totales ?? {};
 
-  const elMes   = document.getElementById("tMes");
-  const elAnio  = document.getElementById("tAnio");
-  const elSaldo = document.getElementById("tSaldoMes");
+  const set = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = formatMoney(Number(val || 0));
+  };
 
-  const elMesConSaldo  = document.getElementById("tMesConSaldo");
-  const elAnioConSaldo = document.getElementById("tAnioConSaldo");
+  // Parciales
+  set("tParcialMes",  t.parcial_mes);
+  set("tParcialAnio", t.parcial_anio);
 
-  const monthTotal = Number(t.month_total || 0);
-  const yearTotal  = Number(t.year_total  || 0);
+  // Otros + saldo
+  set("tOtrosMes",   t.otros_mes);
+  set("tOtrosAnio",  t.otros_anio);
+  set("tSaldoTotal", t.saldo_hasta_mes);
 
-  const saldoMes   = Number(t.saldo_vigente_total || 0);
+  // Eliminados
+  set("tEliminadosMes",  t.eliminados_mes);
+  set("tEliminadosAnio", t.eliminados_anio);
 
-  // Estos dos vienen del PHP como “extra”
-  // const saldoTotalMes  = Number(t.saldo_total_mes  || 0);
- const saldoVigente = Number(t.saldo_vigente_total || t.saldo_mes || 0); // saldo acumulado vigente
+  // Estimados
+  set("tEstimadoMes",  t.estimado_mes);
+  set("tEstimadoAnio", t.estimado_anio);
 
-  if (elMes)   elMes.textContent   = formatMoney(monthTotal);
-  if (elAnio)  elAnio.textContent  = formatMoney(yearTotal);
-  if (elSaldo) elSaldo.textContent = formatMoney(saldoMes);
+  // Gastos
+  set("tGastosMes",  t.gastos_mes);
+  set("tGastosAnio", t.gastos_anio);
 
-  // ✅ Totales con saldo (los marcamos como “menos importantes” con class .extra)
-  if (elMesConSaldo) elMesConSaldo.textContent = formatMoney(monthTotal + saldoVigente);
-  if (elAnioConSaldo) elAnioConSaldo.textContent = formatMoney(yearTotal + saldoVigente);
+  // Finales
+  set("tFinalMes",  t.final_mes);
+  set("tFinalAnio", t.final_anio);
 }
 
 /* ==========================================================
@@ -798,4 +806,122 @@ function renderOtrosPartidosPublico(data){
     
   }
   box.innerHTML = html;
+}
+
+
+
+let __eliminadosMesCache = null;
+
+
+async function cargarEliminadosMes(mes, anio){
+  const elMes  = document.getElementById("tEliminadosMes");
+  const elAnio = document.getElementById("tEliminadosAnio");
+
+  const btn   = document.getElementById("btnVerEliminados");
+  const modal = document.getElementById("modalEliminados");
+  const body  = document.getElementById("modalEliminadosBody");
+  const close = document.getElementById("closeModalEliminados");
+
+  if (!btn || !modal || !body || !close) return;
+
+  // Bind 1 vez
+  if (!btn.dataset.bound) {
+    btn.dataset.bound = "1";
+
+    btn.addEventListener("click", () => {
+      const data = __eliminadosMesCache;
+
+      if (!data || data.ok !== true) {
+        body.innerHTML = `<div style="opacity:.85;">No hay información disponible de eliminados para este mes.</div>`;
+        modal.classList.remove("hidden");
+        return;
+      }
+
+      const items = Array.isArray(data.items) ? data.items : [];
+
+      if (!items.length){
+        body.innerHTML = `<div style="opacity:.85;">No hubo eliminados en este mes.</div>`;
+      } else {
+
+        const totMes  = Number(data.totales?.eliminados_mes || 0);
+        const totAnio = Number(data.totales?.eliminados_anio || 0);
+        const totSal  = Number(data.totales?.saldo_eliminados || 0);
+
+        body.innerHTML = `
+          <div class="table-mini-wrap">
+            <table class="table-mini">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Fecha baja</th>
+                  <th class="right">Total Mes</th>
+                  <th class="right">Total Año</th>
+                  <th class="right">Saldo</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${items.map(it => `
+                  <tr>
+                    <td>${escapeHtml(it.nombre || "")}</td>
+                    <td>${escapeHtml(it.fecha_baja || "")}</td>
+                    <td class="right"><strong>${formatMoney(it.total_mes || 0)}</strong></td>
+                    <td class="right">${formatMoney(it.total_anio || 0)}</td>
+                    <td class="right">${formatMoney(it.saldo || 0)}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2"><strong>Totales</strong></td>
+                  <td class="right"><strong>${formatMoney(totMes)}</strong></td>
+                  <td class="right"><strong>${formatMoney(totAnio)}</strong></td>
+                  <td class="right"><strong>${formatMoney(totSal)}</strong></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        `;
+      }
+
+      modal.classList.remove("hidden");
+    });
+
+    function closeModal(){
+      modal.classList.add("closing");
+      setTimeout(() => {
+        modal.classList.add("hidden");
+        modal.classList.remove("closing");
+      }, 180);
+    }
+
+    close.onclick = closeModal;
+    modal.onclick = (e) => { if(e.target === modal) closeModal(); };
+    document.addEventListener("keydown", (ev) => {
+      if(ev.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
+    });
+  }
+
+  // Cargar data
+  try {
+    const r = await fetch(`${API_ELIMINADOS_PUBLICO}?mes=${mes}&anio=${anio}`, { cache:"no-store" });
+
+    // si backend devuelve HTML/redirect, aquí lo detectas rápido:
+    const ct = r.headers.get("content-type") || "";
+    if (!ct.includes("application/json")) throw new Error("Respuesta no es JSON (posible redirect/auth)");
+
+    const data = await r.json();
+    __eliminadosMesCache = data;
+
+    const totMes  = Number(data?.totales?.eliminados_mes || 0);
+    const totAnio = Number(data?.totales?.eliminados_anio || 0);
+
+    if (elMes)  elMes.textContent  = formatMoney(totMes);
+    if (elAnio) elAnio.textContent = formatMoney(totAnio);
+
+  } catch (err) {
+    __eliminadosMesCache = { ok:false };
+    if (elMes)  elMes.textContent  = formatMoney(0);
+    if (elAnio) elAnio.textContent = formatMoney(0);
+    console.warn("No se pudo leer eliminados_publico:", err);
+  }
 }
