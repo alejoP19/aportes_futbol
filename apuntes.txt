@@ -907,5 +907,4 @@ table.totales-table.final td{
 
 BUG --> Al eliminar un aportante con saldos, el saldo no se actualiza en el informativo 
 la seccion aportantes eliminados de ste mes sin refrescar la página
-BUG --> La tabla de nuevo juego no refresca y coloca la nueva fila sin recargar la pagina
-BUG --> Pregintar a la IA sobre la falla de cargar el chat 
+

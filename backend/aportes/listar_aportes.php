@@ -244,30 +244,28 @@ echo "
   <div class='month-header'>
     Mes: <strong>{$mesesEsp[$mes]} $anio</strong>
   </div>
-
-  <div style='display:flex; gap:10px; align-items:center; flex-wrap:wrap;'>
-    <div class='buscador-jugadores'>
-      <span class='icono-buscar'>🔍</span>
-      <input type='text' id='searchJugador' placeholder='Buscar aportante…' autocomplete='off'>
-      <button type='button' id='clearSearch' title='Limpiar'>✕</button>
-    </div>
-
-    <div class='otro-juego-picker'>
-      <span>Otro juego</span>
-      <select id='selectOtroDia'>
+        <div class='otro-juego-picker'>
+            <h6>Otro juego</h6>
+            <select id='selectOtroDia'>
 ";
 
-foreach ($opcionesOtro as $dopt) {
-    $sel = ($dopt == $otroDia) ? "selected" : "";
-    echo "<option value='{$dopt}' {$sel}>Día {$dopt}</option>";
-}
+                foreach ($opcionesOtro as $dopt) {
+                    $sel = ($dopt == $otroDia) ? "selected" : "";
+                    echo "<option value='{$dopt}' {$sel}>Día {$dopt}</option>";
+                }
 
-echo "
-      </select>
+                echo "
+            </select>
+        </div>
+    <div style='display:flex; gap:10px; align-items:center; flex-wrap:wrap;'>
+        <div class='buscador-jugadores'>
+        <span class='icono-buscar'>🔍</span>
+        <input type='text' id='searchJugador' placeholder='Buscar aportante…' autocomplete='off'>
+        <button type='button' id='clearSearch' title='Limpiar'>✕</button>
+        </div>
     </div>
-  </div>
 </div>
-";
+        ";
 
 echo "<table class='planilla'>";
 echo "<thead>";

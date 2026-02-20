@@ -4,8 +4,8 @@
 body{
   font-family: DejaVu Sans, sans-serif;
   margin-top: 160px;
-  margin-left: 20px;
-  margin-right: 20px;
+  margin-left: 10px;
+  margin-right: 10px;
   margin-bottom: 20px;
   font-size: 12pt;
 }
@@ -33,7 +33,7 @@ h3{
   width: 100% !important;
   border-collapse: collapse;
   table-layout: fixed;          /* ✅ CLAVE */
-  margin: 10px 0 18px 0;
+  margin: 10px 0 10px 0;
 }
 
 .pdf-table th,
@@ -49,9 +49,16 @@ h3{
   color: #fff;
   font-weight: 700;
   text-align: center;
+   padding: 4px 6px;   /* arriba/abajo | lados */
+   justify-items: center;
+   align-items: center;
 }
+.col-especial,
+.col-otros{
+ font-size: 10px !important;
+    padding: 0px 18px !important;
 
-/* Filas alternas */
+}
 .pdf-table tbody tr:nth-child(even){
   background: #f2f2f2;
 }
@@ -107,7 +114,10 @@ tr.eliminado td{
   font-size: 10pt;
   margin-top: -6px;
   margin-bottom: 8px;
-  color: #444;
+  color: #007997d0;
+  font-weight: bold;
+  text-shadow: -1px 1px 1px black;
+  text-align: center;
 }
 
 .totales-box{
@@ -187,4 +197,36 @@ table.totales-table.final td{
 }
 .section-block{
   page-break-inside: avoid;
+}
+
+
+
+
+/* ✅ FIX FUERTE: Nombre legible sin tocar PHP */
+.pdf-table--aportes th.col-jugador,
+.pdf-table--aportes td.td-jugador{
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+/* Celda Jugador */
+.pdf-table--aportes td.td-jugador{
+  font-size: 8.4pt;         /* un poquito más bajo (clave en Dompdf) */
+  line-height: 1.05;        /* compacta sin volverse ilegible */
+  font-weight: 600;         /* menos pesado que 700 (bold aplasta) */
+
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;  /* ✅ permite cortar si se necesita */
+  hyphens: none;
+
+  /* deja hasta 3 líneas aprox, pero evita “reventar” la fila */
+  max-height: 30pt;
+  overflow: hidden;
+}
+
+/* Encabezado "Jugador" también compacto */
+.pdf-table--aportes th.col-jugador{
+  font-size: 9pt;
+  line-height: 1.05;
 }

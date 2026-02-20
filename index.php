@@ -23,11 +23,58 @@ include "conexion.php";
     </div>
 
     <!-- BOTÓN APORTANTES -->
+    
     <button class="toggle-left-panel" id="btnVerAportantes">
       Ver Aportantes
     </button>
+    <div class="actions-buttons-div">
+      <div class="logout-pdf-buttons">
+        <button class="export-pdf-butt">Generar PDF</button>
+        <button id="btnLogout" class="logout-button">Cerrar Sesión</button>
+      </div>
+      <!-- SELECTS FECHA -->
+      <div class="date-selectors">
+        <label>Año</label>
+        <select id="yearSelect" class="year">
+          <?php
+          $year = date('Y');
+          for ($i = $year; $i >= $year - 5; $i--) {
+            echo "<option value='$i'" . ($i == $year ? " selected" : "") . ">$i</option>";
+          }
+          ?>
+        </select>
 
-    <button id="btnLogout" class="logout-button">Cerrar Sesión</button>
+        <label>Mes</label>
+        <select id="monthSelect" class="month">
+          <?php
+          $months = [
+            1 => 'Enero',
+            2 => 'Febrero',
+            3 => 'Marzo',
+            4 => 'Abril',
+            5 => 'Mayo',
+            6 => 'Junio',
+            7 => 'Julio',
+            8 => 'Agosto',
+            9 => 'Septiembre',
+            10 => 'Octubre',
+            11 => 'Noviembre',
+            12 => 'Diciembre'
+          ];
+
+          $currentMonth = date('n'); // mes actual en número
+
+          foreach ($months as $k => $m) {
+            $sel = ($k == $currentMonth) ? " selected" : "";
+            echo "<option value='$k'$sel>$m</option>";
+          }
+          ?>
+        </select>
+
+      </div>
+
+
+    </div>
 
 
     <!-- TÍTULO -->
@@ -36,47 +83,7 @@ include "conexion.php";
       <div class="subtitle">Las Reliquias Del Fútbol</div>
     </div>
 
-    <!-- SELECTS FECHA -->
-    <div class="date-selectors">
 
-      <label>Año</label>
-      <select id="yearSelect" class="year">
-        <?php
-        $year = date('Y');
-        for ($i = $year; $i >= $year - 5; $i--) {
-          echo "<option value='$i'" . ($i == $year ? " selected" : "") . ">$i</option>";
-        }
-        ?>
-      </select>
-
-      <label>Mes</label>
-      <select id="monthSelect" class="month">
-        <?php
-        $months = [
-          1 => 'Enero',
-          2 => 'Febrero',
-          3 => 'Marzo',
-          4 => 'Abril',
-          5 => 'Mayo',
-          6 => 'Junio',
-          7 => 'Julio',
-          8 => 'Agosto',
-          9 => 'Septiembre',
-          10 => 'Octubre',
-          11 => 'Noviembre',
-          12 => 'Diciembre'
-        ];
-
-        $currentMonth = date('n'); // mes actual en número
-
-        foreach ($months as $k => $m) {
-          $sel = ($k == $currentMonth) ? " selected" : "";
-          echo "<option value='$k'$sel>$m</option>";
-        }
-        ?>
-      </select>
-
-    </div>
   </header>
 
   <main class="container">
@@ -116,15 +123,19 @@ include "conexion.php";
       </div>
     </section>
 
+    <!-- OVERLAY PARA TABLA (Aportantes) -->
+    <div class="overlay-aportantes" id="overlayAportantes" aria-hidden="true">
+
+      <!-- PANEL CENTRAL: TABLA + OBSERVACIONES -->
+      <section class="middle-panel">
+        <!-- Tabla scrollable -->
+        <div class="table-wrap" id="monthlyTableContainer">
+          <div class="loading">Cargando planilla mensual...</div>
+        </div>
+      </section>
 
 
-    <!-- PANEL CENTRAL: TABLA + OBSERVACIONES -->
-    <section class="middle-panel">
-      <!-- Tabla scrollable -->
-      <div class="table-wrap" id="monthlyTableContainer">
-        <div class="loading">Cargando planilla mensual...</div>
-      </div>
-    </section>
+    </div>
 
 
     <!-- PANEL DE GASTOS-->
@@ -155,14 +166,14 @@ include "conexion.php";
       <div class="totals-card">
         <h4 class="parcial-tot-title">Totales (COP)</h4>
         <div class="total-parcial-mini">
-          <small  class="parcial-totals-mini-help">Incluyen Valores de Cada Día de la Columna Otro Juego</small>
-            <div><span>Total Parcial Mes <small>(Sin Otros Aportes/Saldo/Eliminados) </small>
-                <strong id="tParcialMes" class="totales-item-value">$ 0</strong></span>
-            </div>
+          <small class="parcial-totals-mini-help">Incluyen Valores de Cada Día de la Columna Otro Juego</small>
+          <div><span>Total Parcial Mes <small>(Sin Otros Aportes/Saldo/Eliminados) </small>
+              <strong id="tParcialMes" class="totales-item-value">$ 0</strong></span>
+          </div>
 
-            <div><span>Total Parcial Año <small>(Sin Otros Aportes/Saldo/Eliminados)</small>
-              <strong id="tParcialAnio"  class="totales-item-value">$ 0</strong></span>
-            </div>
+          <div><span>Total Parcial Año <small>(Sin Otros Aportes/Saldo/Eliminados)</small>
+              <strong id="tParcialAnio" class="totales-item-value">$ 0</strong></span>
+          </div>
         </div>
 
 
@@ -229,20 +240,19 @@ include "conexion.php";
     <div class="otros-partidos-info-card">
       <h4>Datos Columna Otro Juego</h4>
       <div> <span><strong id="otrosPartidosInfo" class="totales-otros-card"></strong></span></div>
+      <!-- Observaciones -->
+      <div class="observaciones-container" id="gastosWrapper">
+        <h3>Observaciones Del Mes</h3>
+        <textarea id="obsMes"></textarea>
+
+        <button id="saveObsBtn" class="guardar-observaciones">Guardar Observaciones</button>
+
+      </div>
     </div>
 
-    <!-- Observaciones -->
-    <div class="observaciones-container" id="gastosWrapper">
-      <h3>Observaciones Del Mes</h3>
-      <textarea id="obsMes"></textarea>
-
-      <button id="saveObsBtn" class="guardar-observaciones">Guardar Observaciones</button>
-
-    </div>
-    <div class="notes-card">
-      <h4>Reporte Actual Del Mes</h4>
-      <button class="export-pdf-butt">Generar PDF</button>
-    </div>
+    <!-- <div class="notes-card">
+     
+    </div> -->
 
   </main>
 

@@ -767,18 +767,57 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-  
-// --- MOSTRAR / OCULTAR TABLA APORTANTES ---
-const btnVer = document.getElementById("btnVerAportantes");
-const tabla = document.getElementById("playersTableContainer");
 
-if (btnVer && tabla) {
-    btnVer.addEventListener("click", () => {
-        const middlePanel = document.querySelector('.middle-panel');
-        const isExpanded = middlePanel.classList.toggle("expanded");
-        btnVer.textContent = isExpanded ? "Ocultar Aportantes" : "Ver Aportantes";
-    });
+// --- MOSTRAR / OCULTAR TABLA APORTANTES (con overlay + click fuera) ---
+const btnVer = document.getElementById("btnVerAportantes");
+const middlePanel = document.getElementById("middlePanel") || document.querySelector(".middle-panel");
+const overlay = document.getElementById("overlayAportantes");
+
+function openAportantes(){
+  if (!middlePanel) return;
+  middlePanel.classList.add("expanded");
+  overlay?.classList.add("show");
+  overlay?.setAttribute("aria-hidden", "false");
+  if (btnVer) btnVer.textContent = "Ocultar Aportantes";
+
+  // reset scroll
+  middlePanel.scrollTop = 0;
+  middlePanel.scrollLeft = 0;
 }
+
+function closeAportantes(){
+  if (!middlePanel) return;
+  middlePanel.classList.remove("expanded");
+  overlay?.classList.remove("show");
+  overlay?.setAttribute("aria-hidden", "true");
+  if (btnVer) btnVer.textContent = "Ver Aportantes";
+}
+
+function toggleAportantes(){
+  if (!middlePanel) return;
+  const isOpen = middlePanel.classList.contains("expanded");
+  isOpen ? closeAportantes() : openAportantes();
+}
+
+if (btnVer && middlePanel) {
+  btnVer.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggleAportantes();
+  });
+}
+
+// click fuera (overlay)
+overlay?.addEventListener("click", closeAportantes);
+
+// ESC para cerrar
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && middlePanel?.classList.contains("expanded")) {
+    closeAportantes();
+  }
+});
+
+// evitar que clicks dentro de la tabla cierren (por si luego usas listener global)
+middlePanel?.addEventListener("click", (e) => e.stopPropagation());
 
 
 

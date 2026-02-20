@@ -416,41 +416,40 @@ $stmtOP->close();
 
   <?php
   // ====== ANCHOS DINÁMICOS ======
-  $nDias = count($days);
+$nDias = count($days);
+$wNombre  = 12;   // ← ancho ideal
+$wEsp     = 16;
+$wOtros   = 16;
+$wTotal   = 13;
+$wSaldo   = 13;
+$wDeuda   = 14;
 
-  // Ajusta estos si quieres más/menos aire
-  $wNombre  = 28;  // ↑ sube si quieres más ancho de nombre
-  $wEsp     = 10;  // Otro juego / Especial
-  $wOtros   = 7;
-  $wTotal   = 7;
-  $wSaldo   = 7;
-  $wDeuda   = 14;  // ↑ sube si quieres más espacio de deuda
-
-  $fixed = $wNombre + $wEsp + $wOtros + $wTotal + $wSaldo + $wDeuda;
-  $wDia = ($nDias > 0) ? max(2.5, (100 - $fixed) / $nDias) : 0; // mínimo 2.5%
+$fixed = $wNombre + $wEsp + $wOtros + $wTotal + $wSaldo + $wDeuda;
+$wDia = ($nDias > 0) ? max(2.5, (100 - $fixed) / $nDias) : 0;
   ?>
 
   <table class="pdf-table pdf-table--aportes" width="100%" cellspacing="0" cellpadding="4">
     <colgroup>
-      <col style="width:<?= $wNombre ?>%">
+   <col width="<?= $wNombre ?>%">
       <?php foreach ($days as $_): ?>
-        <col style="width:<?= $wDia ?>%">
+      <col width="<?= $wDia ?>%">
       <?php endforeach; ?>
-      <col style="width:<?= $wEsp ?>%">
-      <col style="width:<?= $wOtros ?>%">
-      <col style="width:<?= $wTotal ?>%">
-      <col style="width:<?= $wSaldo ?>%">
-      <col style="width:<?= $wDeuda ?>%">
+       <col width="<?= $wEsp ?>%">
+  <col width="<?= $wOtros ?>%">
+  <col width="<?= $wTotal ?>%">
+  <col width="<?= $wSaldo ?>%">
+  <col width="<?= $wDeuda ?>%">
     </colgroup>
 
     <thead>
       <tr>
-        <th class="col-jugador">Jugador</th>
+      <th class="col-jugador" style="width:<?= $wNombre ?>%;">Jugador</th>
+
         <?php foreach ($days as $d): ?>
           <th class="col-dia"><?= (int)$d ?></th>
         <?php endforeach; ?>
-        <th class="col-especial">Especial<br>(<?= str_pad((string)$otroDia, 2, "0", STR_PAD_LEFT) ?>)</th>
-        <th class="col-otros">Otros</th>
+        <th class="col-especial">Otro Juego<br>(<?= str_pad((string)$otroDia, 2, "0", STR_PAD_LEFT) ?>)</th>
+        <th class="col-otros">Otros Aportes</th>
         <th class="col-total">Total</th>
         <th class="col-saldo">Saldo</th>
         <th class="col-deuda">Deuda</th>
@@ -521,13 +520,12 @@ $stmtOP->close();
   </table>
 
 
-  <!-- ✅ FORZAR que "Resumen General" arranque arriba (evita título cortado al final) -->
-  <!-- <div class="page-break"></div> -->
+ 
   <div class="section-block">
     <h3 class="keep-title">Resumen General</h3>
-    <h3 class="keep-title">Totales (COP)</h3>
-    <div class="totales-sub">Incluyen valores de cada día de la columna Especial (<?= str_pad((string)$otroDia, 2, "0", STR_PAD_LEFT) ?>)</div>
-
+    <h3 class="keep-title">Totales (COP)</h3><br>
+    <div class="totales-sub">Incluyen valores de Los Días de la Columna Otro Juego (<?= str_pad((string)$otroDia, 2, "0", STR_PAD_LEFT) ?>) <br> (Ver Tabla Datos de Otros Juegos - Abajo &dArr; ) </div>
+<br>
     <div class="totales-box">
       <table class="totales-table">
         <tr>
@@ -637,7 +635,7 @@ $stmtOP->close();
 
 
   <div class="section-block">
-    <h3 class="keep-title">Datos de Otros Partidos</h3>
+    <h3 class="keep-title">Datos de Otros Juegos</h3>
 
     <?php if (empty($otros_partidos_items)): ?>
       <div style="font-size:11pt; opacity:.85;">
