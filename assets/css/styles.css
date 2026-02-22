@@ -583,22 +583,25 @@ border-radius: 12px;
 font-weight: bold;
 margin-bottom: 3%;
 }
-
+.total-parcial-mini small,.totales-estimado-mini small,.totales-finales-mini small{
+  font-size: 11px !important;
+  color: #006b30;
+}
 
 .parcial-totals-mini-help{
 display: flex;
-  font-size:12px; 
 text-align: center;
-  opacity:.95;
+  opacity:.98;
    margin:4% 2% 10% 2%; 
-color: rgb(0, 0, 0);
+color: rgba(90, 89, 1, 0.836) !important;
 text-shadow: -1px 1px 1px rgb(255, 255, 255),-1px 1px 1px rgb(255, 255, 255);
 background-color: #ffffff85;
 padding:10px;
 border-radius: 12px;
 font-weight: bold;
-border: 1px dotted rgba(199, 199, 199, 0.788);
+border: 1px dotted rgba(138, 138, 138, 0.788);
 font-style: oblique;
+font-size: 13px !important;
 }
 
 
@@ -632,7 +635,10 @@ border-radius: 5px;
 font-weight: bold;
 
 }
-
+.otros-saldo-mini small{
+ font-size: 12px !important;
+  color: #006b2d;
+}
 
 .totales-aportantes-eliminados{
 position: relative;
@@ -670,11 +676,11 @@ margin-bottom: 2% !important;
 
 .mini-help{ 
  display: flex;
-  font-size:12px; 
+  font-size:13px; 
 text-align: center;
   opacity:.95;
    margin:4% 2% 25% 2%; 
-color: rgb(0, 0, 0);
+color: rgba(90, 89, 1, 0.836) !important;
 text-shadow: -1px 1px 1px rgb(255, 255, 255),-1px 1px 1px rgb(255, 255, 255);
 background-color: #ffffff67;
 padding:10px;
@@ -1768,6 +1774,114 @@ input[type="number"] {
   max-width: 100%;
   overflow: visible;
 }
+
+
+.esporadicos-details{
+  margin-top: 8px;
+  border-radius: 18px;
+}
+
+.esporadicos-summary{
+  cursor: pointer;
+  font-weight: 800;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(238,238,238,.70);
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+.esporadicos-summary small{
+  display:block;
+  font-weight:600;
+  opacity:.85;
+  margin-top:4px;
+  font-style: italic;
+}
+
+.esporadicos-toolbar{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  gap:10px;
+  margin: 10px 0;
+}
+
+.btn-add-esp{
+  border-radius: 12px;
+  padding: 6px 10px;
+  border: 1px solid rgba(0,0,0,.15);
+  background: rgba(88,194,226,.25);
+  font-weight: 800;
+}
+
+.esp-hint{
+  font-size: 12px;
+  opacity: .9;
+  font-style: italic;
+}
+
+.esp-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  border:1px solid rgba(0,0,0,.14);
+  border-radius:12px;
+  overflow:hidden;
+  font-size: 13px;
+  background:#fff;
+}
+
+.esp-table thead th{
+  position: sticky; top: 0;
+  background:#0a83b3;
+  color:#fff;
+  padding:10px;
+  text-align:center;
+}
+
+.esp-table td{
+  padding:8px 8px;
+  border-top:1px solid rgba(0,0,0,.08);
+  border-right:1px solid rgba(0,0,0,.06);
+  text-align:center;
+  white-space:nowrap;
+}
+
+.esp-table td:last-child, .esp-table th:last-child{ border-right:none; }
+
+.esp-cell{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+
+.esp-chip{
+  padding:3px 8px;
+  border-radius: 999px;
+  background: rgba(0,199,60,.12);
+  border: 1px solid rgba(0,199,60,.25);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.esp-chip.zero{
+  background: rgba(0,0,0,.05);
+  border-color: rgba(0,0,0,.08);
+  font-weight: 700;
+  opacity:.8;
+}
+
+.esp-pencil{
+  opacity:.85;
+  cursor:pointer;
+}
+
+.esp-tfoot{
+  background:#f7f9fb;
+  font-weight: 900;
+}
+
 /* Hover */
 /* #monthlyTableContainer table tr:hover { background-color: #f0f8ff; cursor: pointer; }
 #monthlyTableContainer table tr.selected-row { background-color: #000000; }
@@ -1988,7 +2102,10 @@ font-size: 14px;
 font-size: 14px;
 
 }
-
+.total-parcial-mini small,.totales-estimado-mini small,.totales-finales-mini small{
+  font-size: 11px !important;
+  color: #006b30;
+}
   .modal-card{ padding:12px; }
   .table-mini{ font-size:12px; }
   .table-mini thead th, .table-mini tbody td{ padding:8px;}

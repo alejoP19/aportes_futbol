@@ -132,6 +132,23 @@ include "conexion.php";
         <div class="table-wrap" id="monthlyTableContainer">
           <div class="loading">Cargando planilla mensual...</div>
         </div>
+        <details class="esporadicos-details" closed>
+          <summary class="esporadicos-summary">
+            Aportes Esporádicos
+            <small>— se suman automáticamente a totales diarios, mensuales y anuales</small>
+          </summary>
+
+          <div class="esporadicos-toolbar">
+            <button type="button" id="btnAddEspRow" class="btn-add-esp">+ Agregar fila</button>
+            <span class="esp-hint">Checkbox = $3.000 · Click en valor para editar</span>
+          </div>
+
+          <div id="esporadicosWrap"></div>
+
+          <div class="esp-note">
+            Los aportes esporádicos se suman automáticamente a los totales diarios, mensuales y anuales.
+          </div>
+        </details>
       </section>
 
 
@@ -166,22 +183,27 @@ include "conexion.php";
       <div class="totals-card">
         <h4 class="parcial-tot-title">Totales (COP)</h4>
         <div class="total-parcial-mini">
-          <small class="parcial-totals-mini-help">Incluyen Valores de Cada Día de la Columna Otro Juego</small>
-          <div><span>Total Parcial Mes <small>(Sin Otros Aportes/Saldo/Eliminados) </small>
-              <strong id="tParcialMes" class="totales-item-value">$ 0</strong></span>
+          <div class="parcial-totals-mini-help">Totales Parciales Incluyen Valores de Cada Día 
+            y de la Columna Otro Juego de Las Planillas Principal y Aportes Esporádicos 
+            (Ver Registros en Tabla Datos Columna Otro Juego)</div>
+            <div>
+            <span>Total Parcial Mes: </span><br>
+           <small>( Sin Otros Aportes / Sin Saldo / Sin Eliminados) </small>
           </div>
-
-          <div><span>Total Parcial Año <small>(Sin Otros Aportes/Saldo/Eliminados)</small>
-              <strong id="tParcialAnio" class="totales-item-value">$ 0</strong></span>
-          </div>
+          <strong id="tParcialMes" class="totales-item-value">$ 0</strong>
+          <div>
+            <span>Total Parcial Año: </span><br>
+          <small>(Sin Otros Aportes / Sin Saldo / Sin Eliminados)</small>
+        </div>
+        <strong id="tParcialAnio" class="totales-item-value">$ 0</strong>
         </div>
 
 
         <hr style="opacity:.25; margin:1px 0;">
         <div class="otros-saldo-mini">
-          <div><span>Otros Aportes Mes <strong id="tOtrosMes" class="totales-item-value otros-span">$ 0</strong></span>
+          <div><span>Otros Aportes Mes <small>(+ Esporádicos )</small><strong id="tOtrosMes" class="totales-item-value otros-span">$ 0</strong></span>
           </div>
-          <div><span>Otros Aportes Año <strong id="tOtrosAnio" class="totales-item-value otros-span">$ 0</strong></span>
+          <div><span>Otros Aportes Año <small>( + Esporádicos )</small><strong id="tOtrosAnio" class="totales-item-value otros-span">$ 0</strong></span>
           </div>
           <div><span> Saldo Actual Hasta Mes <strong id="tSaldoTotal" class="totales-item-value otros-span">$ 0</strong></span>
           </div>
@@ -199,11 +221,15 @@ include "conexion.php";
 
         <hr style="opacity:.25; margin:1px 0;">
         <div class="totales-estimado-mini">
-          <div><span>Total Estimado Mes <small>( + Otros Aportes + Saldos + Eliminados, Sin gastos)</small>
-              <strong id="tEstimadoMes" class="totales-item-value">$ 0</strong></span>
+          <span>Total Estimado Mes: </span>
+          <div> 
+           <small>( Total Parcial Mes + Otros Aportes + Saldos + Eliminados, Sin gastos)</small> 
+           <strong id="tEstimadoMes" class="totales-item-value">$ 0</strong>
           </div>
-          <div> <span>Total Estimado Año <small>( + Otros Aportes + Saldos + Eliminados, Sin gastos)</small>
-              <strong id="tEstimadoAnio" class="totales-item-value">$ 0</strong></span>
+          <span>Total Estimado Año: </span>
+          <div> 
+            <small>( Total Parcial Año + Otros Aportes + Saldos + Eliminados, Sin gastos)</small>
+              <strong id="tEstimadoAnio" class="totales-item-value">$ 0</strong>
           </div>
         </div>
 
@@ -219,8 +245,8 @@ include "conexion.php";
 
         <hr style="opacity:.25; margin:1px 0;">
         <div class="totales-finales-mini">
-          <div>Total Final Mes <small>(estimado - gastos)</small> <strong id="tFinalMes" class="totales-item-value">$ 0</strong></div>
-          <div>Total Final Año <small>(estimado - gastos)</small> <strong id="tFinalAnio" class="totales-item-value">$ 0</strong></div>
+          <div>Total Final Mes <small>(Total Estimado Mes - gastos)</small> <strong id="tFinalMes" class="totales-item-value">$ 0</strong></div>
+          <div>Total Final Año <small>(Total Estimado Mes - gastos)</small> <strong id="tFinalAnio" class="totales-item-value">$ 0</strong></div>
         </div>
 
         <div id="modalEliminados" class="modal hidden">

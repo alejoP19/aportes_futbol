@@ -37,6 +37,7 @@ try {
       AND YEAR(a.fecha) = ?
       -- MySQL DAYOFWEEK: 1=Dom,2=Lun,3=Mar,4=Mié,5=Jue,6=Vie,7=Sáb
       AND DAYOFWEEK(a.fecha) NOT IN (4,7)
+      AND (a.tipo_aporte IS NULL OR a.tipo_aporte <> 'esporadico_otro')
     GROUP BY a.fecha
     HAVING efectivo_total > 0
     ORDER BY a.fecha ASC

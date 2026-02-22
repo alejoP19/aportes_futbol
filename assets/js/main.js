@@ -3,8 +3,14 @@
 // assets/js/main.js
 const API = "backend";
 let currentOtroDia = null; // recuerda el día seleccionado del "Otro juego"
-
 let selectedPlayerId = null; // fila seleccionada global
+const API_ESP_GET  = `${API}/aportes_esporadicos/get.php`;
+const API_ESP_SAVE = `${API}/aportes_esporadicos/save.php`;
+const API_ESP_META_SAVE = `${API}/aportes_esporadicos/save_meta.php`;
+
+let __espCache = null;
+let __espSlots = 10;
+const ESP_BASE = 3000;
 
 // ----------- UTILS -----------------
 async function fetchText(url) {
@@ -63,7 +69,21 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
+async function refreshAfterEsporadicoSave({ refreshOtros = false } = {}) {
+  const mes  = monthSelect.value;
+  const anio = yearSelect.value;
 
+  // 1) totales generales (parcial/otros/saldo/estimado/final)
+  await loadTotals(mes, anio);
+
+  // 2) si el esporádico fue en "Otra Fecha", impacta "Otros Partidos"
+  if (refreshOtros) {
+    await loadOtrosPartidosInfo(mes, anio);
+  }
+
+  // 3) recargar tabla esporádicos (con el otro día actual)
+  await cargarAportesEsporadicos(mes, anio, currentOtroDia);
+}
 
 // ----------- JUGADORES -----------------
 async function loadPlayersList() {
@@ -536,13 +556,13 @@ return;
 }
 
 // ----------- TOTALES -----------------
-function formatMoney(n){
-  return Number(n || 0).toLocaleString("es-CO", {
-    style: "currency",
-    currency: "COP",
-    maximumFractionDigits: 0
-  });
-}
+// function formatMoney(n){
+//   return Number(n || 0).toLocaleString("es-CO", {
+//     style: "currency",
+//     currency: "COP",
+//     maximumFractionDigits: 0
+//   });
+// }
 
 async function loadTotals(mes, anio) {
   const res = await fetch(`${API}/aportes/get_totals.php?mes=${mes}&anio=${anio}`, { cache:"no-store" });
@@ -682,14 +702,6 @@ document.addEventListener("keydown", (ev) => {
 }
 
 
-function getOtroKey(mes, anio) {
-  return `otroDia_${anio}_${mes}`;
-}
-
-function getStoredOtroDia(mes, anio) {
-  const v = parseInt(localStorage.getItem(getOtroKey(mes, anio)) || "", 10);
-  return Number.isFinite(v) ? v : null;
-}
 // ----------- REFRESH COMPLETA -----------------
 
 
@@ -704,8 +716,19 @@ async function refreshSheet() {
 
     await loadSheet(mes, anio);
     await loadTotals(mes, anio);
-    await cargarEliminadosMes(mes, anio);   // ✅ AQUÍ
-    await loadGastos();
+  try {
+  await cargarAportesEsporadicos(mes, anio, currentOtroDia);
+} catch (e) {
+  console.warn("Esporádicos falló, continúo:", e);
+}
+
+await cargarEliminadosMes(mes, anio);
+
+try {
+  await loadGastos();
+} catch (e) {
+  console.warn("Gastos falló:", e);
+}
     await loadOtrosPartidosInfo(mes, anio); 
     loadObservaciones(mes, anio);
 }
@@ -1567,6 +1590,220 @@ async function loadOtrosPartidosInfo(mes, anio) {
       </div>
     </div>
   `;
+}
+
+
+async function cargarAportesEsporadicos(mes, anio, otroDia){
+  const wrap = document.getElementById("esporadicosWrap");
+  const btnAdd = document.getElementById("btnAddEspRow");
+  if (!wrap) return;
+
+  if (btnAdd && !btnAdd.dataset.bound){
+    btnAdd.dataset.bound = "1";
+    btnAdd.addEventListener("click", async () => {
+      if (__espSlots >= 22) return;
+      __espSlots++;
+      await cargarAportesEsporadicos(mes, anio, otroDia);
+    });
+  }
+
+  // const r = await fetch(`${API_ESP_GET}?mes=${mes}&anio=${anio}&otro=${otroDia||""}&slots=${__espSlots}`, { cache:"no-store" });
+  // const data = await r.json();
+
+  const url = `${API_ESP_GET}?mes=${mes}&anio=${anio}&otro=${otroDia||""}&slots=${__espSlots}`;
+const r = await fetch(url, { cache:"no-store" });
+
+const txt = await r.text(); // 👈 siempre lee texto primero
+let data = null;
+
+try { data = JSON.parse(txt); }
+catch (e) {
+  console.error("Respuesta NO JSON en esporádicos:", { url, status: r.status, txt });
+  throw e; // para que refreshSheet lo capture
+}
+
+if (!r.ok || !data?.ok) {
+  console.error("Error esporádicos:", { url, status: r.status, data });
+  throw new Error("get esporádicos no ok");
+}
+  __espCache = data;
+
+  if (!data?.ok){
+    wrap.innerHTML = `<div style="opacity:.85;">No se pudo cargar aportes esporádicos.</div>`;
+    return;
+  }
+
+  renderTablaEsporadicos(wrap, data);
+}
+
+function renderTablaEsporadicos(wrap, data){
+  const dias = Array.isArray(data.dias_validos) ? data.dias_validos : [];
+  const anio = Number(data.anio);
+  const mes  = Number(data.mes);
+  const otroDia = Number(data.otro_dia);
+
+  const fechasDias = dias.map(d => `${anio}-${String(mes).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
+  const fechaOtro  = data.fecha_otro;
+
+  let html = `
+    <div style="overflow:auto; max-height:60vh;">
+      <table class="esp-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            ${dias.map(d => `<th>${d}</th>`).join("")}
+            <th>Otra Fecha (${String(otroDia).padStart(2,"0")})</th>
+            <th>Otro Aporte</th>
+            <th>Nota</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+  const meta = data.meta_by_slot || {};
+  const rows = Array.isArray(data.rows) ? data.rows : [];
+  rows.forEach(row => {
+    const slot = Number(row.slot);
+
+    html += `<tr data-slot="${slot}"><td><strong>${slot}</strong></td>`;
+
+    // días mié/sáb
+    fechasDias.forEach(f => {
+      const v = Number(row.dias?.[f] || 0);
+      html += `<td>${cellEspHtml(slot, f, v)}</td>`;
+    });
+
+    // otro día
+    html += `<td>${cellEspHtml(slot, fechaOtro, Number(row.otro||0))}</td>`;
+const m = meta[slot] || {};
+const metaOtro = Number(m.otro_aporte || 0);
+const metaNota = (m.nota || "");
+
+
+html += `<td><input class="form-control esp-otros-input" data-slot="${slot}" placeholder="$0" value="${metaOtro ? metaOtro : ""}" /></td>`;
+html += `<td><input class="form-control esp-nota-input" data-slot="${slot}" placeholder="Nota…" value="${escapeHtml(metaNota)}" /></td>`;
+   
+    html += `</tr>`;
+  });
+
+  // TFOOT (totales por columna)
+  const totals = data.totals_by_date || {};
+  html += `</tbody><tfoot class="esp-tfoot"><tr><td>Totales</td>`;
+  fechasDias.forEach(f => {
+    html += `<td><strong>${formatMoney(Number(totals[f]||0))}</strong></td>`;
+  });
+  html += `<td><strong>${formatMoney(Number(totals[fechaOtro]||0))}</strong></td>`;
+  html += `<td><strong>${formatMoney(0)}</strong></td>`; // otro aporte total (lo activamos cuando guardemos meta)
+  html += `<td></td></tr></tfoot></table></div>`;
+
+  // total general
+  html += `
+    <div style="margin-top:10px; opacity:.92;">
+      <strong>Total esporádicos del mes:</strong> ${formatMoney(Number(data.total_mes_esporadicos||0))}
+    </div>
+  `;
+
+  wrap.innerHTML = html;
+
+  // bind interacción celdas
+  wrap.querySelectorAll(".esp-cell").forEach(el => bindEspCell(el));
+ 
+// ✅ bind de "Otro Aporte" y "Nota"
+wrap.querySelectorAll(".esp-otros-input, .esp-nota-input").forEach(inp => {
+  inp.addEventListener("blur", async () => {
+    const slot = Number(inp.dataset.slot);
+    const tr = inp.closest("tr");
+    if (!tr) return;
+
+    const otrosEl = tr.querySelector(".esp-otros-input");
+    const notaEl  = tr.querySelector(".esp-nota-input");
+
+    const otrosVal = parseInt(String(otrosEl?.value || "").replace(/[^\d]/g,""), 10) || 0;
+    const notaVal  = String(notaEl?.value || "").trim();
+
+    const mes  = monthSelect.value;
+    const anio = yearSelect.value;
+
+    await fetch(API_ESP_META_SAVE, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({slot, mes,anio,otro_aporte: otrosVal,nota: notaVal})
+    });
+     await loadTotals(mes, anio);
+    // ✅ refrescar totales sin recargar
+await refreshAfterEsporadicoSave({ refreshOtros: false });
+  });
+});
+  
+}
+
+function cellEspHtml(slot, fecha, valor){
+  const v = Number(valor||0);
+  const checked = v > 0 ? "checked" : "";
+  const chipClass = v > 0 ? "esp-chip" : "esp-chip zero";
+  const chipText  = v > 0 ? formatMoney(v) : "$0";
+
+  const tip = v === ESP_BASE
+    ? "Aportó valor estándar"
+    : (v > 0 ? "Click para editar valor" : "Marcar para agregar $3.000");
+
+  return `
+    <div class="esp-cell" data-slot="${slot}" data-fecha="${fecha}">
+      <input type="checkbox" class="esp-check" ${checked} title="${tip}">
+      <span class="${chipClass} esp-value" title="Click para editar valor">${chipText}</span>
+      <span class="esp-pencil" title="Click para editar">✎</span>
+    </div>
+  `;
+}
+
+function bindEspCell(cell){
+  const slot  = Number(cell.dataset.slot);
+  const fecha = cell.dataset.fecha;
+
+  const chk = cell.querySelector(".esp-check");
+  const valEl = cell.querySelector(".esp-value");
+  const pencil = cell.querySelector(".esp-pencil");
+
+  async function setValor(newVal){
+  const v = Math.max(0, Number(newVal||0));
+
+  const resp = await fetch(API_ESP_SAVE, {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ slot, fecha, valor: v })
+  });
+
+  // si la celda guardada fue en un día NO miércoles/sábado,
+  // entonces afecta el bloque "Otros Partidos"
+  // (tu backend lo calcula con DAYOFWEEK NOT IN (4,7))
+  const d = new Date(fecha + "T00:00:00");
+  const day = d.getDay(); // 0 dom ... 6 sáb
+  const isMiercoles = (day === 3);
+  const isSabado    = (day === 6);
+  const refreshOtros = !(isMiercoles || isSabado);
+
+  await refreshAfterEsporadicoSave({ refreshOtros });
+}
+
+  chk.addEventListener("change", async () => {
+    if (chk.checked){
+      await setValor(ESP_BASE);
+    } else {
+      await setValor(0); // borra
+    }
+  });
+
+  function editar(){
+    const actualText = (valEl.textContent || "").replace(/[^\d]/g,"");
+    const actual = Number(actualText || 0);
+    const input = prompt("Ingrese valor del aporte esporádico:", String(actual || ESP_BASE));
+    if (input === null) return;
+    const v = Number(String(input).replace(/[^\d]/g,""));
+    if (!Number.isFinite(v) || v < 0) return;
+    setValor(v);
+  }
+
+  valEl.addEventListener("click", editar);
+  pencil.addEventListener("click", editar);
 }
 
 
