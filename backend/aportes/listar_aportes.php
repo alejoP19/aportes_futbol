@@ -247,11 +247,9 @@ echo "
         <div class='otro-juego-picker'>
             <h6>Otro juego</h6>
             <select id='selectOtroDia'>
-";
-
-                foreach ($opcionesOtro as $dopt) {
-                    $sel = ($dopt == $otroDia) ? "selected" : "";
-                    echo "<option value='{$dopt}' {$sel}>Día {$dopt}</option>";
+";          foreach ($opcionesOtro as $dopt) {
+            $sel = ($dopt == $otroDia) ? "selected" : "";
+            echo "<option value='{$dopt}' {$sel}>Día {$dopt}</option>";
                 }
 
                 echo "

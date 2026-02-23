@@ -441,11 +441,20 @@ color: #a7a7a780;
 
 width: 100% !important;
 }
+#listaGastos span{
+font-style:italic;
+color: #000000;
+font-weight:bold; 
+text-shadow: -1px 1px 1px rgb(255, 255, 255);
+list-style: none;
+font-size: 15px;
+
+}
 
  .totales-gastos-item-value{
 
-  display: block;
-  width: 30px;
+display: block;
+width: 30px;
 color:#da000b;
 gap: 1px;
 font-weight:bold; 
@@ -526,7 +535,6 @@ padding-left:0;
   transform: scale(1.06);
 }
 
-
 /*  MOSTRAR TOTALES CARD     */
 
 
@@ -538,25 +546,6 @@ box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
 border: 1px solid   rgba(194, 198, 202, 0.95); 
 
 } */
-
-.totales-item-value{
-color: #00c73c;
-font-weight:bold; 
-font-size: 14px;
-text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
-
-}
-
-
-.totals-card span, #listaGastos span, .otros-partidos-title,.totales-gastos-mini,.totales-finales-mini{
-font-style:italic; 
-color: #000000;
-font-weight:bold; 
-text-shadow: -1px 1px 1px rgb(255, 255, 255);
-list-style: none;
-font-size: 15px;
-
-}
 
 /*  MOSTRAR TOTALES CON SALDO MINI CARD     */
 
@@ -570,29 +559,28 @@ border: 1px solid   rgba(194, 198, 202, 0.95);
 
 } */
 
-.totales-estimado-mini div,.totales-finales-mini div, .totales-gastos-mini div{
-  display:flex;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 4px 0;
-  margin: auto;
-}
-.totales-estimado-mini,.totales-gastos-mini,.totales-finales-mini{
-padding: 8px 10px;
-border-radius: 12px;
-font-weight: bold;
-margin-bottom: 3%;
-}
-.total-parcial-mini small,.totales-estimado-mini small,.totales-finales-mini small{
+
+.total-parcial-mini small,.otros-saldo-mini small,.totales-estimado-mini small,
+.totales-finales-mini small{
   font-size: 11px !important;
   color: #006b30;
 }
+.totales-item-value{
+display: flex;
+color: #00c73c;
+font-weight:bold; 
+font-size: 14px;
+margin-top: 2%;
+margin-bottom: 3%;
+justify-self: flex-end;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
 
+}
 .parcial-totals-mini-help{
 display: flex;
 text-align: center;
-  opacity:.98;
-   margin:4% 2% 10% 2%; 
+opacity:.98;
+margin:4% 2% 10% 2%; 
 color: rgba(90, 89, 1, 0.836) !important;
 text-shadow: -1px 1px 1px rgb(255, 255, 255),-1px 1px 1px rgb(255, 255, 255);
 background-color: #ffffff85;
@@ -604,41 +592,72 @@ font-style: oblique;
 font-size: 13px !important;
 }
 
-
-.total-parcial-mini{
-  display:flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
- width: 100%;
- height: 100%;
-background-color: #dddfdd6b;
-padding: 29px;
-border-radius: 5px;
-font-weight: bold;
-
-}
-
-.otros-saldo-mini{
-  display:flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-
- width: 100%;
- height: 100%;
+.total-parcial-mini,.otros-saldo-mini,.totales-estimado-mini,.totales-finales-mini{
+display:block;
+justify-content: center;
+align-items: center;
+gap: 10px;
+width: 100%;
+height: 100%;
 background-color: #dddfdd6b;
 padding: 20px;
-border-radius: 5px;
+border-radius: 10px;
+}
+.total-parcial-mini  span,.otros-saldo-mini  span,.totales-estimado-mini span,
+.totales-gastos-mini span,.totales-finales-mini span{
+color: #000;
+font-size: 15px;
 font-weight: bold;
+text-shadow: -1px 1px 1px rgb(255, 255, 255),-1px 1px 1px rgb(255, 255, 255);
+}
+.total-parcial-mini-items,.otros-aportes-items,.totales-estimado-mini-items{
+display: block;
+flex-direction: column;
+align-items: center;
+justify-content: space-between;
 
 }
-.otros-saldo-mini small{
- font-size: 12px !important;
-  color: #006b2d;
+
+ .totales-gastos-mini div{
+  display:flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+  margin: auto;
 }
+.totales-gastos-mini{
+padding: 8px 10px;
+border-radius: 12px;
+margin-bottom: 3%;
+}
+
+.totales-item-value.gastos-item{
+display: flex;
+align-self: center !important; 
+margin-top: 0%;
+margin-bottom: 2%;
+justify-self: flex-end;
+}
+
+
+.totales-estimado-mini{
+ background: rgba(238, 238, 238, 0.644);
+  border: 1px solid rgba(0, 199, 60, 0.534);
+}
+
+.totales-gastos-mini{
+  background: rgba(253, 113, 132, 0.144);
+  border: 1px solid rgba(170, 103, 107, 0.363);
+}
+ .gastos-item{
+  color: red !important;
+}
+.totales-finales-mini{
+ background-color: #93ac9950;
+  border: 1px solid rgba(2, 184, 57, 0.39);
+}
+
+
 
 .totales-aportantes-eliminados{
 position: relative;
@@ -694,8 +713,8 @@ font-style: oblique;
 
 
 .totales-aportantes-eliminados span{
-  position: absolute;
-  display: flex;
+position: absolute;
+display: flex;
 color: #00c73c;
 font-weight:bold; 
 font-size: 15px;
@@ -705,8 +724,7 @@ bottom: 35%;
 
 }
 
-.btn-ver-eliminados{
-  
+.btn-ver-eliminados{ 
 position:relative;
 align-self: center !important;
 bottom: 15% !important;
@@ -740,22 +758,6 @@ border: 1px solid rgba(61, 255, 109, 0.884);
 
 
 
-.totales-estimado-mini{
- background: rgba(238, 238, 238, 0.644);
-  border: 1px solid rgba(0, 199, 60, 0.534);
-}
-
-.totales-gastos-mini{
-  background: rgba(253, 113, 132, 0.144);
-  border: 1px solid rgba(170, 103, 107, 0.363);
-}
- .gastos-item{
-  color: red !important;
-}
-.totales-finales-mini{
- background-color: #93ac9950;
-  border: 1px solid rgba(2, 184, 57, 0.39);
-}
 
 
 
@@ -1041,8 +1043,6 @@ background: linear-gradient(180deg,
 } */
 
 
-
-
 /* ESTILOS TITULOS DE CARDS */
 
 .add-aportante h4,.otros-aportes-card h4,.gastos-card h4,.gastos-registrados-card h4,.totals-card h4, 
@@ -1056,7 +1056,7 @@ align-self: center;
 margin-bottom: 10%;
 }
 
-/* ESTILOS LABELS DE CARDS */
+/* ESTILOS LABELS DE LAS FORMS EN CARDS */
 
 .add-aportante label,.otros-aportes-card label, .gastos-card label{
 font-weight:bold !important; 
@@ -1343,25 +1343,27 @@ font-style:italic;
 
 
 .otro-juego-picker{
-position: fixed;
 display:flex; 
-flex-direction: row;
-top: 12%;
-right: 3%;
-
-gap:6px;
+flex-direction: column;
+justify-items: center;
+gap:0px;
 align-items:center;
-
-
+justify-self: center;
+margin-left: 58% !important;
+margin-bottom: 2%;
+width: 35%;
+top: 0%;
 }
-
+select#selectOtroDia{
+  align-items: normal;
+  text-align: normal;
+}
 .otro-juego-picker h6 {
-position: fixed;
 display: flex;
-flex-direction: row;
 font-weight:bold; 
 font-size: 14px;
-top: 5%;
+
+margin-bottom: 2%;
 right: 5%;
 color: #f3db02;
 text-shadow: -1px 1px 1px black, -1px 1px 1px black, -1px 1px 1px black;
@@ -2295,19 +2297,35 @@ left: 2%;
 
 
 .otro-juego-picker{
-top: 18%;
-right: 3%;
+width: 10%;
+
+
+
+
+justify-self: flex-end;
+margin-left: 0% !important;
+margin-bottom: 0%;
+margin-right: 5%;
+
+
 }
-#selectOtroDia{
-padding: 3px 15px !important;
-font-size: 12px;
+select#selectOtroDia{
+  align-items: normal;
+  text-align: normal;
 }
 .otro-juego-picker h6 {
-top: 10%;
-right: 3.5%;
+display: flex;
+font-weight:bold; 
+font-size: 14px;
 
+margin-bottom: 2%;
+right: 5%;
+color: #f3db02;
+text-shadow: -1px 1px 1px black, -1px 1px 1px black, -1px 1px 1px black;
  
 }
+
+
 
 /* BOTONES PLANILLA MOSTRAR GASTOS EDITAR - ELIMINAR  */
 
@@ -2369,19 +2387,37 @@ margin-top: 0%;
   font-size: large !important;
 }
 
-
-
-/* APORTANTES ELIMINADOS CARD */
-.otros-saldo-mini{
- 
-  flex-direction: row;
-  gap: 5px;
+.total-parcial-mini,.otros-saldo-mini,.totales-estimado-mini,.totales-finales-mini{
+display:block;
+justify-content: center;
+align-items: center;
+gap: 10px;
+width: 100%;
+height: 100%;
+background-color: #dddfdd6b;
+padding: 20px;
+border-radius: 10px;
 }
-.otros-span{
- margin-left: 22% !important;
+
+.total-parcial-mini-items,.otros-aportes-items,.totales-estimado-mini-items,.totales-finales-mini-item{
+display: flex;
+flex-direction: row;
+align-items: center;
+justify-content: space-between;
+
 }
 
-/* APORTANTES ELIMINADOS CARD */
+.otros-saldo-mini small{
+ font-size: 12px !important;
+  color: #006b2d;
+}
+ .otros-span{
+margin-top: 0%;
+margin-bottom: 0% !important;
+
+}
+
+
 .totales-aportantes-eliminados{
 align-items: center;
 gap: 5px;
@@ -2419,7 +2455,7 @@ margin:2%  0% 4% 0%;
 position: absolute;
 color: #00c73c;
 right: 6%;
-margin-bottom: 2%;
+margin-bottom: 3%;
 font-weight:bold; 
 font-size: 15px;
 text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
