@@ -260,7 +260,22 @@ activarBusquedaJugadores();
 
 
 container.querySelectorAll('.cell-aporte').forEach(input => {
+
+  // ✅ Si el usuario SOLO tocó para ver tooltip, NO guardamos nada.
+  input.addEventListener("focus", (ev) => {
+    ev.target.dataset.dirty = "0";         // no editó aún
+    ev.target.dataset.prevValue = ev.target.value; // por si quieres comparar
+  });
+
+  input.addEventListener("input", (ev) => {
+    ev.target.dataset.dirty = "1";         // sí editó
+  });
+
   input.addEventListener('blur', async ev => {
+
+    // ✅ Si no editó, no dispares guardar_aporte.php
+    if (ev.target.dataset.dirty !== "1") return;
+
     const id = ev.target.dataset.player;
     const fecha = ev.target.dataset.fecha;
     const raw = (ev.target.value || "").toString().trim();
@@ -268,69 +283,64 @@ container.querySelectorAll('.cell-aporte').forEach(input => {
     let valorToSend = null;
 
     if (raw === "") {
-        valorToSend = null;
+      valorToSend = null;
     } else {
-        const digits = raw.replace(/[^\d\-]/g, "");
-        valorToSend = parseInt(digits, 10);
-        if (isNaN(valorToSend)) valorToSend = null;
+      const digits = raw.replace(/[^\d\-]/g, "");
+      valorToSend = parseInt(digits, 10);
+      if (isNaN(valorToSend)) valorToSend = null;
     }
 
     // Guardar en backend
     const resp = await postJSON(`${API}/aportes/guardar_aporte.php`, { 
-        id_jugador: id, 
-        fecha, 
-        valor: valorToSend 
+      id_jugador: id, 
+      fecha, 
+      valor: valorToSend 
     });
 
     ev.target.classList.add('saved');
     setTimeout(() => ev.target.classList.remove('saved'), 400);
 
-    // 🔃 Recargar TODO lo relacionado (tabla + totales + gastos + obs)
     if (resp && resp.ok) {
 
-    // ✅ Si backend devuelve aporte_efectivo, fijar el valor mostrado en el input
-    // (esto evita que el "Otro juego" se quede vacío o "no se pueda borrar")
-if (Object.prototype.hasOwnProperty.call(resp, "aporte_efectivo")) {
-  ev.target.value = resp.aporte_efectivo ? String(resp.aporte_efectivo) : "";
-} else {
-  // delete o respuesta sin aporte_efectivo
-  ev.target.value = (valorToSend === null) ? "" : String(valorToSend);
-}
+      // ✅ Si backend devuelve aporte_efectivo, fijar el valor mostrado en el input
+      if (Object.prototype.hasOwnProperty.call(resp, "aporte_efectivo")) {
+        ev.target.value = resp.aporte_efectivo ? String(resp.aporte_efectivo) : "";
+      } else {
+        ev.target.value = (valorToSend === null) ? "" : String(valorToSend);
+      }
 
-// ✅ IMPORTANTE: actualizar SIEMPRE marcadores (aunque sea delete)
-applySaldoMarker(ev.target, resp);              // si no hay consumido_target => lo toma como 0 y limpia
-const realParaMarcar = (resp && Object.prototype.hasOwnProperty.call(resp, "valor_real"))
-  ? Number(resp.valor_real || 0)
-  : Number(valorToSend || 0);
+      // ✅ actualizar marcadores
+      applySaldoMarker(ev.target, resp);
 
-applyExcedenteMarker(ev.target, realParaMarcar); 
+      const realParaMarcar = (resp && Object.prototype.hasOwnProperty.call(resp, "valor_real"))
+        ? Number(resp.valor_real || 0)
+        : Number(valorToSend || 0);
 
-    // ✅ Actualizar saldo mostrado en esa fila (columna "Tu Saldo")
-    if (Object.prototype.hasOwnProperty.call(resp, "saldo")) {
+      applyExcedenteMarker(ev.target, realParaMarcar);
+
+      // ✅ actualizar saldo fila
+      if (Object.prototype.hasOwnProperty.call(resp, "saldo")) {
         const row = ev.target.closest("tr");
         const table = document.querySelector(".planilla");
         if (row && table) {
-            const saldoColIndex = findColumnIndex(table, "Tu Saldo");
-            if (saldoColIndex !== -1 && row.cells[saldoColIndex]) {
-                const strong = row.cells[saldoColIndex].querySelector("strong");
-                const txt = Number(resp.saldo || 0).toLocaleString("es-CO");
-                if (strong) strong.textContent = txt;
-                else row.cells[saldoColIndex].textContent = txt;
-            }
+          const saldoColIndex = findColumnIndex(table, "Tu Saldo");
+          if (saldoColIndex !== -1 && row.cells[saldoColIndex]) {
+            const strong = row.cells[saldoColIndex].querySelector("strong");
+            const txt = Number(resp.saldo || 0).toLocaleString("es-CO");
+            if (strong) strong.textContent = txt;
+            else row.cells[saldoColIndex].textContent = txt;
+          }
         }
+      }
+
+      // ✅ recompute tabla y tarjetas
+      const table = document.querySelector(".planilla");
+      if (table) recomputePlanilla(table);
+      await loadTotals(monthSelect.value, yearSelect.value);
+
+    } else {
+      console.error("Error guardando aporte:", resp);
     }
-
-    // ✅ Recalcular TOTAL DÍA + Total por Jugador + Total Mes (footer) SIN recargar tabla
-    const table = document.querySelector(".planilla");
-    if (table) recomputePlanilla(table);
-
-    // ✅ Actualizar tarjetas (Día/Mes/Año) sin reconstruir tabla
-    await loadTotals(monthSelect.value, yearSelect.value);
-
-} else {
-    console.error("Error guardando aporte:", resp);
-}
-
   });
 });
 
@@ -1577,17 +1587,18 @@ async function loadOtrosPartidosInfo(mes, anio) {
           <tbody>
             ${rows}
           </tbody>
-        </table>
+
+          
+          </table>
+          <div class='otros-partidos-tfoot-table' style="margin-top:10px;">
+              <div>
+                <span class="otros-general-total-label-span">Total otros partidos:
+                <span class="otros-general-total-value-span">${totalGeneralFmt}</span></span>
+          
+              </div>
+          </div>
       </div>
 
-      <div class='otros-partidos-tfoot-table' style="margin-top:10px;">
-          <div>
-            <span class="otros-general-total-label-span">Total otros partidos:
-            <span class="otros-general-total-value-span">${totalGeneralFmt}</span></span>
-      
-          </div>
-      
-      </div>
     </div>
   `;
 }

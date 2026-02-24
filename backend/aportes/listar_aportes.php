@@ -240,11 +240,18 @@ for ($d = 1; $d <= $days_count; $d++) {
 $otroLabel = sprintf("%02d", $otroDia);
 
 echo "
-<div class='tabla-toolbar'>
+
   <div class='month-header'>
     Mes: <strong>{$mesesEsp[$mes]} $anio</strong>
-  </div>
-        <div class='otro-juego-picker'>
+        <div>
+        <div class='buscador-jugadores'>
+        <span class='icono-buscar'>🔍</span>
+        <input type='text' id='searchJugador' placeholder='Buscar aportante…' autocomplete='off'>
+        <button type='button' id='clearSearch' title='Limpiar'>✕</button>
+        </div>
+    </div>
+
+     <div class='otro-juego-picker'>
             <h6>Otro juego</h6>
             <select id='selectOtroDia'>
 ";          foreach ($opcionesOtro as $dopt) {
@@ -253,21 +260,17 @@ echo "
                 }
 
                 echo "
-            </select>
+            </select>  
         </div>
-    <div style='display:flex; gap:10px; align-items:center; flex-wrap:wrap;'>
-        <div class='buscador-jugadores'>
-        <span class='icono-buscar'>🔍</span>
-        <input type='text' id='searchJugador' placeholder='Buscar aportante…' autocomplete='off'>
-        <button type='button' id='clearSearch' title='Limpiar'>✕</button>
-        </div>
-    </div>
-</div>
+  </div>
+       
+
+
         ";
 
 echo "<table class='planilla'>";
 echo "<thead>";
-echo "<tr>";
+echo "<tr class='header-tr-one'>";
 echo "<th>Nombres</th>";
 echo "<th colspan='{$colspanDias}' data-group='dias'>Días de los juegos</th>";
 echo "<th colspan='2' data-group='otros'>Otros aportes</th>";
@@ -278,7 +281,7 @@ echo "<th>Deudas</th>";
 echo "<th></th>";
 echo "</tr>";
 
-echo "<tr>";
+echo "<tr class='header-tr-two'>";
 echo "<th></th>";
 
 foreach ($days as $d) echo "<th data-group='dias'>{$d}</th>";

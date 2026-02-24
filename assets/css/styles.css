@@ -64,7 +64,7 @@ grid-area: title;
 
 
 .logo { 
-width: 40%; 
+width: 30%; 
 border-radius:
 8px; 
 object-fit: cover;
@@ -198,7 +198,7 @@ display: flex;
 justify-self:center;
 flex-direction: row;
 align-items: center !important;
-top: 70%;
+top: 65%;
 gap:10px;
 }
 .year {
@@ -883,12 +883,32 @@ font-style:italic;
 
 }
 .otros-partidos-table{
-  width:100%; 
-  border-collapse:collapse; 
-  font-size:13px;
-  margin-top: 2%;
+width:100%; 
+border-collapse:collapse; 
+font-size:13px;
+margin-top: 2%;
 justify-self: center;
+position: sticky;
+border-radius: 5px;
+top: 0%;                 /* 👈 ahora sí */
+z-index: 20;
+padding: 0px !important;
+background: linear-gradient(380deg,
+rgb(44, 179, 111),rgba(0, 85, 50, 0.973)) !important;
+color: #fdf79c;
+font-weight: lighter !important;
+font-size: 15px;
+text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
  
+}
+
+.otros-partidos-table thead tr th :first-child {
+border-top-left-radius: 18px;
+
+}
+.otros-partidos-table tr td{
+  color: white;
+  text-shadow: -1px 1px 1px #080808,-1px 1px 1px #000,-1px 1px 1px #000;
 }
  .otros-partidos-table  thead tr th{
   text-align:center;
@@ -915,8 +935,9 @@ justify-self: center;
  min-height:fit-content;
  height: 35px !important;
 align-content: center;
+top: 0%;
   padding: 7px 5px;
-  border-radius: 12px;
+  border-radius: 10px;
   background: rgba(226, 240, 230, 0.774);
   border: 1px solid rgba(0, 199, 60, 0.534);
 
@@ -939,8 +960,8 @@ font-size: 15px;
 
 }
 .no-otros-partidos-alert{
-  position: relative;
-  justify-self: center;
+position: relative;
+justify-self: center;
 opacity:.80; 
 color: #ffffff;
 font-weight: bold;
@@ -1199,37 +1220,6 @@ border: 2px solid rgba(0, 85, 33, 0.753);
   border-collapse: collapse;
   -webkit-overflow-scrolling: touch; 
 
- 
-
-}
-
-
-
-/* La tabla usa TODO el ancho disponible */
-.table-wrap .planilla {
-  position: relative;
-  display: inline-table;
-  max-height: calc(100vh - 240px);
-  border-radius: 18px;
-  overflow: auto;
-  overflow: visible !important;
-  min-width: 96%; 
-  width: 96%;
-  border-collapse: collapse; 
- min-height: fit-content;
-}
-
-/* ===============================
-   TOOLBAR SOBRE LA TABLA (MÓVIL)
-  ===============================  */
-
-.tabla-toolbar {
-  width: 100%;
-  position: relative;
-  top: 0;
-  z-index: 100;
-padding: 10px 0px 30px 0px;
-
 }
 
 
@@ -1248,18 +1238,53 @@ font-style:italic; white-space: nowrap;
 
 
 }
+
+/* ===============================
+   SELECTOR DE OTRO JUEGO
+   =============================== */
+.otro-juego-picker{
+position: fixed;
+display:flex; 
+flex-direction: column;
+justify-items: center;
+gap:0px;
+align-items:center;
+justify-self: center;
+margin-left: 58% !important;
+bottom: 1%;
+width: 30%;
+top: 40px;
+}
+select#selectOtroDia{
+  align-items: normal;
+  text-align: normal;
+}
+.otro-juego-picker h6 {
+display: flex;
+font-weight:bold; 
+font-size: 14px;
+margin-left: 10px;
+margin-bottom: 2%;
+right: 5%;
+color: #f3db02;
+text-shadow: -1px 1px 1px black, -1px 1px 1px black, -1px 1px 1px black;
+ 
+}
+
+
+
 /* ===============================
    BUSCADOR
    =============================== */
 
 .buscador-jugadores {
-  position:relative;
+  position:fixed;
   display: flex;
   width: 92.5%;
   min-width: 91.5%;
   max-width: none;
-  margin-left: 10px;
-  margin-bottom: -5%;
+  left: 16px;
+  top: 17%;
   justify-self: flex-start;
   gap: 8px;
   padding: 6px 12px;
@@ -1267,6 +1292,7 @@ font-style:italic; white-space: nowrap;
   border-radius: 10px;
   box-shadow: 0 6px 16px rgba(0,0,0,0.15);
   z-index: 90;
+  margin-bottom: 1%;
 
 }
 
@@ -1342,65 +1368,68 @@ font-style:italic;
 }
 
 
-.otro-juego-picker{
-display:flex; 
-flex-direction: column;
-justify-items: center;
-gap:0px;
-align-items:center;
-justify-self: center;
-margin-left: 58% !important;
-margin-bottom: 2%;
-width: 35%;
-top: 0%;
+/* La tabla usa TODO el ancho disponible */
+ .planilla {
+  position: relative;
+  display: inline-table;
+  max-height: calc(100vh - 240px);
+  border-radius: 18px;
+  overflow: auto;
+  overflow: visible !important;
+  min-width: 96%; 
+  width: 96%;
+  top: 10%;
+  border-collapse: collapse; 
+  min-height: fit-content;
 }
-select#selectOtroDia{
-  align-items: normal;
-  text-align: normal;
-}
-.otro-juego-picker h6 {
-display: flex;
-font-weight:bold; 
-font-size: 14px;
-
-margin-bottom: 2%;
-right: 5%;
-color: #f3db02;
-text-shadow: -1px 1px 1px black, -1px 1px 1px black, -1px 1px 1px black;
- 
-}
-
-
 
 /* ===============================
    STICKY HEADERS CORRECTOS
    =============================== */
 
 /* Fila 1 del thead */
-.planilla thead tr:nth-child(1) th {
-   position: sticky;
-  top: 0;                 /* 👈 ahora sí */
-  z-index: 20;
-padding: 6px;
-background-color: #237a6b !important;
+
+.header-tr-one{
+position: sticky;                /* 👈 ahora sí */
+z-index: 20;
+margin-top: 1%;
+background: linear-gradient(380deg,
+rgb(53, 189, 121),
+rgba(0, 85, 50, 0.973)) !important;
+color: #ffffff;
+font-weight: lighter !important;
+font-size: 17px;
+text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
+}
+.header-tr-one :first-child{
+  border-top-left-radius: 18px;
+}
+.header-tr-one :last-child{
+  border-top-right-radius: 18px;
 }
 
 /* Fila 2 del thead */
-.planilla thead tr:nth-child(2) th {
- position: sticky;
-  top: 39px;              /* altura real fila 1 */
-  z-index: 19;
-  padding: 4px;
-    background-color: #01926e !important;
-  
+.header-tr-two{
+position: sticky;
+top: 0%;                 /* 👈 ahora sí */
+z-index: 20;
+padding: 0px !important;
+background: linear-gradient(380deg,
+rgb(44, 179, 111),rgba(0, 85, 50, 0.973)) !important;
+color: #fdf46d;
+font-weight: lighter !important;
+font-size: 15px;
+text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
 }
 
 
-
-/* Separar los titulos de los theads de los extremos de los bordes de la tabla */
-.planilla thead tr:first-child th:first-child {
-    padding: 5px 18px;
-} 
+ /* Separar los titulos de los theads de los extremos de los bordes de la tabla */
+.header-tr-one th {
+    padding: 4px 8px !important;
+}
+.header-tr-two th {
+    padding: 3px 8px !important;
+}
 
 /* Columna activa */
 .planilla .col-activa {
@@ -1421,11 +1450,8 @@ background-color: #237a6b !important;
 
 
 /* COLUMNA - ACCIONES */
-
 .acciones{
- 
   background-color: #d8d8d8;
-
 }
 
 .planilla td.telefono-cell {
@@ -1441,19 +1467,21 @@ background-color: #237a6b !important;
   display: flex;
   gap: 0px;
   flex-direction: row;
-  justify-self: flex-end;
+  align-items: center;
+  justify-self: center;
   gap: 5px;
   margin-bottom: 12%;
-  align-items: center;
+
 }
 
 .btn-edit-player{
   margin-top: 0.5rem;
   bottom: 0rem;
   right: 0rem;
-  width: 2.1rem;
-  height: 2.1rem;
-  font-size: 1.1rem;
+  width: 1.9rem;
+  height: 1.9rem;
+  font-size: 0.85rem;
+  align-content: center;
   border-radius: 999px;
   border: 1px solid rgba(0, 104, 122, 0.979);
   background: rgba(107, 238, 255, 0.973);
@@ -1475,13 +1503,13 @@ background-color: #237a6b !important;
   margin-top: 0.5rem;
   bottom: 0rem;
   right: 0rem;
-  width: 2.3rem;
-  height: 2.3rem;
-  font-size: 1.1rem;
+   width: 31px;
+  height:31px;
+  font-size: 0.80rem;
   border-radius: 999px;
   background: rgba(236, 6, 56, 0.89);
   color: #fddddd;
- border: 1px solid rgba(255, 155, 180, 0.979);
+ border: 1px solid rgba(161, 0, 0, 0.979);
   cursor: pointer;
   display: grid;
   place-items: center;
@@ -1500,14 +1528,16 @@ background-color: #237a6b !important;
 
 .tooltip-aporte{
   position:absolute;
-  background:#222;
-  color:#fff;
+  background:#00ffea;
+  color:#020202;
   padding:6px 10px;
   border-radius:8px;
   font-size:13px;
   z-index:999999;
   white-space:nowrap;
+  font-weight: bold;
   box-shadow:0 6px 18px rgba(0,0,0,.25);
+ 
 }
 
 /* Celda donde completó con saldo */
@@ -1610,43 +1640,6 @@ td.celda-dia.saldo-usado {
 }
 
 
-
-
-thead tr:first-child,thead tr:nth-child(2){
-background-color: #007749;
-color: #ffffff;
-font-weight:lighter; 
-text-shadow: -1px 1px 1px rgb(0, 0, 0),
--1px 1px 1px rgb(0, 0, 0),
--1px 1px 1px rgb(0, 0, 0);
-font-style:italic;
-justify-self: center;
-}
-thead tr:nth-child(3),tfoot{
-background-color: #13b370;
-padding: 10%;
-color: #ffffff;
-font-weight:lighter; 
-text-shadow: -1px 1px 1px rgb(0, 0, 0),
--1px 1px 1px rgb(0, 0, 0),
--1px 1px 1px rgb(0, 0, 0);
-font-style:italic;
-justify-self: center;
-
-}
-thead tr:first-child th{
-padding: 10px;
-font-size: large;
-
-}
-td{
-border:1px solid #eee;
-padding:4px;
-text-align:center;
-}
-
-
-
 tbody tr{
 padding: 10%;
 color: #000000;
@@ -1658,15 +1651,35 @@ font-style:italic;
 justify-self: center;
 }
 tbody tr td:first-child{
-text-align: left;
-padding: 1% 1%;
+text-align: left !important;
+padding: 3px 10px;
+font-size: 14px;
+}
 
+tbody tr td:nth-child(16){ 
+  display: block;
+  max-height: 25px; 
+  height: 25px;        
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px; 
+  margin: 5px;        
+  box-sizing: border-box;
+  scrollbar-gutter: stable;
+
+}
+
+tbody tr td:nth-child(11),tbody tr td:nth-child(12),
+tbody tr td:nth-child(13),tbody tr td:nth-child(14),
+tbody tr td:nth-child(16),tbody tr td:nth-child(17){
+font-size: 14px;
+text-align: center;
 }
 tbody tr td:last-child, tbody tr td:last-child{
 text-align: center;
 padding: 1% 1%;
 font-weight:bolder; 
-background-color: #99ccbb;
+background-color: #f3f3f3fd;
 
 }
 tbody tr td:nth-child(12){
@@ -1728,14 +1741,16 @@ background-color: #b9b9b9 !important;  /* beige más oscuro */
 
 
 /* fila seleccionada tabla */
-.planilla tbody tr.selected-row{
+.planilla tbody tr.selected-row tbody tr td:first-child{
   background-color: #aff3e862 !important;
   color: #000000 !important;
-   text-shadow: -1px 1px 1px rgb(255, 255, 255) !important;
-   font-size: 14px;
+  text-shadow: -1px 1px 1px rgb(255, 255, 255) !important;
   border-left: 4px solid var(--primary-blue);
 }
+.planilla tbody tr.selected-row td:first-child{
+  font-size: 16px !important;
 
+}
 .planilla tbody tr.selected-row:hover{
   background-color: #78f1d762 !important;
 }
@@ -1755,7 +1770,7 @@ border: 1px solid rgb(199, 199, 199);
 text-align: center;
 
 }
-
+ 
 /* Chrome, Edge, Safari */
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
@@ -1768,6 +1783,28 @@ input[type="number"] {
     appearance: textfield;      /* estándar */
     -moz-appearance: textfield; /* Firefox */
 }
+
+/* TFOOT PLANILLA */
+thead tr:nth-child(3),tfoot{
+background: linear-gradient(380deg,
+rgb(53, 189, 121),
+rgba(0, 85, 50, 0.973)) !important;
+padding: 1% 0% !important;
+color: #ffd900;
+font-size: 13px !important;
+text-shadow:-1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
+font-weight: lighter;
+padding: 8%;
+font-style:italic;
+justify-self: center;
+text-align: center;
+
+}
+
+tfoot tr td:last-child{
+border-bottom-right-radius: 18px;
+}
+
 
 
 .middle-panel,
@@ -2206,20 +2243,15 @@ margin-bottom: 0% !important;
     margin-bottom: 5% !important;
       
     }
-/* ===== MUY IMPORTANTE ===== */
-/* La tabla NO debe tener overflow */
-.planilla {
-  overflow: visible !important;
-}
-  /* Estado normal (tabla oculta) */
-  .middle-panel {
-    display: none;
-  }
+    /* Estado normal (tabla oculta) */
+    .middle-panel {
+      display: none;
+    }
 
-  /* Estado visible */
-  .middle-panel.expanded {          /* 🔥 CLAVE */
-    width: 100%;
-    max-width: 100%;
+    /* Estado visible */
+    .middle-panel.expanded {          /* 🔥 CLAVE */
+      width: 100%;
+      max-width: 100%;
     margin-top: -1% !important;
     margin-bottom: 0% !important;
     padding: 0;
@@ -2227,48 +2259,30 @@ margin-bottom: 0% !important;
     overflow: hidden;            /* ok aquí */
     border-radius: 10px;
     justify-self: center;
-
+    
   }
   .middle-panel:not(.expanded) {
-      height: 100dvh;
-      max-height: max-content;
+    height: 100dvh;
+    max-height: max-content;
   }
-
-
-
-
-
-.table-wrap{
+  
+  
+  
+  
+  .table-wrap{
+  max-width: 98%;
+  width: 98%;
   min-height: 100dvh;
-  margin-top: 8% !important;
-  height: 100dvh;
+  margin-top: 1% !important;
+  height: 110dvh;
   border-top-right-radius: 18px !important;
 }
 
-/* 3) Scrollbar delgado (Chrome/Edge/Safari) */
-.table-wrap::-webkit-scrollbar{
-  width: 8px;
-}
-
-.table-wrap::-webkit-scrollbar-track{
-  background: rgba(0,0,0,0.08);
-  border-radius: 10px;
-}
-
-.table-wrap::-webkit-scrollbar-thumb{
-  background: rgba(36,90,75,0.65);   /* verde oscuro de tu paleta */
-  border-radius: 10px;
-  border: 2px solid rgba(0,0,0,0.08); /* “padding visual” */
-}
-
-.table-wrap::-webkit-scrollbar-thumb:hover{
-  background: rgba(36,90,75,0.85);
-}
-
-
 .month-header{ 
-justify-self: flex-start;
-font-size: larger;
+position: fixed;
+top: 2.5%;
+left: 29%;
+font-size: medium;
 top: 4%;
 left: 2%;
 }
@@ -2280,71 +2294,168 @@ left: 2%;
   width: 40%;
   min-width: 40%;
   margin-left:30% !important;
-  margin-bottom: -1%;
+  margin-bottom: 1%;
   padding: 5px 12px;
   align-items: center;
+  top: 5%;
+  justify-self: flex-start;
+
 }
+
 
 .buscador-jugadores input::placeholder {
-  font-size: medium; 
+  font-size: 14px; 
 }
-
 
 /* input */
 .buscador-jugadores input {
-  font-size: 16px !important;
+  font-size: 14px !important;
 }
 
 
+/* ===============================
+   SELECTOR DE OTRO JUEGO
+   =============================== */
 .otro-juego-picker{
-width: 10%;
 
-
-
-
-justify-self: flex-end;
+gap:0px;
+right: 6%;
+justify-self: end;
 margin-left: 0% !important;
-margin-bottom: 0%;
-margin-right: 5%;
+bottom: 2%;
+width: 6%;
+top: 0px;
+}
 
+.otro-juego-picker h6 {
+  display: flex;
+  font-weight:bold; 
+  font-size: 12px;
+margin-bottom: 2%;
+right: 8%;
 
 }
+
 select#selectOtroDia{
   align-items: normal;
   text-align: normal;
 }
-.otro-juego-picker h6 {
-display: flex;
-font-weight:bold; 
-font-size: 14px;
 
-margin-bottom: 2%;
-right: 5%;
-color: #f3db02;
-text-shadow: -1px 1px 1px black, -1px 1px 1px black, -1px 1px 1px black;
- 
+
+
+  /* 3) Scrollbar delgado (Chrome/Edge/Safari) */
+  .table-wrap::-webkit-scrollbar{
+    width: 8px;
+  }
+  
+  .table-wrap::-webkit-scrollbar-track{
+    background: rgba(0,0,0,0.08);
+    border-radius: 10px;
+  }
+  
+  .table-wrap::-webkit-scrollbar-thumb{
+    background: rgba(36,90,75,0.65);   /* verde oscuro de tu paleta */
+    border-radius: 10px;
+    border: 2px solid rgba(0,0,0,0.08); /* “padding visual” */
+  }
+  
+  .table-wrap::-webkit-scrollbar-thumb:hover{
+    background: rgba(36,90,75,0.85);
+  }
+  
+/* ===== MUY IMPORTANTE ===== */
+/* La tabla NO debe tener overflow */
+
+/* La tabla usa TODO el ancho disponible */
+ .planilla {
+  max-height: calc(100vh - 240px);
+  border-radius: 18px;
+  overflow: auto;
+  min-width: 96%; 
+  width: 96%;
+  top: 12%;
+  margin-left: 1%;
+
 }
 
+
+/* ===============================
+   STICKY HEADERS CORRECTOS
+   =============================== */
+
+/* Fila 1 del thead */
+
+.header-tr-one{
+margin-top: 1%;
+font-size: 14px;
+
+}
+
+/* Fila 2 del thead */
+.header-tr-two{
+font-size: 12px;
+}
 
 
 /* BOTONES PLANILLA MOSTRAR GASTOS EDITAR - ELIMINAR  */
 
+.acciones-buttons {
+  display: flex;
+  gap: 0px;
+  flex-direction: row;
+  align-items: center;
+  justify-self: center;
+  gap: 5px;
+  margin-bottom: 12%;
+
+}
 
 .btn-edit-player{
- 
-  width: 2rem;
-  height: 2rem;
-  font-size: 1rem;
-  text-align: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  font-size: 0.82rem;
 }
 
+
+
 .btn-del-player {
- 
-  width: 2.2rem;
-  height: 2.2rem;
-  font-size: 1rem;
- 
+   width: 29px;
+  height:29px;
+  font-size: 0.70rem;
 }
+
+
+
+tbody tr td:first-child{
+font-size: 12px;
+}
+
+tbody tr td:nth-child(11),tbody tr td:nth-child(12),
+tbody tr td:nth-child(13),tbody tr td:nth-child(14),
+tbody tr td:nth-child(16),tbody tr td:nth-child(17){
+font-size: 12px;
+}
+
+.planilla tbody tr.selected-row td:first-child{
+  font-size: 14px !important;
+
+}
+
+.cell-aporte{
+font-size:11px;
+
+}
+
+
+/* TFOOT PLANILLA */
+thead tr:nth-child(3),tfoot{
+
+padding: 5% 5% !important;
+color: #ffd900;
+font-size: 14px !important;
+text-align: center;
+}
+
 
 /* ESTILOS TITULOS DE CARDS */
 

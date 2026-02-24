@@ -175,7 +175,7 @@ while ($r = $res->fetch_assoc()) {
 // =========================
 // TOTALES BASE
 // =========================
-$month_total = $conexion->query("
+$month_total = (int)($conexion->query("
     SELECT IFNULL(SUM(
         LEAST(a.aporte_principal + IFNULL(t.consumido,0), $TOPE)
     ),0) AS total_mes
@@ -187,9 +187,11 @@ $month_total = $conexion->query("
     ) t ON t.target_aporte_id = a.id
     WHERE YEAR(a.fecha) = $anio
       AND MONTH(a.fecha) = $mes
-")->fetch_assoc()['total_mes'] ?? 0;
+      AND a.id_jugador IS NOT NULL
+      AND (a.tipo_aporte IS NULL OR a.tipo_aporte <> 'esporadico')
+")->fetch_assoc()['total_mes'] ?? 0);
 
-$year_total = $conexion->query("
+$year_total = (int)($conexion->query("
     SELECT IFNULL(SUM(
         LEAST(a.aporte_principal + IFNULL(t.consumido,0), $TOPE)
     ),0) AS total_anio
@@ -201,7 +203,9 @@ $year_total = $conexion->query("
     ) t ON t.target_aporte_id = a.id
     WHERE YEAR(a.fecha) = $anio
       AND MONTH(a.fecha) <= $mes
-")->fetch_assoc()['total_anio'] ?? 0;
+      AND a.id_jugador IS NOT NULL
+      AND (a.tipo_aporte IS NULL OR a.tipo_aporte <> 'esporadico')
+")->fetch_assoc()['total_anio'] ?? 0);
 
 $otros_mes = (int)$conexion->query("
     SELECT IFNULL(SUM(valor),0)
@@ -214,6 +218,44 @@ $otros_anio = (int)$conexion->query("
     FROM otros_aportes
     WHERE anio=$anio AND mes<=$mes
 ")->fetch_row()[0];
+
+// =========================
+// ESPORÁDICOS (planilla nueva)
+// =========================
+$esporadicos_mes = (int)($conexion->query("
+    SELECT IFNULL(SUM(aporte_principal),0) AS s
+    FROM aportes
+    WHERE tipo_aporte='esporadico'
+      AND YEAR(fecha)=$anio
+      AND MONTH(fecha)=$mes
+")->fetch_assoc()['s'] ?? 0);
+
+$esporadicos_anio = (int)($conexion->query("
+    SELECT IFNULL(SUM(aporte_principal),0) AS s
+    FROM aportes
+    WHERE tipo_aporte='esporadico'
+      AND YEAR(fecha)=$anio
+      AND MONTH(fecha) <= $mes
+")->fetch_assoc()['s'] ?? 0);
+
+// "Otro Aporte" de esporádicos (si lo estás guardando como tipo_aporte='esporadico_otro')
+$otros_esporadicos_mes = (int)($conexion->query("
+  SELECT IFNULL(SUM(aporte_principal),0) s
+  FROM aportes
+  WHERE tipo_aporte='esporadico_otro'
+    AND YEAR(fecha)=$anio AND MONTH(fecha)=$mes
+")->fetch_assoc()['s'] ?? 0);
+
+$otros_esporadicos_anio = (int)($conexion->query("
+  SELECT IFNULL(SUM(aporte_principal),0) s
+  FROM aportes
+  WHERE tipo_aporte='esporadico_otro'
+    AND YEAR(fecha)=$anio AND MONTH(fecha) <= $mes
+")->fetch_assoc()['s'] ?? 0);
+
+// ✅ Otros Aportes = otros_aportes + esporadico_otro
+$otros_mes  = (int)$otros_mes + (int)$otros_esporadicos_mes;
+$otros_anio = (int)$otros_anio + (int)$otros_esporadicos_anio;
 
 $gasto_mes = (int)$conexion->query("
     SELECT IFNULL(SUM(valor),0)
@@ -343,14 +385,21 @@ $saldo_total_hasta_mes = (int)($conexion->query("
 // =========================
 // SECCIONES
 // =========================
-$parcial_mes  = (int)$month_total - (int)$eliminados_mes_total;
-$parcial_anio = (int)$year_total  - (int)$eliminados_anio_total;
+// =========================
+// SECCIONES (NUEVA DEFINICIÓN)
+// =========================
 
-$estimado_mes  = (int)$month_total + (int)$otros_mes  + (int)$saldo_total_hasta_mes;
-$estimado_anio = (int)$year_total  + (int)$otros_anio + (int)$saldo_total_hasta_mes;
+// ✅ Parciales: (base sin esporádicos) - eliminados  + esporádicos
+$parcial_mes  = (int)(($month_total - $eliminados_mes_total) + $esporadicos_mes);
+$parcial_anio = (int)(($year_total  - $eliminados_anio_total) + $esporadicos_anio);
 
-$final_mes  = (int)$estimado_mes  - (int)$gasto_mes;
-$final_anio = (int)$estimado_anio - (int)$gasto_anio;
+// ✅ Estimados: Parcial + Otros + Saldo + Eliminados (sin gastos)
+$estimado_mes  = (int)($parcial_mes  + $otros_mes  + $saldo_total_hasta_mes + $eliminados_mes_total);
+$estimado_anio = (int)($parcial_anio + $otros_anio + $saldo_total_hasta_mes + $eliminados_anio_total);
+
+// ✅ Finales
+$final_mes  = (int)($estimado_mes  - $gasto_mes);
+$final_anio = (int)($estimado_anio - $gasto_anio);
 
 $obs = trim(get_obs($conexion, $mes, $anio));
 
@@ -400,7 +449,41 @@ while ($row = $resOP->fetch_assoc()) {
   ];
 }
 $stmtOP->close();
+// =========================
+// DETALLE ESPORÁDICOS POR FECHA (para PDF)
+// =========================
+$esp_items = [];
+$total_esp_mes = 0;
+
+$stmtEsp = $conexion->prepare("
+  SELECT fecha, SUM(aporte_principal) AS total
+  FROM aportes
+  WHERE tipo_aporte='esporadico'
+    AND YEAR(fecha)=?
+    AND MONTH(fecha)=?
+  GROUP BY fecha
+  HAVING total > 0
+  ORDER BY fecha ASC
+");
+$stmtEsp->bind_param("ii", $anio, $mes);
+$stmtEsp->execute();
+$resEsp = $stmtEsp->get_result();
+
+while ($row = $resEsp->fetch_assoc()) {
+  $f = $row["fecha"];
+  $v = (int)$row["total"];
+  $total_esp_mes += $v;
+
+  $esp_items[] = [
+    "fecha" => $f,
+    "fecha_label" => date("d-m-Y", strtotime($f)),
+    "total" => $v,
+  ];
+}
+$stmtEsp->close();
 ?>
+
+
 
 <!DOCTYPE html>
 <html>
@@ -519,12 +602,51 @@ $wDia = ($nDias > 0) ? max(2.5, (100 - $fixed) / $nDias) : 0;
     </tbody>
   </table>
 
+<div class="section-block">
+  <h3 class="keep-title">Planilla Aportes Esporádicos</h3>
 
+  <?php if (empty($esp_items)): ?>
+    <div style="font-size:11pt; opacity:.85;">
+      No hay aportes esporádicos en este mes.
+    </div>
+  <?php else: ?>
+    <table class="pdf-table pdf-table--otros" border="1" width="100%" cellspacing="0" cellpadding="4">
+      <colgroup>
+        <col style="width:18%">
+        <col style="width:22%">
+        <col style="width:60%">
+      </colgroup>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Fecha</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($esp_items as $i => $it): ?>
+          <tr>
+            <td>Esporádico <?= (int)($i + 1) ?></td>
+            <td><?= htmlspecialchars($it["fecha_label"]) ?></td>
+            <td style="text-align:right;"><strong>$ <?= number_format((int)$it["total"], 0, ',', '.') ?></strong></td>
+          </tr>
+        <?php endforeach; ?>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2"><strong>Total aportes esporádicos</strong></td>
+          <td style="text-align:right;"><strong>$ <?= number_format((int)$total_esp_mes, 0, ',', '.') ?></strong></td>
+        </tr>
+      </tfoot>
+    </table>
+  <?php endif; ?>
+</div>
  
   <div class="section-block">
     <h3 class="keep-title">Resumen General</h3>
     <h3 class="keep-title">Totales (COP)</h3><br>
-    <div class="totales-sub">Incluyen valores de Los Días de la Columna Otro Juego (<?= str_pad((string)$otroDia, 2, "0", STR_PAD_LEFT) ?>) <br> (Ver Tabla Datos de Otros Juegos - Abajo &dArr; ) </div>
+    <div class="totales-sub">Totales Parciales Incluyen Valores de Cada Día Incluyendo Los Días de la Columna Otro Juego de Ambas Planillas.
+  (Ver Registros en Tabla: Datos Columna Otro Juego)(<?= str_pad((string)$otroDia, 2, "0", STR_PAD_LEFT) ?>) <br> (Ver Tabla Datos de Otros Juegos - Abajo &dArr; ) </div>
 <br>
     <div class="totales-box">
       <table class="totales-table">
@@ -548,15 +670,21 @@ $wDia = ($nDias > 0) ? max(2.5, (100 - $fixed) / $nDias) : 0;
 
       <table class="totales-table">
         <tr>
-          <td class="label"><strong>Otros Aportes Mes</strong></td>
+         <td class="label">
+  <strong>Otros Aportes Mes</strong>
+  <div class="note">(+ Otros Aportes Planilla Esporádicos)</div>
+</td>
           <td class="money">$ <?= number_format((int)$otros_mes, 0, ',', '.') ?></td>
         </tr>
         <tr>
-          <td class="label"><strong>Otros Aportes Año</strong></td>
+       <td class="label">
+  <strong>Otros Aportes Mes</strong>
+  <div class="note">(+ Otros Aportes Planilla Esporádicos)</div>
+</td>
           <td class="money">$ <?= number_format((int)$otros_anio, 0, ',', '.') ?></td>
         </tr>
         <tr>
-          <td class="label"><strong>Saldo Actual Hasta Mes</strong></td>
+          <td class="label"><strong>Saldos Actuales De Aportantes(Hasta Este Mes)</strong></td>
           <td class="money">$ <?= number_format((int)$saldo_total_hasta_mes, 0, ',', '.') ?></td>
         </tr>
       </table>
@@ -569,7 +697,7 @@ $wDia = ($nDias > 0) ? max(2.5, (100 - $fixed) / $nDias) : 0;
             <strong>Aportantes eliminados este mes</strong>
             <div class="note">No aparecen en planilla, pero sus aportes y saldos siguen sumando en totales.</div>
           </td>
-          <td class="money">$ <?= number_format((int)$eliminados_mes_total, 0, ',', '.') ?></td>
+          <td class="money">$ <?= number_format((int)$eliminados_mes_total, 0, ',', '.') ?> <span style="font-size:10pt; opacity:.85;">Ver detalle</span></td>
         </tr>
         <tr>
           <td class="label">

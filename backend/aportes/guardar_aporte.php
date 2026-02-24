@@ -277,7 +277,8 @@ $q->close();
         'target_id' => $target_id,
         'consumido_target' => $consumido_target,
         'aporte_efectivo' => $aporte_efectivo,
-        'saldo' => $saldo_actual
+        'saldo' => $saldo_actual,
+        'valor_real' => $valor // ✅ NUEVO: valor real guardado
     ]);
     exit;
 
