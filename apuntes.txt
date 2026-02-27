@@ -383,133 +383,60 @@ Si quieres, en el siguiente mensaje hacemos lo mismo con el PDF público (es cas
 
 
 
+te explico, el reporte debe traer la tabla principal con las
+ columnas: 
+ | Jugador | 4 7 11 14 18 21 25 28 | Otros Aportes | Total mes | Saldo | Deuda 
+ entonces eliminaremos la columna otros juegos ya que despues se reflejaran todos los 
+ otros juegos y sus totales en una tabla : Otos Juegos, en esta, deben ir todos ,
+ tanto los de la table principal como los de la tabla esporádicos(en los totales se sumaran) 
+ Ahora, se deben sumar y aparecer todos los totales de los dias de las dos tablas 
+ en el tfoot(en este momento con tus arreglos no coinciden) ; pero hagamos algo mas calro ,
+  manejemos e tfoots, el primero que muestre los totales de todos los dias incluyendo los otros
+   aportes y saldos solo d el atabla principal, el segundo tfoot (con otroclor)que muestre
+    los valores de los mismos campos pero de laplanilla esporadicos y un tercer
+     tfoot (otro color)con los mismos campos pero con el total de los dos tablas
+     (creo que esto inicia el reporte con as claridad. luego viene la tabla que muestra
+      todos los otros jegos , esta tabla está bien estructurada(imagen 1) Luego en el
+       resuemn genral qedará así (mismos estilos); 
+       tal como en el admin los totales parciales mes/año tendran la suma de todos los aportes
+        incluyendo los de otros juegos anterioremnte mostrados
+         en la tabla (Sin otros aportes / saldo / eliminados) luego vendran :
+          Otros Aportes Mes (Otros Aportes Planilla principal + planilla Esporádicos) $ 8.000 
+          Otros Aportes Año (Otros Aportes Planilla principal + planilla Esporádicos) $ 10.000 
+          Saldos Actuales De Aportantes(Hasta Este Mes) $ 18.000
+           Luego mostramos una tabla de los eliminados con sus aportes 
+          | nombre | Fecha aporte | cantidad | Saldos | Total General | 
+          | jose    | 2- 1- 2026  | 3000 |   |1000    | 
+          | alex    | 5-1-2026    | 2000 |   |2000    | 
+          | jose    | 2-2-2026    | 3000 |   |        | 
+          | Total aportes y Saldos| 8000 |   |3000    |       11000   | 
+             
+             luego vendria : Totales Aportantes eliminados este mes $ 8.000 
+             No aparecen en planilla (Ver tabla anterior), 
+             pero sus aportes y saldos se suman al total del mes y año. 
+             luego vendria:
+             
+              Total Estimado Mes 
+              (Totlase Parciales+ otros aportes + saldos + eliminados((total general), sin gastos)
+               $ Total Estimado Año (+ otros aportes + saldos + eliminados, sin gastos) $
+                y finalemnte
+                 Gastos del Mes $
+                  Gastos del Año $ 
+                  Total Final Mes (estimado - gastos) 
+                  $ 
+                  Total Final Año (estimado - gastos) $
+                  
+                   Por ultimo dejamos la tabla que muestra os otros juegos y las
+                    observaciones NOTA: Reitero que con la lógica que tu pusiste los 
+                    totales no están siendo sumados igual que el admin planilla genral 
+                    y te propongo que hagas una nueva estructura del pdf consistente en 
+                    todos los partes; pero sin quitar la logica solo lo visual a ver cual
+                     seve mas bonito, si el que ya tengo o el nuevo, repito solo visual
 
 
 
 
 
-
-
-/* ===============================
-   BUSCADOR DE JUGADORES – ADMIN
-   =============================== */
-
-.buscador-jugadores {
-  display: flex;
-  align-items: center;align-self: flex-end;
-  gap: 8px;
-  padding: 5px 10px;
-  margin-top: 0%;
-  margin-bottom: -11%;
-  background: linear-gradient(135deg, #00694f, #028f6b);
-  border-radius: 10px;
-  width: 340px;
-  max-width: 98%;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-  cursor: pointer;
-  z-index: 90;
-
-}
-.buscador-jugadores input::placeholder {
-  color: rgb(255, 255, 255); /* O un código hexadecimal como #FF0000 */
-  font-size: large;
-  font-weight: lighter;
-  text-shadow:
--1px 1px 1px #000000;
-
-  
-}
-
-/* icono */
-.buscador-jugadores .icono-buscar {
-  font-size: 18px;
-  color: #ffffff;
-  opacity: 0.9;
-}
-
-/* input */
-.buscador-jugadores input {
-  flex: 1;
-  border: none;
-  outline: none;
-  background: transparent;
-  color: #ffffff;
-  font-size: 14px;
-  padding: 6px 4px;
-}
-
-/* botón limpiar */
-.buscador-jugadores button {
-  background: rgba(255, 106, 131, 0.712);
-  border: none;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  color: #ffffff;
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 1;
-  transition: background 0.80s ease, transform 0.90s ease;
-}
-
-.buscador-jugadores button:hover {
-  background: rgba(92, 173, 140, 0.863);
-  transform: scale(1.1);
-}
-
-.buscador-jugadores button:active {
-  transform: scale(0.97);
-}
-
-/* enfoque */
-.buscador-jugadores:focus-within {
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.76),
-              0 6px 20px rgba(255, 255, 255, 0.2);
-           
-           
-}
-
-
-/* Al hacer clic o tabular (recibir foco) */
-input[type="text"]:focus {
-    background-color: #016b51; /* Fondo blanco al recibir foco */
-    border-radius: 18px;
-    width: 98%;
-    color: #ffffff; 
-   font-size: large;
-  font-weight: lighter;
-  text-shadow:
--1px 1px 1px #000000;
-
-    outline: none; /* Quita el borde por defecto del navegador */
-}
-
-
-
-No sé pero se generó un enredo en los totales;
- etonces te voy poner el contexto de cómo deben mostrarse los totales para que
-  se vea clara la información ya que de esta misma manera se deberá ver tanto 
-  en el pdf de reortes como en la interfaz d eusuario;
-   entonces los totales deben ser así,
-    vamos a hacer una especie de secciones de sumas y restas para que se alo más claro posible
-     para el usuario que necesit verificar la inforacion de cada mes podemos poner un mensajito 
-     debajo o al lado de cada item que diga cómo s eestá haciendo laopreción: 
-     
-Total Parcial del mes (sin saldos , sin otros aportes , sin aportes de los jugadores eliminados) 
-Total Parcial del Año (sin saldos , sin otros aportes , sin aportes de los jugadores eliminados) 
-Total Otros Aportes del mes
- Total Otros Aportes del año
-
-Total Saldo Actual Hasta Mes: (el saldo vienen de otros meses hasta que no sea tomado del todo)
-Total Estimado Del Mes : (con saldo , con otros aportes, con total de aportes jugadores eliminados;
- pero sin restar aun gastos del mes) 
- Total Estimado Del Año : (con saldo ,con otros aportes con total de aportes jugadores eliminados;
-  pero sin restar gastos del año)
-  
-  
-   Total Final del mes (con saldo + otros aportes+eliminados -gastos ): 
-  
-  Total Final del año (con saldo + otros aportes + eliminados - gastos):
 
 
 

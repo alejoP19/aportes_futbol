@@ -26,28 +26,33 @@ for ($d = 1; $d <= $days_count; $d++) {
 // --- "Otro juego" SIEMPRE existe (1 sola columna extra)
 function pick_default_otro_dia($days, $days_count)
 {
-    // preferir 28 si NO es miércoles/sábado (o sea, no está en $days)
     if (!in_array(28, $days) && 28 <= $days_count) return 28;
 
-    // si 28 es día normal, usar el primer día NO miércoles/sábado
     for ($d = 1; $d <= $days_count; $d++) {
         if (!in_array($d, $days)) return $d;
     }
-    // fallback (no debería pasar)
     return 1;
 }
 
 // Permitir que el usuario cambie el día "otro" por GET ?otro=DD
 $otroDia = isset($_GET['otro']) ? intval($_GET['otro']) : pick_default_otro_dia($days, $days_count);
 if ($otroDia < 1 || $otroDia > $days_count) $otroDia = pick_default_otro_dia($days, $days_count);
-// Validar que el otroDia NO sea miércoles/sábado:
-if  (in_array($otroDia, $days, true)) {    $otroDia = pick_default_otro_dia($days, $days_count);
+
+// Validar que el otroDia NO sea miércoles/sábado
+if (in_array($otroDia, $days, true)) {
+    $otroDia = pick_default_otro_dia($days, $days_count);
 }
 
 $colspanDias = count($days) + 1; // +1 por "Otro juego"
 
+// ✅ Todos los días NO miércoles/sábado del mes (posibles "Otro juego")
+$otrosDias = [];
+for ($d = 1; $d <= $days_count; $d++) {
+    if (!in_array($d, $days, true)) $otrosDias[] = $d;
+}
+
 // --- obtener todos los jugadores (activos y eliminados)
-$fechaCorteMes = date('Y-m-t', strtotime("$anio-$mes-01")); // último día del mes seleccionado
+$fechaCorteMes = date('Y-m-t', strtotime("$anio-$mes-01"));
 $jug_res = $conexion->query("
     SELECT id, nombre, telefono, activo, fecha_baja
     FROM jugadores
@@ -90,7 +95,6 @@ function get_aporte_real($conexion, $id_jugador, $fecha)
 
 function get_consumo_saldo_target($conexion, $id_jugador, $fecha)
 {
-    // consumo aplicado a ESTE día (target)
     $stmt = $conexion->prepare("
         SELECT IFNULL(SUM(m.amount),0) AS c
         FROM aportes a
@@ -147,6 +151,52 @@ function get_saldo_acumulado($conexion, $id_jugador, $mes, $anio)
 }
 
 /* ===========================
+   FOOTER HELPERS (SQL)
+   - Sirven para calcular el TFOOT por fecha (incluye eliminados)
+   - No depende del array $jugadores
+=========================== */
+function total_efectivo_registrados_por_fecha($conexion, $fecha, $TOPE = 3000)
+{
+    $stmt = $conexion->prepare("
+        SELECT IFNULL(SUM(
+            LEAST(
+                LEAST(IFNULL(a.aporte_principal,0), ?) + IFNULL(t.consumido,0),
+                ?
+            )
+        ),0) AS s
+        FROM aportes a
+        LEFT JOIN (
+            SELECT target_aporte_id, SUM(amount) AS consumido
+            FROM aportes_saldo_moves
+            GROUP BY target_aporte_id
+        ) t ON t.target_aporte_id = a.id
+        WHERE a.fecha = ?
+          AND a.id_jugador IS NOT NULL
+          AND a.tipo_aporte IS NULL
+    ");
+    $stmt->bind_param("iis", $TOPE, $TOPE, $fecha);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    return (int)($row['s'] ?? 0);
+}
+
+function total_esporadicos_por_fecha($conexion, $fecha)
+{
+    $stmt = $conexion->prepare("
+        SELECT IFNULL(SUM(aporte_principal),0) AS s
+        FROM aportes
+        WHERE fecha = ?
+          AND tipo_aporte='esporadico'
+    ");
+    $stmt->bind_param("s", $fecha);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    return (int)($row['s'] ?? 0);
+}
+
+/* ===========================
    DEUDAS POR DÍA (mes actual)
 =========================== */
 $deudas_map = [];
@@ -177,23 +227,7 @@ while ($row = $resTot->fetch_assoc()) {
 }
 
 /* ===========================
-   FECHA "DEUDA DESDE" (la más antigua hasta el mes actual)
-=========================== */
-$deudas_desde = [];
-$resDesde = $conexion->query("
-    SELECT id_jugador, MIN(fecha) AS desde
-    FROM deudas_aportes
-    WHERE (YEAR(fecha) < $anio)
-       OR (YEAR(fecha) = $anio AND MONTH(fecha) <= $mes)
-    GROUP BY id_jugador
-");
-while ($row = $resDesde->fetch_assoc()) {
-    $deudas_desde[(int)$row['id_jugador']] = $row['desde']; // YYYY-MM-DD
-}
-
-/* ===========================
    LISTA DE FECHAS DE DEUDAS (hasta el mes seleccionado)
-   -> Para mostrar: "Deudas: N" y debajo las fechas
 =========================== */
 $deudas_lista = [];
 $fechaCorteDeuda = date('Y-m-t', strtotime("$anio-$mes-01"));
@@ -210,63 +244,46 @@ while ($row = $resLista->fetch_assoc()) {
     $deudas_lista[$jid][] = date("d-m-Y", strtotime($row['fecha']));
 }
 
-
 /* ===========================
    HTML
 =========================== */
-
-
 $mesesEsp = [
-    1 => "Enero",
-    2 => "Febrero",
-    3 => "Marzo",
-    4 => "Abril",
-    5 => "Mayo",
-    6 => "Junio",
-    7 => "Julio",
-    8 => "Agosto",
-    9 => "Septiembre",
-    10 => "Octubre",
-    11 => "Noviembre",
-    12 => "Diciembre"
+    1 => "Enero", 2 => "Febrero", 3 => "Marzo", 4 => "Abril",
+    5 => "Mayo", 6 => "Junio", 7 => "Julio", 8 => "Agosto",
+    9 => "Septiembre", 10 => "Octubre", 11 => "Noviembre", 12 => "Diciembre"
 ];
 
 // Select de "Otro juego"
 $opcionesOtro = [];
 for ($d = 1; $d <= $days_count; $d++) {
     if (!in_array($d, $days, true)) $opcionesOtro[] = $d;
-
 }
 $otroLabel = sprintf("%02d", $otroDia);
 
 echo "
-
   <div class='month-header'>
     Mes: <strong>{$mesesEsp[$mes]} $anio</strong>
-        <div>
-        <div class='buscador-jugadores'>
+    <div>
+      <div class='buscador-jugadores'>
         <span class='icono-buscar'>🔍</span>
         <input type='text' id='searchJugador' placeholder='Buscar aportante…' autocomplete='off'>
         <button type='button' id='clearSearch' title='Limpiar'>✕</button>
-        </div>
+      </div>
     </div>
 
-     <div class='otro-juego-picker'>
-            <h6>Otro juego</h6>
-            <select id='selectOtroDia'>
-";          foreach ($opcionesOtro as $dopt) {
-            $sel = ($dopt == $otroDia) ? "selected" : "";
-            echo "<option value='{$dopt}' {$sel}>Día {$dopt}</option>";
-                }
-
-                echo "
-            </select>  
-        </div>
+    <div class='otro-juego-picker'>
+      <h6>Otro juego</h6>
+      <select id='selectOtroDia'>
+";
+foreach ($opcionesOtro as $dopt) {
+    $sel = ($dopt == $otroDia) ? "selected" : "";
+    echo "<option value='{$dopt}' {$sel}>Día {$dopt}</option>";
+}
+echo "
+      </select>
+    </div>
   </div>
-       
-
-
-        ";
+";
 
 echo "<table class='planilla'>";
 echo "<thead>";
@@ -285,9 +302,7 @@ echo "<tr class='header-tr-two'>";
 echo "<th></th>";
 
 foreach ($days as $d) echo "<th data-group='dias'>{$d}</th>";
-// ✅ TH "Otro juego" con id + data-dia para que JS lo actualice sin recargar
 echo "<th id='thOtroJuego' data-group='otro' data-dia='{$otroDia}'>Otro juego ({$otroLabel})</th>";
-
 
 echo "<th data-group='otros'>Tipo</th>";
 echo "<th data-group='otros'>Valor</th>";
@@ -299,12 +314,66 @@ echo "<th>Teléfono</th>";
 echo "</tr>";
 echo "</thead>";
 
+
+
+
 echo "<tbody>";
 
+// ✅ Inicializaciones correctas
 $totales_por_dia = array_fill(0, count($days), 0);
-$total_otro_col = 0;
+$total_otro_col_all = 0;       // suma REAL de todos los otros días (no mié/sáb)
+$total_otro_col_visible = 0;   // suma SOLO del día seleccionado en "Otro juego"
 $total_otros_global = 0;
 $total_saldo_global = 0;
+
+
+
+/* ===========================
+   ESPORÁDICOS (SUMAS POR FECHA)
+   - solo afectan TFOOT (no por jugador)
+=========================== */
+$esp_por_fecha = [];
+$stmt = $conexion->prepare("
+  SELECT fecha, IFNULL(SUM(aporte_principal),0) AS s
+  FROM aportes
+  WHERE tipo_aporte='esporadico'
+    AND YEAR(fecha)=?
+    AND MONTH(fecha)=?
+  GROUP BY fecha
+");
+$stmt->bind_param("ii", $anio, $mes);
+$stmt->execute();
+$res = $stmt->get_result();
+while($r = $res->fetch_assoc()){
+  $esp_por_fecha[$r['fecha']] = (int)$r['s'];
+}
+$stmt->close();
+
+/* sumar esporádicos a:
+   - totales_por_dia (solo fechas mié/sáb)
+   - total_otro_col_all (fechas NO mié/sáb)
+*/
+$esp_total_mes = 0;
+$esp_total_otro = 0;
+
+foreach($esp_por_fecha as $f => $s){
+  $esp_total_mes += $s;
+
+  $dia = (int)date("j", strtotime($f));
+
+  // si es mié/sáb (está en $days), súmalo al índice de ese día
+  $idx = array_search($dia, $days, true);
+  if ($idx !== false) {
+    $totales_por_dia[$idx] += $s;
+  } else {
+    // si NO es mié/sáb, cuenta como "otro juego" (todos)
+    $esp_total_otro += $s;
+  }
+}
+
+// esto es CLAVE: el total "otro juego (todos)" ahora incluye esporádicos no mié/sáb
+$total_otro_col_all += $esp_total_otro;
+
 
 foreach ($jugadores as $jug) {
     $jugId = intval($jug['id']);
@@ -325,7 +394,6 @@ foreach ($jugadores as $jug) {
         $real    = get_aporte_real($conexion, $jugId, $fecha);
         $consumo = get_consumo_saldo_target($conexion, $jugId, $fecha);
 
-        // efectivo informativo (para sumar bien el mes)
         $efectivo = min($cashCap + $consumo, $TOPE);
 
         $hayDeuda = isset($deudas_map[$jugId][$d]);
@@ -342,9 +410,7 @@ foreach ($jugadores as $jug) {
             $tooltip = "data-real='{$real}' title='Aportó " . number_format($real, 0, ',', '.') . "'";
         }
 
-        // NO mostrar badge, solo dejar data-consumo para tooltip/marker
         $saldoAttr = ($consumo > 0) ? " data-saldo-uso='{$consumo}' " : "";
-
 
         echo "
 <td class='celda-dia {$excedenteAttr}' {$tooltip} {$saldoAttr}>
@@ -356,9 +422,8 @@ foreach ($jugadores as $jug) {
            placeholder='$'
            value='" . ($efectivo > 0 ? $efectivo : "") . "'>
     <span class='saldo-flag " . ($flag ? "show" : "") . "'>★</span>
-<!-- ✨ Símbolo cuando completó con saldo (persistente por data-saldo-uso) -->
-<span class='saldo-uso-flag " . ($consumo > 0 ? "show" : "") . "'>✚</span>
-    
+    <span class='saldo-uso-flag " . ($consumo > 0 ? "show" : "") . "'>✚</span>
+
     <label class='chk-deuda-label " . ($hayDeuda ? "con-deuda" : "") . "'>
       <input type='checkbox'
              class='chk-deuda'
@@ -370,32 +435,54 @@ foreach ($jugadores as $jug) {
 </td>";
     }
 
-    // OTRO JUEGO (día NO miércoles/sábado)
-    $fechaOtro = sprintf("%04d-%02d-%02d", $anio, $mes, $otroDia);
+    // ===========================
+    // OTRO JUEGO:
+    // - Columna visible: SOLO $otroDia
+    // - Total mes: suma TODOS los días NO mié/sáb
+    // ===========================
+    $efectivoO_selected = 0;
+    $totalOtrosJuegosJugador = 0;
 
-    $cashCapO = get_aporte_cash_cap($conexion, $jugId, $fechaOtro, $TOPE);
-    $realO    = get_aporte_real($conexion, $jugId, $fechaOtro);
-    $consumoO = get_consumo_saldo_target($conexion, $jugId, $fechaOtro);
-    $efectivoO = min($cashCapO + $consumoO, $TOPE);
+    // capturas para tooltip/flags del día seleccionado
+    $realO_sel = 0;
+    $consumoO_sel = 0;
 
-    $hayDeudaOtro = isset($deudas_map[$jugId][$otroDia]);
+    foreach ($otrosDias as $dOther) {
+        $fechaX = sprintf("%04d-%02d-%02d", $anio, $mes, $dOther);
 
-    $total_jugador_mes += $efectivoO;
-    $total_otro_col += $efectivoO;
+        $cashCapX = get_aporte_cash_cap($conexion, $jugId, $fechaX, $TOPE);
+        $realX    = get_aporte_real($conexion, $jugId, $fechaX);
+        $consumoX = get_consumo_saldo_target($conexion, $jugId, $fechaX);
 
-    $flagO = ($realO > $TOPE) ? "★" : "";
-    $tooltipO = "";
-    $excedenteAttrO = "";
-    if ($realO > $TOPE) {
-        $excedenteAttrO = "aporte-excedente";
-        $tooltipO = "data-real='{$realO}' title='Aportó " . number_format($realO, 0, ',', '.') . "'";
+        $efectivoX = min($cashCapX + $consumoX, $TOPE);
+
+        $totalOtrosJuegosJugador += $efectivoX;
+        $total_otro_col_all      += $efectivoX;
+
+        if ($dOther === $otroDia) {
+            $efectivoO_selected = $efectivoX;
+            $total_otro_col_visible += $efectivoX;
+
+            $realO_sel = $realX;
+            $consumoO_sel = $consumoX;
+        }
     }
 
-    // NO mostrar badge, solo dejar data-consumo para tooltip/marker
-    $saldoAttrO = ($consumoO > 0) ? " data-saldo-uso='{$consumoO}' " : "";
+    // ✅ total jugador incluye TODOS los otros días, aunque no se vean
+    $total_jugador_mes += $totalOtrosJuegosJugador;
 
+    // imprimir celda visible del día seleccionado
+    $fechaOtro = sprintf("%04d-%02d-%02d", $anio, $mes, $otroDia);
+    $hayDeudaOtro = isset($deudas_map[$jugId][$otroDia]);
 
-
+    $flagO = ($realO_sel > $TOPE) ? "★" : "";
+    $tooltipO = "";
+    $excedenteAttrO = "";
+    if ($realO_sel > $TOPE) {
+        $excedenteAttrO = "aporte-excedente";
+        $tooltipO = "data-real='{$realO_sel}' title='Aportó " . number_format($realO_sel, 0, ',', '.') . "'";
+    }
+    $saldoAttrO = ($consumoO_sel > 0) ? " data-saldo-uso='{$consumoO_sel}' " : "";
 
     echo "
 <td class='celda-dia {$excedenteAttrO}' {$tooltipO} {$saldoAttrO}>
@@ -405,10 +492,9 @@ foreach ($jugadores as $jug) {
            data-fecha='{$fechaOtro}'
            type='number'
            placeholder='$'
-          value='" . ($efectivoO > 0 ? $efectivoO : "") . "'>
+           value='" . ($efectivoO_selected > 0 ? $efectivoO_selected : "") . "'>
     <span class='saldo-flag " . ($flagO ? "show" : "") . "'>★</span>
-    <!-- ✨ Símbolo cuando completó con saldo (persistente por data-saldo-uso) -->
-<span class='saldo-uso-flag " . ($consumoO > 0 ? "show" : "") . "'>✚</span>
+    <span class='saldo-uso-flag " . ($consumoO_sel > 0 ? "show" : "") . "'>✚</span>
 
     <label class='chk-deuda-label " . ($hayDeudaOtro ? "con-deuda" : "") . "'>
       <input type='checkbox'
@@ -445,40 +531,32 @@ foreach ($jugadores as $jug) {
     $telefonoSafe = htmlspecialchars($jug['telefono'] ?? '', ENT_QUOTES, 'UTF-8');
 
     echo "<td class='acciones'>
-                <div class='acciones-buttons'>
-                    <button class='btn-edit-player'
-                            data-id='{$jugId}'
-                            data-nombre='{$nombreSafe}'
-                            data-telefono='{$telefonoSafe}'
-                            title='Editar aportante'>✏️</button>
-                    <button class='btn-del-player'
-                            data-id='{$jugId}'
-                            title='Eliminar aportante'>🗑️</button>
-                </div>
-            </td>";
-
-
+            <div class='acciones-buttons'>
+                <button class='btn-edit-player'
+                        data-id='{$jugId}'
+                        data-nombre='{$nombreSafe}'
+                        data-telefono='{$telefonoSafe}'
+                        title='Editar aportante'>✏️</button>
+                <button class='btn-del-player'
+                        data-id='{$jugId}'
+                        title='Eliminar aportante'>🗑️</button>
+            </div>
+          </td>";
 
     $listaFechas = $deudas_lista[$jugId] ?? [];
 
     echo "<td class='estado-deuda'>
-        <label class='chk-deuda-global " . ($tieneDeuda ? "con-deuda" : "") . "'>";
-
+            <label class='chk-deuda-global " . ($tieneDeuda ? "con-deuda" : "") . "'>";
     if ($tieneDeuda) {
         echo "Deudas: {$deudaDias}";
-
         if (!empty($listaFechas)) {
             echo "<div class='deuda-desde' style='font-size:12px; color:#2e8b57; margin-top:4px;'>
-                " . implode("<br>", array_map("htmlspecialchars", $listaFechas)) . "
-              </div>";
+                    " . implode("<br>", array_map("htmlspecialchars", $listaFechas)) . "
+                  </div>";
         }
     }
-
     echo "  </label>
-      </td>";
-
-
-
+          </td>";
 
     $telefonoView = $jug['telefono'] ? htmlspecialchars($jug['telefono']) : "";
     echo "<td class='telefono-cell' data-full='{$telefonoView}'>{$telefonoView}</td>";
@@ -488,26 +566,136 @@ foreach ($jugadores as $jug) {
 
 echo "</tbody>";
 
-// FOOTER
+
+// ✅ TOTAL MES REAL: mié/sáb + TODOS los otros días + otros aportes
+$totales_mes_actualizado = array_sum($totales_por_dia) + $total_otro_col_all + $total_otros_global;
+
+/* ==========================================================
+   ✅ FOOTER REAL POR SQL (INCLUYE ELIMINADOS)
+   - Tu tabla NO muestra eliminados, pero el TFOOT debe sumar TODO lo del mes.
+   - Calcula por fecha:
+       total_dia = registrados_efectivo + esporadicos
+       total_otro = suma de TODOS los dias NO mié/sáb (registrados + esporadicos)
+       total_otros_aportes = otros_aportes + esporadico_otro
+========================================================== */
+
+// 1) Totales por cada día mié/sáb (registrados + esporádicos)
+$totales_por_dia_footer = [];
+foreach ($days as $d) {
+    $f = sprintf("%04d-%02d-%02d", $anio, $mes, $d);
+    $totales_por_dia_footer[] =
+        total_efectivo_registrados_por_fecha($conexion, $f, $TOPE)
+        + total_esporadicos_por_fecha($conexion, $f);
+}
+
+// 2) Total OTRO JUEGO (TODOS los días NO mié/sáb)
+$total_otro_footer = 0;
+foreach ($otrosDias as $dOther) {
+    $f = sprintf("%04d-%02d-%02d", $anio, $mes, $dOther);
+    $total_otro_footer +=
+        total_efectivo_registrados_por_fecha($conexion, $f, $TOPE)
+        + total_esporadicos_por_fecha($conexion, $f);
+}
+
+// 3) Total "Otros aportes" del mes (otros_aportes + esporadico_otro)
+$total_otros_aportes_footer = 0;
+
+// otros_aportes (tabla aparte)
+$rowOA = $conexion->query("
+    SELECT IFNULL(SUM(valor),0) AS s
+    FROM otros_aportes
+    WHERE mes=$mes AND anio=$anio
+")->fetch_assoc();
+$total_otros_aportes_footer += (int)($rowOA['s'] ?? 0);
+
+// esporadico_otro (guardado en aportes)
+$rowEO = $conexion->query("
+    SELECT IFNULL(SUM(aporte_principal),0) AS s
+    FROM aportes
+    WHERE tipo_aporte='esporadico_otro'
+      AND YEAR(fecha)=$anio AND MONTH(fecha)=$mes
+")->fetch_assoc();
+$total_otros_aportes_footer += (int)($rowEO['s'] ?? 0);
+
+// 4) Total mes REAL (para footer): días mié/sáb + otros días + otros aportes
+$totales_mes_footer =
+    array_sum($totales_por_dia_footer)
+    + $total_otro_footer
+    + $total_otros_aportes_footer;
+
+// 5) Saldo total (informativo) — aquí puedes dejar tu cálculo anterior si quieres,
+//    pero ojo: el saldo NO es "recaudo"; es dinero ya contado en aportes anteriores.
+//    (Si lo quieres mostrar igual, ok. Solo que no se suma al "total mes" de aportes.)
+/* $total_saldo_global ya lo calculabas por jugador mostrado.
+   Eso NO incluye eliminados. Si quieres saldo total real (incluye eliminados),
+   lo mejor es calcularlo por SQL (similar a tu get_total.php).
+*/
+$saldo_total_footer = 0;
+$rowSaldo = $conexion->query("
+    SELECT IFNULL(SUM(
+        GREATEST(IFNULL(ex.excedente,0) - IFNULL(co.consumido,0), 0)
+    ),0) AS saldo
+    FROM jugadores j
+    LEFT JOIN (
+        SELECT id_jugador, SUM(GREATEST(aporte_principal - $TOPE, 0)) AS excedente
+        FROM aportes
+        WHERE fecha <= '$fechaCorteMes'
+          AND id_jugador IS NOT NULL
+          AND tipo_aporte IS NULL
+        GROUP BY id_jugador
+    ) ex ON ex.id_jugador = j.id
+    LEFT JOIN (
+        SELECT id_jugador, SUM(amount) AS consumido
+        FROM aportes_saldo_moves
+        WHERE fecha_consumo <= '$fechaCorteMes'
+        GROUP BY id_jugador
+    ) co ON co.id_jugador = j.id
+")->fetch_assoc();
+$saldo_total_footer = (int)($rowSaldo['saldo'] ?? 0);
+
+// === PRINT FOOTER
 echo "<tfoot><tr>";
 echo "<td><strong>TOTAL DÍA</strong></td>";
 
-foreach ($totales_por_dia as $td) {
+foreach ($totales_por_dia_footer as $td) {
     echo "<td><strong>" . number_format($td, 0, ',', '.') . "</strong></td>";
 }
 
-// Total de la columna "Otro juego"
-echo "<td><strong>" . number_format($total_otro_col, 0, ',', '.') . "</strong></td>";
+// total otro (todos)
+echo "<td style='background:#e8f7ef;'>
+        <strong>" . number_format($total_otro_footer, 0, ',', '.') . "</strong>
+      </td>";
 
-echo "<td><strong>TOTAL OTROS</strong></td>";
-echo "<td><strong>" . number_format($total_otros_global, 0, ',', '.') . "</strong></td>";
+// col "Tipo" vacía
+echo "<td></td>";
 
-$totales_mes_actualizado = array_sum($totales_por_dia) + $total_otro_col + $total_otros_global;
-echo "<td><strong>" . number_format($totales_mes_actualizado, 0, ',', '.') . "</strong></td>";
+// total otros aportes
+echo "<td style='background:#eef3ff;'>
+        <strong>" . number_format($total_otros_aportes_footer, 0, ',', '.') . "</strong>
+      </td>";
 
-echo "<td><strong>" . number_format($total_saldo_global, 0, ',', '.') . "</strong></td>";
+// total mes
+echo "<td style='background:#dff5e3;'>
+        <strong>" . number_format($totales_mes_footer, 0, ',', '.') . "</strong>
+      </td>";
+
+// saldo
+echo "<td><strong>" . number_format($saldo_total_footer, 0, ',', '.') . "</strong></td>";
+
+// acciones/deudas/tel vacías
 echo "<td></td><td></td><td></td>";
-echo "</tr></tfoot>";
+echo "</tr>";
+
+// Fila explicativa
+echo "<tr class='tfoot-info'>
+  <td colspan='" . (count($days)+6) . "'></td>
+  <td colspan='3' style='font-size:12px; color:#444; padding-top:6px;'>
+    ✔ Otros juegos del mes (registrados + esporádicos) suman: <strong>$ "
+    . number_format($total_otro_footer,0,',','.')
+    . "</strong>
+  </td>
+</tr>";
+
+echo "</tfoot>";
 
 echo "</table>";
-

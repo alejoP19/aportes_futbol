@@ -19,29 +19,31 @@ $TOPE = 3000;
 
 try {
   $sql = "
-    SELECT 
-      a.fecha,
-      SUM(
-        LEAST(
+  SELECT 
+    a.fecha,
+    SUM(
+      CASE 
+        WHEN a.tipo_aporte = 'esporadico' THEN IFNULL(a.aporte_principal,0)
+        ELSE LEAST(
           LEAST(IFNULL(a.aporte_principal,0), ?) + IFNULL(m.consumido,0),
           ?
         )
-      ) AS efectivo_total
-    FROM aportes a
-    LEFT JOIN (
-      SELECT target_aporte_id, IFNULL(SUM(amount),0) AS consumido
-      FROM aportes_saldo_moves
-      GROUP BY target_aporte_id
-    ) m ON m.target_aporte_id = a.id
-    WHERE MONTH(a.fecha) = ?
-      AND YEAR(a.fecha) = ?
-      -- MySQL DAYOFWEEK: 1=Dom,2=Lun,3=Mar,4=Mié,5=Jue,6=Vie,7=Sáb
-      AND DAYOFWEEK(a.fecha) NOT IN (4,7)
-      AND (a.tipo_aporte IS NULL OR a.tipo_aporte <> 'esporadico_otro')
-    GROUP BY a.fecha
-    HAVING efectivo_total > 0
-    ORDER BY a.fecha ASC
-  ";
+      END
+    ) AS efectivo_total
+  FROM aportes a
+  LEFT JOIN (
+    SELECT target_aporte_id, IFNULL(SUM(amount),0) AS consumido
+    FROM aportes_saldo_moves
+    GROUP BY target_aporte_id
+  ) m ON m.target_aporte_id = a.id
+  WHERE MONTH(a.fecha) = ?
+    AND YEAR(a.fecha) = ?
+    AND DAYOFWEEK(a.fecha) NOT IN (4,7)
+    AND (a.tipo_aporte IS NULL OR a.tipo_aporte <> 'esporadico_otro')
+  GROUP BY a.fecha
+  HAVING efectivo_total > 0
+  ORDER BY a.fecha ASC
+";
 
   $stmt = $conexion->prepare($sql);
   $stmt->bind_param("iiii", $TOPE, $TOPE, $mes, $anio);

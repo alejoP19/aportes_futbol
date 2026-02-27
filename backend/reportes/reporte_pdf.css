@@ -100,9 +100,18 @@ tr.eliminado td{
   overflow-wrap: break-word;
 }
 
+.deuda-dot{
+  display:block;
+  margin-top:2px;
+  color:#d00;
+  font-size:11pt;
+  line-height:11pt;
+  font-family: DejaVu Sans, sans-serif;
+}
+
 .deuda-list{
   margin-top: 3px;
-  color: #2e8b57;
+  color: #ff0000;
   font-size: 8.5pt;
   line-height: 10pt;
 }
@@ -230,3 +239,6 @@ table.totales-table.final td{
   font-size: 9pt;
   line-height: 1.05;
 }
+
+
+

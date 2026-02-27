@@ -73,15 +73,18 @@ async function refreshAfterEsporadicoSave({ refreshOtros = false } = {}) {
   const mes  = monthSelect.value;
   const anio = yearSelect.value;
 
-  // 1) totales generales (parcial/otros/saldo/estimado/final)
+  // 1) recargar planilla principal para que el TFOOT refleje esporádicos
+  await loadSheet(mes, anio);
+
+  // 2) tarjetas
   await loadTotals(mes, anio);
 
-  // 2) si el esporádico fue en "Otra Fecha", impacta "Otros Partidos"
+  // 3) informativo otros partidos (si aplica)
   if (refreshOtros) {
     await loadOtrosPartidosInfo(mes, anio);
   }
 
-  // 3) recargar tabla esporádicos (con el otro día actual)
+  // 4) recargar tabla esporádicos
   await cargarAportesEsporadicos(mes, anio, currentOtroDia);
 }
 
@@ -334,8 +337,8 @@ container.querySelectorAll('.cell-aporte').forEach(input => {
       }
 
       // ✅ recompute tabla y tarjetas
-      const table = document.querySelector(".planilla");
-      if (table) recomputePlanilla(table);
+      // const table = document.querySelector(".planilla");
+      await refreshSheet();
       await loadTotals(monthSelect.value, yearSelect.value);
 
     } else {
@@ -1704,12 +1707,12 @@ html += `<td><input class="form-control esp-nota-input" data-slot="${slot}" plac
   });
   html += `<td><strong>${formatMoney(Number(totals[fechaOtro]||0))}</strong></td>`;
   html += `<td><strong>${formatMoney(0)}</strong></td>`; // otro aporte total (lo activamos cuando guardemos meta)
-  html += `<td></td></tr></tfoot></table></div>`;
 
-  // total general
+
+ // ✅ dejar aviso único
   html += `
     <div style="margin-top:10px; opacity:.92;">
-      <strong>Total esporádicos del mes:</strong> ${formatMoney(Number(data.total_mes_esporadicos||0))}
+      ℹ️ Los aportes esporádicos se suman automáticamente a los totales diarios, mensuales y anuales de la planilla principal.
     </div>
   `;
 
