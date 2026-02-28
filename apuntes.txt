@@ -457,3 +457,6 @@ marialiliaperezdiaz@gmail.com
 BUG --> Al eliminar un aportante con saldos, el saldo no se actualiza en el informativo 
 la seccion aportantes eliminados de ste mes sin refrescar la página
 
+
+
+

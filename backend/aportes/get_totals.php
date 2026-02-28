@@ -1,12 +1,13 @@
 <?php
 header("Content-Type: application/json");
-include "../auth/auth.php";
-protegerAdmin();
 include "../../conexion.php";
+require_once __DIR__ . "/../auth/auth.php";
+protegerAdmin();
 
 
 
-mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+
 
 $mes  = intval($_GET['mes']  ?? date('n'));
 $anio = intval($_GET['anio'] ?? date('Y'));

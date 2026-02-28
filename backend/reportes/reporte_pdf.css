@@ -242,3 +242,43 @@ table.totales-table.final td{
 
 
 
+/* ===== Eliminados (PDF) ===== */
+.pdf-table--eliminados th{
+  background:#f3f5f7;
+  font-weight:700;
+}
+
+.pdf-table--eliminados tr.row-mes-actual td{
+  background:#eaf4ff; /* azul suave */
+}
+
+.pdf-table--eliminados tr.row-mes-previo td{
+  background:#fff0f0; /* rojo suave */
+}
+
+.pdf-table--eliminados tr.elim-total td{
+  background:#f6f8fb;
+  border-top:1px solid #cfd6de;
+}
+
+.pdf-table--eliminados tr.elim-grand td{
+  background:#eef7ee;
+  border-top:2px solid #aeb8c2;
+}
+
+.pdf-table--eliminados tr.elim-sep td{
+  border:0;
+  height:10px;
+  background:transparent;
+  padding:0;
+}
+
+.baja-pill{
+  display:inline-block;
+  background:#ffe5e5;
+  color:#8a1f1f;
+  border:1px solid rgba(138,31,31,.2);
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:10pt;
+}

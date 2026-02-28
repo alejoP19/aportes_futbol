@@ -757,12 +757,7 @@ border: 1px solid rgba(61, 255, 109, 0.884);
 }
 
 
-
-
-
-
-
-/* ===== Modal Eliminados (mejorado) ===== */
+/* ===== Modal Eliminados ===== */
 .modal.hidden{ display:none; }
 
 .modal{
@@ -771,39 +766,41 @@ border: 1px solid rgba(61, 255, 109, 0.884);
   display:flex; align-items:center; justify-content:center;
   z-index:9999;
   padding:14px;
-}
 
-/* overlay + tarjeta con animación */
+  opacity:1;
+  transition: opacity 600ms ease;
+}
+.modal.closing{ opacity:0; }
+
+/* tarjeta */
 .modal-card{
   width:min(920px, 96vw);
   max-height:82vh;
   overflow:auto;
-
   background:#ffffff;
   color:#1b1f24;
-
   border-radius:16px;
   border:1px solid rgba(0,0,0,.12);
   box-shadow:0 18px 60px rgba(0,0,0,.30);
-
   padding:14px;
 
-  /* animación entrada */
-  transform: translateY(10px) scale(.98);
+  transform: translateY(18px) scale(.98);
   opacity: 0;
-  animation: modalIn 1s ease-out forwards;
+
+  animation: modalIn 3s cubic-bezier(.2,.9,.2,1) forwards !important;
 }
 
 @keyframes modalIn{
   to{ transform: translateY(0) scale(1); opacity:1; }
 }
 
-/* salida (la activamos con clase .closing desde JS) */
+/* salida */
 .modal.closing .modal-card{
-  animation: modalOut 1s ease-in forwards;
+  animation: modalOut 13s cubic-bezier(.4,0,1,1) forwards !important;
 }
+
 @keyframes modalOut{
-  to{ transform: translateY(10px) scale(.98); opacity:0; }
+  to{ transform: translateY(18px) scale(.98); opacity:0; }
 }
 
 .modal-head{
@@ -820,6 +817,58 @@ border: 1px solid rgba(61, 255, 109, 0.884);
   background:#f3f5f7;
   border-radius:10px;
   padding:6px 10px;
+}
+
+.modal-card{
+  /* ... */
+  animation: modalIn 180ms ease-out forwards;
+}
+
+.modal.closing .modal-card{
+  animation: modalOut 180ms ease-in forwards;
+}
+
+/* Encabezado jugador */
+.eliminados-detalle .player-head td{
+  background:#f6f8fb;
+  font-weight:600;
+}
+
+.player-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.baja-pill{
+  background:#ffe5e5;
+  color:#8a1f1f;
+  border:1px solid rgba(138,31,31,.2);
+  padding:3px 8px;
+  border-radius:999px;
+  font-size:12px;
+}
+
+/* Filas */
+.eliminados-detalle tr.row-mes-actual td{
+  background:#eaf4ff; /* azul suave */
+}
+
+.eliminados-detalle tr.row-mes-previo td{
+  background:#fff0f0; /* rojo suave */
+}
+
+/* Separador por jugador */
+.eliminados-detalle .player-sep td{
+  background:transparent;
+  padding:0;
+  height:10px;
+  border:0;
+}
+
+/* Total general */
+.eliminados-detalle tfoot .total-general td{
+  background:#eef7ee;
+  border-top:2px solid rgba(0,0,0,.08);
 }
 
 /* Tabla mini más clara con bordes */
