@@ -578,10 +578,10 @@ text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
 }
 .parcial-totals-mini-help{
 display: flex;
-text-align: center;
+text-align: left;
 opacity:.98;
 margin:4% 2% 10% 2%; 
-color: rgba(90, 89, 1, 0.836) !important;
+color: rgba(121, 119, 0, 0.911) !important;
 text-shadow: -1px 1px 1px rgb(255, 255, 255),-1px 1px 1px rgb(255, 255, 255);
 background-color: #ffffff85;
 padding:10px;
@@ -849,13 +849,35 @@ border: 1px solid rgba(61, 255, 109, 0.884);
 }
 
 /* Filas */
-.eliminados-detalle tr.row-mes-actual td{
-  background:#eaf4ff; /* azul suave */
+/* Aporte normal (azul suave) */
+.eliminados-detalle tr.row-normal td{
+  background:#eaf4ff;
 }
 
-.eliminados-detalle tr.row-mes-previo td{
-  background:#fff0f0; /* rojo suave */
+
+.deuda-fechas{
+  margin-top:4px;
+  font-size:12px;
+  color:#ec3f29;
+  line-height:1.25;
+  opacity:.85;
+  white-space:nowrap;
 }
+
+.deuda-cell{
+  text-align:right;
+  line-height:1.15;
+  display: block;
+  max-height: 25px; 
+  height: 25px;        
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px; 
+  margin: 5px;        
+  box-sizing: border-box;
+  scrollbar-gutter: stable;
+}
+
 
 /* Separador por jugador */
 .eliminados-detalle .player-sep td{
@@ -1838,7 +1860,8 @@ input[type="number"] {
     -moz-appearance: textfield; /* Firefox */
 }
 
-/* TFOOT PLANILLA */
+/* ===== TFOOT PLANILLA ===== */
+
 thead tr:nth-child(3),tfoot{
 background: linear-gradient(380deg,
 rgb(53, 189, 121),
@@ -1860,6 +1883,17 @@ border-bottom-right-radius: 18px;
 }
 
 
+.planilla tfoot tr td{
+  border-top: 0 !important; /* quita borde en filas intermedias */
+}
+
+.planilla tfoot tr.tfoot-final-mes td{
+  border-top: 2px solid rgba(0,0,0,.22) !important; /* SOLO la última fila fuerte */
+}
+
+.planilla tfoot tr.tfoot-base-sin-elim td{
+  border-top: 0 !important;
+}
 
 .middle-panel,
 .middle-panel.expanded {

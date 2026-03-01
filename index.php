@@ -183,20 +183,22 @@ include "conexion.php";
       <div class="totals-card">
         <h4 class="parcial-tot-title">Totales (COP)</h4>
         <div class="total-parcial-mini">
-          <div class="parcial-totals-mini-help">Totales Parciales Suman Los Aportes de Cada Día (Miercoles / Sabado)
-            Con Los aportes de la Columna Otro Juego  de Ambas Planillas (De Cada Dia / Seleciona Cada Dia  de Los Registros en Tabla: Datos Columna Otro Juego para Corroborar).
-             Incluyen Aportes de Eliminados / Estos se Pueden Ver en La Sección de Aportantes Eliminados Este Mes.
+          <div class="parcial-totals-mini-help">Total Parcial Mes Suma: <br>
+             - Los Aportes de Cada Día (Miercoles / Sabado) <br>
+             - Aportes de (Cada Dia) la Columna Otro Juego de Ambas Planillas; Seleciona Cada Dia  de Los Registros en Tabla: Datos Columna Otro Juego para Corroborar. <br>
+          
+             - Incluye Aportes y Otros Aportes de Los Jugadores Eliminados; Estos se Pueden Ver en La Sección de Aportantes Eliminados Este Mes (Ver Detalle).
         
 
           </div>
           <div class="total-parcial-mini-items">
             <span>Total Parcial Mes </span>
-            <small>(+ Eliminados / Sin Otros Aportes / Sin Saldo): </small>
+            <small>(Incluye: Aportes Eliminados / Otros Aportes / Sin Saldo): </small>
             <strong id="tParcialMes" class="totales-item-value">$ 0</strong>
           </div>
           <div class="total-parcial-mini-items">
             <span>Total Parcial Año </span>
-            <small>( + Eliminados / Sin Otros Aportes / Sin Saldo): </small>
+            <small>(Incluye: Aportes Eliminados / Otros Aportes / Sin Saldo): </small>
             <strong id="tParcialAnio" class="totales-item-value">$ 0</strong>
           </div>
         </div>
@@ -206,13 +208,13 @@ include "conexion.php";
         <div class="otros-saldo-mini">
           <div class="otros-aportes-items">
             <span>Otros Aportes Mes</span>
-            <small>(De Las Dos PLanillas + Otros Aportes de Eliminados):</small>
+            <small>(Solo Informativo):</small>
             <strong id="tOtrosMes" class="totales-item-value">$ 0</strong>
           </div>
 
           <div class="otros-aportes-items">
             <span>Otros Aportes Año </span>
-            <small>(De Las Dos PLanillas + Otros Aportes de Eliminados):</small>
+            <small>(Solo Informativo):</small>
             <strong id="tOtrosAnio" class="totales-item-value">$ 0</strong>
           </div>
 
@@ -227,8 +229,11 @@ include "conexion.php";
         <div class="totales-aportantes-eliminados">
           <h4>Aportes De Aportantes Eliminados </h4>
           <div class="eliminados-div-button">
-            <div class="mini-help">No Aparecen en Planilla, Pero sus Aportes y Saldos Siguen Sumando en Totales.</div>
-            <span id="totalEliminadosMes">$ 0</span>
+            <div class="mini-help"> - Aportantes Eliminados No Aparecen en Planilla <br> - Sus Aportes y Saldos Siguen Sumando en Totales Parciales. <br>
+               - Pueden Verse En la Tabla Aportes Eliminados </div>
+               <!-- <div> Solo Informativo Ya está Sumando en Total Parcial.</div> -->
+              
+            <!-- <span id="totalEliminadosMes"></span> -->
             <button type="button" id="btnVerEliminados" class="btn-ver-eliminados">Ver detalle</button>
           </div>
         </div>
@@ -238,13 +243,13 @@ include "conexion.php";
 
           <div class="totales-estimado-mini-items">
             <span>Total Estimado Mes</span>
-            <small>(Total Parcial Mes + Otros Aportes  + Saldos, Sin gastos):</small>
+            <small>(Total Parcial Mes + Saldos (Actual), Sin gastos):</small>
             <strong id="tEstimadoMes" class="totales-item-value">$ 0</strong>
           </div>
 
           <div class="totales-estimado-mini-items">
             <span>Total Estimado Año</span>
-            <small>(Total Parcial Año + Otros Aportes + Saldos, Sin gastos):</small>
+            <small>(Total Parcial Año + Saldos(Actual), Sin gastos):</small>
             <strong id="tEstimadoAnio" class="totales-item-value">$ 0</strong>
           </div>
         </div>

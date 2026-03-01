@@ -607,8 +607,8 @@ async function loadTotals(mes, anio) {
   if (gAnio) gAnio.innerText = formatMoney(j.gastos_anio);
 
   // tarjeta eliminados del mes (si la usas)
-  const el = document.getElementById("totalEliminadosMes");
-  if (el) el.innerText = formatMoney(j.eliminados_mes_total || 0);
+  // const el = document.getElementById("totalEliminadosMes");
+  // if (el) el.innerText = formatMoney(j.eliminados_mes_total || );
 }
 
 
@@ -662,71 +662,111 @@ async function cargarEliminadosMes(mes, anio) {
         <th class="right" style="width:6%;">#</th>
         <th style="width:20%;">Fecha</th>
         <th class="right" style="width:14%;">Cantidad</th>
-        <th class="right" style="width:13%;">Total</th>
+        <th class="right" style="width:13%;">Totales</th>
         <th class="right" style="width:13%;">Saldo</th>
+        <th class="right" style="width:13%;">Deudas</th>
+
       </tr>
     </thead>
 
     <tbody>
-      ${players.map(p => {
-        const pr = rowsByPlayer.get(String(p.id)) || [];
-        const fechaBaja = escapeHtml(p.fecha_baja || "");
-      // const fechaBaja = p.fecha_baja ? formatSpanishDateAny(p.fecha_baja) : "Sin fecha";
+    
 
-        // Cabecera simple del jugador
-        const head = `
-          <tr class="player-head">
-            <td>
-              <div class="player-title">
-                <strong>${escapeHtml(p.nombre || "")}</strong>
-                <span class="baja-pill">Baja: ${fechaBaja}</span>
-              </div>
-            </td>
-            <td colspan="5"></td>
-          </tr>
-        `;
+        return head + fil${players.map(p => {
+  const pr = rowsByPlayer.get(String(p.id)) || [];
+  const fechaBaja = escapeHtml(p.fecha_baja || "");
 
-        // Filas de aportes
-        const filas = pr.length ? pr.map(r => {
-          const cls = r.es_mes_actual ? "row-mes-actual" : "row-mes-previo";
-          return `
-            <tr class="${cls}">
-              <td></td>
-              <td class="right">${r.n}</td>
-              <td>${escapeHtml(r.fecha || "")}</td>
-              <td class="right">${formatMoney(r.cantidad || 0)}</td>
-              <td class="right">${formatMoney(r.total || 0)}</td>
-              <td class="right"><strong>${formatMoney(r.saldo || 0)}</strong></td>
-            </tr>
-          `;
-        }).join("") : `
-          <tr class="row-empty">
-            <td colspan="6" style="opacity:.75;">Sin aportes registrados hasta este mes.</td>
-          </tr>
-        `;
+  // ✅ Deudas (info)
+  const deudaTotal = Number(p.deudas_total || 0);
+  const deudaFechas = Array.isArray(p.deudas_fechas) ? p.deudas_fechas : [];
 
-        // ✅ Totales del jugador AL FINAL (como lo pediste)
-        const footJugador = `
-          <tr class="player-total">
-            <td><strong>Total aportes jugador</strong></td>
-            <td colspan="3"></td>
-            <td class="right"><strong>${formatMoney(p.total_aportes || 0)}</strong></td>
-            <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
-          </tr>
-          <tr class="player-sep"><td colspan="6"></td></tr>
-        `;
+  const deudasBox = deudaTotal
+    ? `<div class="deuda-box">
+         <strong>Deudas:</strong> ${deudaTotal}
+         <div class="deuda-fechas">${deudaFechas.map(escapeHtml).join("<br>")}</div>
+       </div>`
+    : `<div class="deuda-box" style="opacity:.75;">Deudas: 0</div>`;
 
-        return head + filas + footJugador;
-      }).join("")}
+  // ✅ Celda deudas (para la columna Deudas) — solo última fila o empty
+  const deudasCellFull = deudaTotal
+    ? `<div class="deuda-cell">
+         <strong>${deudaTotal}</strong>
+         <div class="deuda-fechas">${deudaFechas.map(escapeHtml).join("<br>")}</div>
+       </div>`
+    : `<span style="opacity:.75;">0</span>`;
+
+  // Cabecera del jugador
+  const head = `
+    <tr class="player-head">
+      <td>
+        <div class="player-title">
+          <strong>${escapeHtml(p.nombre || "")}</strong>
+          <span class="baja-pill">Baja: ${fechaBaja}</span>
+        </div>
+        ${deudasBox}
+      </td>
+      <td colspan="6"></td>
+    </tr>
+  `;
+
+  const filas = pr.length ? pr.map((r, i) => {
+    const isLast = i === pr.length - 1;
+
+    const cls = (r.kind === "otro") ? "row-otro" : "row-normal";
+    const labelHtml = r.label ? `<div class="row-label">${escapeHtml(r.label)}</div>` : "";
+    const saldoHtml = isLast ? `<strong>${formatMoney(p.saldo_fin_mes || 0)}</strong>` : "";
+
+    // ✅ Deudas SOLO en el último registro
+    const deudasCell = isLast ? deudasCellFull : "";
+
+    return `
+      <tr class="${cls}">
+        <td></td>
+        <td class="right">${r.n}</td>
+        <td>
+          ${escapeHtml(r.fecha || "")}
+          ${labelHtml}
+        </td>
+        <td class="right">${formatMoney(r.cantidad || 0)}</td>
+        <td class="right">${formatMoney(r.total || 0)}</td>
+        <td class="right">${saldoHtml}</td>
+        <td class="right">${deudasCell}</td>
+      </tr>
+    `;
+  }).join("") : `
+    <tr class="row-empty">
+      <td colspan="6" style="opacity:.85;">
+        Este aportante fue eliminado en este mes, pero <strong>no tiene aportes registrados en ${mes}/${anio}</strong>.<br>
+        Si quieres ver sus aportes, revisa <strong>meses anteriores</strong> en la planilla.
+      </td>
+      <td class="right">${deudasCellFull}</td>
+    </tr>
+  `;
+
+  const footJugador = `
+    <tr class="player-total">
+      <td><strong>Total aportes jugador (normales del mes)</strong></td>
+      <td colspan="3"></td>
+      <td class="right"><strong>${formatMoney(p.total_mes || 0)}</strong></td>
+      <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
+      <td class="right"><strong>${Number(p.deudas_total || 0)}</strong></td>
+    </tr>
+    <tr class="player-sep"><td colspan="7"></td></tr>
+  `;
+
+  return head + filas + footJugador;
+}).join("")}
+
     </tbody>
 
     <tfoot>
       <tr class="total-general">
-        <td><strong>Total General</strong></td>
-        <td colspan="3"></td>
-        <td class="right"><strong>${formatMoney(data.totales?.total_general_aportes || 0)}</strong></td>
-        <td class="right"><strong>${formatMoney(data.totales?.total_general_saldo || 0)}</strong></td>
-      </tr>
+    <td><strong>Total General</strong></td>
+    <td colspan="3"></td>
+    <td class="right"><strong>${formatMoney(data.totales?.total_general_aportes || 0)}</strong></td>
+    <td class="right"><strong>${formatMoney(data.totales?.total_general_saldo || 0)}</strong></td>
+    <td></td>
+  </tr>
     </tfoot>
   </table>
 `;

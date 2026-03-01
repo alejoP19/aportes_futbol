@@ -6,9 +6,6 @@ protegerAdmin();
 
 
 
-
-
-
 $mes  = intval($_GET['mes']  ?? date('n'));
 $anio = intval($_GET['anio'] ?? date('Y'));
 
@@ -21,25 +18,27 @@ $fechaInicio = date('Y-m-01', strtotime("$anio-$mes-01"));
 $fechaCorte  = date('Y-m-t', strtotime("$anio-$mes-01"));
 
 /**
- * Calcula los totales del MES (según tu lógica actual):
- * - month_total: registrados efectivo (cap 3000 + consumido_target, cap final 3000)
+ * ✅ LÓGICA NUEVA (para que NO sea confuso):
+ * - month_total: registrados efectivo
  * - esporadicos_mes: suma completa
  * - otros_mes: otros_aportes + esporadico_otro
- * - gastos_mes: gastos del mes
- * - saldo_total: saldo acumulado a corte del mes (incluye eliminados)
- * - parcial_mes = month_total + esporadicos_mes  (incluye eliminados)
- * - estimado_mes = parcial_mes + otros_mes + saldo_total
- * - final_mes = estimado_mes - gastos_mes
+ * - saldo_total: saldo foto al corte del mes
+ * - gastos_mes
+ *
+ * ✅ parcial_mes = month_total + esporadicos_mes + otros_mes
+ * ✅ estimado_mes = parcial_mes + saldo_total
+ * ✅ final_mes = estimado_mes - gastos_mes
  */
 function calcular_totales_mes($conexion, $anio, $mes, $TOPE = 3000) {
-    $fechaCorte  = date('Y-m-t', strtotime("$anio-$mes-01"));
+    $fechaCorteLocal = date('Y-m-t', strtotime("$anio-$mes-01"));
 
-    // 1) REGISTRADOS EFECTIVO (incluye eliminados porque vienen en aportes)
+    // 1) REGISTRADOS EFECTIVO
     $month_total = (int)($conexion->query("
         SELECT IFNULL(SUM(
             LEAST(
                 LEAST(IFNULL(a.aporte_principal,0), $TOPE) + IFNULL(t.consumido,0),
-            $TOPE)
+                $TOPE
+            )
         ),0) AS total_mes
         FROM aportes a
         LEFT JOIN (
@@ -53,7 +52,7 @@ function calcular_totales_mes($conexion, $anio, $mes, $TOPE = 3000) {
           AND a.tipo_aporte IS NULL
     ")->fetch_assoc()['total_mes'] ?? 0);
 
-    // 2) ESPORÁDICOS (suma completa)
+    // 2) ESPORÁDICOS
     $esporadicos_mes = (int)($conexion->query("
         SELECT IFNULL(SUM(aporte_principal),0) AS s
         FROM aportes
@@ -84,7 +83,7 @@ function calcular_totales_mes($conexion, $anio, $mes, $TOPE = 3000) {
         WHERE mes=$mes AND anio=$anio
     ")->fetch_assoc()['s'] ?? 0);
 
-    // 5) SALDO TOTAL A CORTE DEL MES (incluye eliminados)
+    // 5) SALDO TOTAL (foto al corte del mes)
     $saldo_total = (int)($conexion->query("
         SELECT IFNULL(SUM(
             GREATEST(IFNULL(ex.excedente,0) - IFNULL(co.consumido,0), 0)
@@ -93,7 +92,7 @@ function calcular_totales_mes($conexion, $anio, $mes, $TOPE = 3000) {
         LEFT JOIN (
             SELECT id_jugador, SUM(GREATEST(aporte_principal - $TOPE, 0)) AS excedente
             FROM aportes
-            WHERE fecha <= '$fechaCorte'
+            WHERE fecha <= '$fechaCorteLocal'
               AND id_jugador IS NOT NULL
               AND tipo_aporte IS NULL
             GROUP BY id_jugador
@@ -101,14 +100,14 @@ function calcular_totales_mes($conexion, $anio, $mes, $TOPE = 3000) {
         LEFT JOIN (
             SELECT id_jugador, SUM(amount) AS consumido
             FROM aportes_saldo_moves
-            WHERE fecha_consumo <= '$fechaCorte'
+            WHERE fecha_consumo <= '$fechaCorteLocal'
             GROUP BY id_jugador
         ) co ON co.id_jugador = j.id
     ")->fetch_assoc()['saldo'] ?? 0);
 
-    // Totales del mes según tu definición
-    $parcial_mes  = (int)($month_total + $esporadicos_mes);
-    $estimado_mes = (int)($parcial_mes + $otros_mes + $saldo_total);
+    // ✅ NUEVO
+    $parcial_mes  = (int)($month_total + $esporadicos_mes + $otros_mes);
+    $estimado_mes = (int)($parcial_mes + $saldo_total);
     $final_mes    = (int)($estimado_mes - $gastos_mes);
 
     return [
@@ -124,7 +123,7 @@ function calcular_totales_mes($conexion, $anio, $mes, $TOPE = 3000) {
 }
 
 // =====================================================
-// ELIMINADOS (SOLO INFORMATIVO) - ids eliminados en mes / hasta fechaCorte
+// ELIMINADOS (informativo) ids eliminados en mes / hasta fechaCorte
 // =====================================================
 function build_in_clause($ids){
     if (empty($ids)) return "NULL";
@@ -163,7 +162,7 @@ $stmt->close();
 $inMes   = build_in_clause($elimIdsMes);
 $inHasta = build_in_clause($elimIdsHasta);
 
-// total aportes efectivos de eliminados (MES)
+// eliminados mes (registrados efectivo)
 $eliminados_mes_total = (int)($conexion->query("
     SELECT IFNULL(SUM(
         LEAST(LEAST(IFNULL(a.aporte_principal,0), $TOPE) + IFNULL(t.consumido,0), $TOPE)
@@ -179,7 +178,7 @@ $eliminados_mes_total = (int)($conexion->query("
       AND a.tipo_aporte IS NULL
 ")->fetch_assoc()['total'] ?? 0);
 
-// total aportes efectivos de eliminados (AÑO hasta mes)
+// eliminados año (registrados efectivo)
 $eliminados_anio_total = (int)($conexion->query("
     SELECT IFNULL(SUM(
         LEAST(LEAST(IFNULL(a.aporte_principal,0), $TOPE) + IFNULL(t.consumido,0), $TOPE)
@@ -196,23 +195,20 @@ $eliminados_anio_total = (int)($conexion->query("
 ")->fetch_assoc()['total'] ?? 0);
 
 // =====================================================
-// CALCULAR MES ACTUAL
+// MES ACTUAL
 // =====================================================
 $mesActual = calcular_totales_mes($conexion, $anio, $mes, $TOPE);
 
 // =====================================================
-// CALCULAR AÑO COMO SUMA DE MESES (1..mes)  ✅ TU VALIDACIÓN
+// AÑO (coherente): parcial_anio = suma de parciales; estimado_anio = parcial_anio + saldo_actual; final_anio = estimado_anio - gastos_anio
 // =====================================================
-$year_total = 0;          // registrados efectivo acumulado
+$year_total = 0;
 $esporadicos_anio = 0;
 $otros_anio = 0;
 $gastos_anio = 0;
-$estimado_anio = 0;
-$final_anio = 0;
 
-// saldo_total del año: informativo = saldo a corte del mes seleccionado
-// (NO se suma 12 veces porque es una "foto", pero tú sí lo usas en el estimado_mes mensual)
-$saldo_total = (int)$mesActual["saldo_total"];
+// ✅ parcial_anio = suma(parcial_mes) => month_total + esporadicos + otros
+$parcial_anio = 0;
 
 for ($m = 1; $m <= $mes; $m++) {
     $tmp = calcular_totales_mes($conexion, $anio, $m, $TOPE);
@@ -222,14 +218,17 @@ for ($m = 1; $m <= $mes; $m++) {
     $otros_anio       += (int)$tmp["otros_mes"];
     $gastos_anio      += (int)$tmp["gastos_mes"];
 
-    $estimado_anio    += (int)$tmp["estimado_mes"];
-    $final_anio       += (int)$tmp["final_mes"];
+    $parcial_anio     += (int)$tmp["parcial_mes"];
 }
 
-// parcial_anio = suma de parciales mes a mes
-$parcial_anio = (int)($year_total + $esporadicos_anio);
+// saldo_total del año = foto a corte del mes seleccionado (NO sumarlo 12 veces)
+$saldo_total = (int)$mesActual["saldo_total"];
 
-// variables del mes actual
+// ✅ NUEVO: estimado_anio coherente
+$estimado_anio = (int)($parcial_anio + $saldo_total);
+$final_anio    = (int)($estimado_anio - $gastos_anio);
+
+// variables mes actual
 $month_total     = (int)$mesActual["month_total"];
 $esporadicos_mes = (int)$mesActual["esporadicos_mes"];
 $otros_mes       = (int)$mesActual["otros_mes"];
@@ -244,30 +243,25 @@ $final_mes       = (int)$mesActual["final_mes"];
 echo json_encode([
     "ok" => true,
 
-    // base registrados efectivo
     "month_total" => $month_total,
     "year_total"  => $year_total,
 
-    // esporadicos
     "esporadicos_mes"  => $esporadicos_mes,
     "esporadicos_anio" => $esporadicos_anio,
 
-    // parciales
+    // ✅ parciales ahora incluyen otros aportes
     "parcial_mes"  => $parcial_mes,
     "parcial_anio" => $parcial_anio,
 
-    // otros aportes
     "otros_mes"    => $otros_mes,
     "otros_anio"   => $otros_anio,
 
-    // saldo (informativo del corte del mes seleccionado)
     "saldo_total"  => $saldo_total,
 
-    // eliminados informativo
     "eliminados_mes_total"  => $eliminados_mes_total,
     "eliminados_anio_total" => $eliminados_anio_total,
 
-    // estimados y finales (AÑO = SUMA DE MESES)
+    // ✅ estimados nuevos coherentes
     "estimado_mes" => $estimado_mes,
     "estimado_anio"=> $estimado_anio,
 
@@ -277,9 +271,10 @@ echo json_encode([
     "final_mes"    => $final_mes,
     "final_anio"   => $final_anio,
 
-    // debug útil
     "debug" => [
         "fecha_inicio" => $fechaInicio,
         "fecha_corte"  => $fechaCorte
     ]
 ], JSON_UNESCAPED_UNICODE);
+
+

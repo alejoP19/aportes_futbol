@@ -152,8 +152,6 @@ function get_saldo_acumulado($conexion, $id_jugador, $mes, $anio)
 
 /* ===========================
    FOOTER HELPERS (SQL)
-   - Sirven para calcular el TFOOT por fecha (incluye eliminados)
-   - No depende del array $jugadores
 =========================== */
 function total_efectivo_registrados_por_fecha($conexion, $fecha, $TOPE = 3000)
 {
@@ -314,23 +312,17 @@ echo "<th>Teléfono</th>";
 echo "</tr>";
 echo "</thead>";
 
-
-
-
 echo "<tbody>";
 
-// ✅ Inicializaciones correctas
+// ✅ Inicializaciones
 $totales_por_dia = array_fill(0, count($days), 0);
 $total_otro_col_all = 0;       // suma REAL de todos los otros días (no mié/sáb)
 $total_otro_col_visible = 0;   // suma SOLO del día seleccionado en "Otro juego"
-$total_otros_global = 0;
+$total_otros_global = 0;       // otros_aportes por jugadores (informativo)
 $total_saldo_global = 0;
-
-
 
 /* ===========================
    ESPORÁDICOS (SUMAS POR FECHA)
-   - solo afectan TFOOT (no por jugador)
 =========================== */
 $esp_por_fecha = [];
 $stmt = $conexion->prepare("
@@ -349,38 +341,27 @@ while($r = $res->fetch_assoc()){
 }
 $stmt->close();
 
-/* sumar esporádicos a:
-   - totales_por_dia (solo fechas mié/sáb)
-   - total_otro_col_all (fechas NO mié/sáb)
-*/
-$esp_total_mes = 0;
+// Sumar esporádicos a días / otros
 $esp_total_otro = 0;
 
 foreach($esp_por_fecha as $f => $s){
-  $esp_total_mes += $s;
-
   $dia = (int)date("j", strtotime($f));
 
-  // si es mié/sáb (está en $days), súmalo al índice de ese día
   $idx = array_search($dia, $days, true);
   if ($idx !== false) {
     $totales_por_dia[$idx] += $s;
   } else {
-    // si NO es mié/sáb, cuenta como "otro juego" (todos)
     $esp_total_otro += $s;
   }
 }
-
-// esto es CLAVE: el total "otro juego (todos)" ahora incluye esporádicos no mié/sáb
 $total_otro_col_all += $esp_total_otro;
-
 
 foreach ($jugadores as $jug) {
     $jugId = intval($jug['id']);
     $deudaDias = $deudas_totales[$jugId] ?? 0;
     $tieneDeuda = $deudaDias > 0;
 
-    $total_jugador_mes = 0;
+    $total_jugador_mes = 0; // ✅ SOLO DÍAS + OTROS JUEGOS (NO incluye otros aportes)
 
     $claseEliminado = ($jug['activo'] == 0) ? "eliminado" : "";
     echo "<tr data-player='{$jugId}' class='{$claseEliminado}'>";
@@ -435,15 +416,12 @@ foreach ($jugadores as $jug) {
 </td>";
     }
 
-    // ===========================
     // OTRO JUEGO:
     // - Columna visible: SOLO $otroDia
-    // - Total mes: suma TODOS los días NO mié/sáb
-    // ===========================
+    // - Total mes por jugador: suma TODOS los días NO mié/sáb
     $efectivoO_selected = 0;
     $totalOtrosJuegosJugador = 0;
 
-    // capturas para tooltip/flags del día seleccionado
     $realO_sel = 0;
     $consumoO_sel = 0;
 
@@ -462,13 +440,11 @@ foreach ($jugadores as $jug) {
         if ($dOther === $otroDia) {
             $efectivoO_selected = $efectivoX;
             $total_otro_col_visible += $efectivoX;
-
             $realO_sel = $realX;
             $consumoO_sel = $consumoX;
         }
     }
 
-    // ✅ total jugador incluye TODOS los otros días, aunque no se vean
     $total_jugador_mes += $totalOtrosJuegosJugador;
 
     // imprimir celda visible del día seleccionado
@@ -506,7 +482,7 @@ foreach ($jugadores as $jug) {
   </div>
 </td>";
 
-    // OTROS APORTES
+    // OTROS APORTES (informativo, NO suma al total por jugador)
     $otros = get_otros($conexion, $jugId, $mes, $anio);
     $tipos = [];
     $valor_otros = 0;
@@ -516,7 +492,6 @@ foreach ($jugadores as $jug) {
         $valor_otros += intval($o['valor']);
     }
 
-    $total_jugador_mes += $valor_otros;
     $total_otros_global += $valor_otros;
 
     echo "<td>" . (empty($tipos) ? '' : implode("<br>", $tipos)) . "</td>";
@@ -566,21 +541,19 @@ foreach ($jugadores as $jug) {
 
 echo "</tbody>";
 
+// ✅ Inicializar footer vars (evita "Undefined variable")
+$totales_por_dia_footer = [];
+$total_otro_footer = 0;
+$total_otros_aportes_footer = 0;
 
-// ✅ TOTAL MES REAL: mié/sáb + TODOS los otros días + otros aportes
-$totales_mes_actualizado = array_sum($totales_por_dia) + $total_otro_col_all + $total_otros_global;
-
-/* ==========================================================
-   ✅ FOOTER REAL POR SQL (INCLUYE ELIMINADOS)
-   - Tu tabla NO muestra eliminados, pero el TFOOT debe sumar TODO lo del mes.
-   - Calcula por fecha:
-       total_dia = registrados_efectivo + esporadicos
-       total_otro = suma de TODOS los dias NO mié/sáb (registrados + esporadicos)
-       total_otros_aportes = otros_aportes + esporadico_otro
-========================================================== */
+// ==========================================================
+// ✅ FOOTER REAL POR SQL (INCLUYE ELIMINADOS)
+// - total_dia = registrados_efectivo + esporadicos
+// - total_otro = suma de TODOS los dias NO mié/sáb (registrados + esporadicos)
+// - otros_aportes_footer = otros_aportes + esporadico_otro  (solo informativo en la tabla)
+// ==========================================================
 
 // 1) Totales por cada día mié/sáb (registrados + esporádicos)
-$totales_por_dia_footer = [];
 foreach ($days as $d) {
     $f = sprintf("%04d-%02d-%02d", $anio, $mes, $d);
     $totales_por_dia_footer[] =
@@ -589,7 +562,6 @@ foreach ($days as $d) {
 }
 
 // 2) Total OTRO JUEGO (TODOS los días NO mié/sáb)
-$total_otro_footer = 0;
 foreach ($otrosDias as $dOther) {
     $f = sprintf("%04d-%02d-%02d", $anio, $mes, $dOther);
     $total_otro_footer +=
@@ -597,10 +569,13 @@ foreach ($otrosDias as $dOther) {
         + total_esporadicos_por_fecha($conexion, $f);
 }
 
-// 3) Total "Otros aportes" del mes (otros_aportes + esporadico_otro)
-$total_otros_aportes_footer = 0;
+// ✅ Total Mes SIN otros aportes (este es el 55.000 de tu ejemplo)
+// (incluye eliminados del mes porque está por SQL)
+$totales_parcial_footer =
+    array_sum($totales_por_dia_footer)
+    + $total_otro_footer;
 
-// otros_aportes (tabla aparte)
+// 3) ✅ Otros aportes del mes (INFORMATIVO en la tabla principal)
 $rowOA = $conexion->query("
     SELECT IFNULL(SUM(valor),0) AS s
     FROM otros_aportes
@@ -608,7 +583,6 @@ $rowOA = $conexion->query("
 ")->fetch_assoc();
 $total_otros_aportes_footer += (int)($rowOA['s'] ?? 0);
 
-// esporadico_otro (guardado en aportes)
 $rowEO = $conexion->query("
     SELECT IFNULL(SUM(aporte_principal),0) AS s
     FROM aportes
@@ -617,19 +591,50 @@ $rowEO = $conexion->query("
 ")->fetch_assoc();
 $total_otros_aportes_footer += (int)($rowEO['s'] ?? 0);
 
-// 4) Total mes REAL (para footer): días mié/sáb + otros días + otros aportes
-$totales_mes_footer =
-    array_sum($totales_por_dia_footer)
-    + $total_otro_footer
-    + $total_otros_aportes_footer;
+// ✅ Total Final Mes CON otros aportes (este es el 64.000 de tu ejemplo)
+$totales_final_con_otros_footer = (int)($totales_parcial_footer + $total_otros_aportes_footer);
 
-// 5) Saldo total (informativo) — aquí puedes dejar tu cálculo anterior si quieres,
-//    pero ojo: el saldo NO es "recaudo"; es dinero ya contado en aportes anteriores.
-//    (Si lo quieres mostrar igual, ok. Solo que no se suma al "total mes" de aportes.)
-/* $total_saldo_global ya lo calculabas por jugador mostrado.
-   Eso NO incluye eliminados. Si quieres saldo total real (incluye eliminados),
-   lo mejor es calcularlo por SQL (similar a tu get_total.php).
-*/
+// 4) ✅ Total Eliminados del mes (solo aportes normales del mes, SIN otros aportes)
+$inicioMes = sprintf("%04d-%02d-01", $anio, $mes);
+$finMes    = date('Y-m-t', strtotime($inicioMes));
+
+$elimIdsMes = [];
+$stmt = $conexion->prepare("
+    SELECT id
+    FROM jugadores
+    WHERE activo=0
+      AND fecha_baja IS NOT NULL
+      AND fecha_baja >= ?
+      AND fecha_baja <= ?
+");
+$stmt->bind_param("ss", $inicioMes, $finMes);
+$stmt->execute();
+$resE = $stmt->get_result();
+while($r = $resE->fetch_assoc()) $elimIdsMes[] = (int)$r['id'];
+$stmt->close();
+
+$inMes = (empty($elimIdsMes)) ? "NULL" : implode(",", array_map("intval",$elimIdsMes));
+
+$eliminados_mes_total_footer = (int)($conexion->query("
+    SELECT IFNULL(SUM(
+        LEAST(LEAST(IFNULL(a.aporte_principal,0), $TOPE) + IFNULL(t.consumido,0), $TOPE)
+    ),0) AS s
+    FROM aportes a
+    LEFT JOIN (
+        SELECT target_aporte_id, SUM(amount) AS consumido
+        FROM aportes_saldo_moves
+        GROUP BY target_aporte_id
+    ) t ON t.target_aporte_id=a.id
+    WHERE YEAR(a.fecha)=$anio AND MONTH(a.fecha)=$mes
+      AND a.tipo_aporte IS NULL
+      AND a.id_jugador IN ($inMes)
+")->fetch_assoc()['s'] ?? 0);
+
+// ✅ NUEVO: Total base sin eliminados del mes (SIN OTROS APORTES)
+// (para que el usuario pueda sumar + eliminados_mes_total_footer = totales_parcial_footer)
+$totales_base_sin_eliminados_footer = (int)max(0, $totales_parcial_footer - $eliminados_mes_total_footer);
+
+// 5) Saldo total (informativo)
 $saldo_total_footer = 0;
 $rowSaldo = $conexion->query("
     SELECT IFNULL(SUM(
@@ -653,8 +658,14 @@ $rowSaldo = $conexion->query("
 ")->fetch_assoc();
 $saldo_total_footer = (int)($rowSaldo['saldo'] ?? 0);
 
-// === PRINT FOOTER
-echo "<tfoot><tr>";
+
+// ==========================================================
+// ✅ PRINT FOOTER
+// ==========================================================
+echo "<tfoot>";
+
+// ===== Fila 1: TOTAL DÍA =====
+echo "<tr class='tfoot-total-dia'>";
 echo "<td><strong>TOTAL DÍA</strong></td>";
 
 foreach ($totales_por_dia_footer as $td) {
@@ -669,14 +680,14 @@ echo "<td style='background:#e8f7ef;'>
 // col "Tipo" vacía
 echo "<td></td>";
 
-// total otros aportes
-echo "<td style='background:#eef3ff;'>
+// total otros aportes (INFORMATIVO)
+echo "<td style='background:#fff7cc;'>
         <strong>" . number_format($total_otros_aportes_footer, 0, ',', '.') . "</strong>
       </td>";
 
-// total mes
-echo "<td style='background:#dff5e3;'>
-        <strong>" . number_format($totales_mes_footer, 0, ',', '.') . "</strong>
+// ✅ OJO: aquí va el TOTAL MES SIN OTROS (55.000)
+echo "<td style='background:#ffffff;'>
+        <strong>" . number_format($totales_parcial_footer, 0, ',', '.') . "</strong>
       </td>";
 
 // saldo
@@ -686,7 +697,41 @@ echo "<td><strong>" . number_format($saldo_total_footer, 0, ',', '.') . "</stron
 echo "<td></td><td></td><td></td>";
 echo "</tr>";
 
-// Fila explicativa
+
+// ✅ NUEVO: fila de comparación (SIN ELIMINADOS / SIN OTROS)
+echo "<tr class='tfoot-base-sin-elim'>";
+echo "<td colspan='" . (1 + count($days) + 1 + 2) . "' style='text-align:right; font-weight:bold;'>
+        TOTAL FINAL MES (SIN APORTES ELIMINADOS / SIN OTROS APORTES)
+        <div style='font-size:11px; font-weight:500; opacity:.85; margin-top:3px;'>
+          Nota: esta cifra + <strong>aportes eliminados del mes</strong> = Total Mes (sin otros aportes).
+        </div>
+      </td>";
+
+echo "<td style='background:#eef4ff;'>
+        <strong>" . number_format($totales_base_sin_eliminados_footer, 0, ',', '.') . "</strong>
+      </td>";
+
+echo "<td><strong>" . number_format($saldo_total_footer, 0, ',', '.') . "</strong></td>";
+echo "<td></td><td></td><td></td>";
+echo "</tr>";
+
+
+// ===== Fila final: TOTAL FINAL MES CON OTROS (sin tocar eliminados, porque el total parcial ya los incluye) =====
+echo "<tr class='tfoot-final-mes'>";
+echo "<td colspan='" . (1 + count($days) + 1 + 2) . "' style='text-align:right; font-weight:bold;'>
+        TOTAL FINAL MES (CON OTROS APORTES)
+      </td>";
+
+echo "<td style='background:#cfeedd;'>
+        <strong>" . number_format($totales_final_con_otros_footer, 0, ',', '.') . "</strong>
+      </td>";
+
+echo "<td><strong>" . number_format($saldo_total_footer, 0, ',', '.') . "</strong></td>";
+echo "<td></td><td></td><td></td>";
+echo "</tr>";
+
+
+// ===== Fila explicativa (si la quieres mantener) =====
 echo "<tr class='tfoot-info'>
   <td colspan='" . (count($days)+6) . "'></td>
   <td colspan='3' style='font-size:12px; color:#444; padding-top:6px;'>

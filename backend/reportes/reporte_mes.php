@@ -770,6 +770,9 @@ $obs = trim(get_obs($conexion, $mes, $anio));
     </tfoot>
   </table>
 
+    <div class="note" style="margin-top:6px;">
+      Nota: Los Aportes de la columna “Otros Aportes” de Las Dos Tablas (Registrados /Esporádicos) se muestran en cada Tabla; pero se Suman en la Sección Resumen General Totales (COP) “Otros Aportes Mes/Año” (abajo).
+    </div>
   <div class="section-block">
     <h3 class="keep-title">Planilla Aportes Esporádicos (Resumen)</h3>
 
