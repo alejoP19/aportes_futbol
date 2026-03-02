@@ -654,121 +654,174 @@ async function cargarEliminadosMes(mes, anio) {
         if (!rowsByPlayer.has(k)) rowsByPlayer.set(k, []);
         rowsByPlayer.get(k).push(r);
       }
-      body.innerHTML = `
+
+      // ✅ helper: celda de deudas con scroll (muestra cantidad + fechas)
+      const renderDeudasCell = (p) => {
+        const total = Number(p.deudas_total || 0);
+        const fechas = Array.isArray(p.deudas_fechas) ? p.deudas_fechas : [];
+
+        if (!total) return `<span style="opacity:.75;">0</span>`;
+
+        return `
+      <div class="deuda-cell">
+        <div class="deuda-count"><strong>${total}</strong></div>
+        <div class="deuda-fechas">
+          ${fechas.map(escapeHtml).join("<br>")}
+        </div>
+      </div>
+    `;
+      };
+body.innerHTML = `
+<div class="table-container">
   <table class="table-mini eliminados-detalle">
     <thead>
       <tr>
-        <th style="width:34%;">Aportante</th>
-        <th class="right" style="width:6%;">#</th>
-        <th style="width:20%;">Fecha</th>
-        <th class="right" style="width:14%;">Cantidad</th>
-        <th class="right" style="width:13%;">Totales</th>
-        <th class="right" style="width:13%;">Saldo</th>
-        <th class="right" style="width:13%;">Deudas</th>
-
+        <th style="width:40%;">Aportante</th>
+        <th style="width:6%;">#</th>
+        <th style="width:25%;">Fecha</th>
+        <th style="width:14%;" class="right">Cantidad</th>
+        <th style="width:10%;" class="right">Totales</th>
+        <th style="width:10%;" class="right">Saldo</th>
+        <th style="width:10%;" class="right">Deudas</th>
       </tr>
     </thead>
 
     <tbody>
-    
+      ${players.map(p => {
+        const pr = rowsByPlayer.get(String(p.id)) || [];
+        const fechaBaja = escapeHtml(p.fecha_baja || "");
 
-        return head + fil${players.map(p => {
-  const pr = rowsByPlayer.get(String(p.id)) || [];
-  const fechaBaja = escapeHtml(p.fecha_baja || "");
+        // helper deudas (scroll)
+       const renderDeudasCell = (pp) => {
+  const total = Number(pp.deudas_total || 0);
+  const fechas = Array.isArray(pp.deudas_fechas) ? pp.deudas_fechas : [];
 
-  // ✅ Deudas (info)
-  const deudaTotal = Number(p.deudas_total || 0);
-  const deudaFechas = Array.isArray(p.deudas_fechas) ? p.deudas_fechas : [];
+  if (!total) {
+    return `<span style="opacity:.6;">0</span>`;
+  }
 
-  const deudasBox = deudaTotal
-    ? `<div class="deuda-box">
-         <strong>Deudas:</strong> ${deudaTotal}
-         <div class="deuda-fechas">${deudaFechas.map(escapeHtml).join("<br>")}</div>
-       </div>`
-    : `<div class="deuda-box" style="opacity:.75;">Deudas: 0</div>`;
-
-  // ✅ Celda deudas (para la columna Deudas) — solo última fila o empty
-  const deudasCellFull = deudaTotal
-    ? `<div class="deuda-cell">
-         <strong>${deudaTotal}</strong>
-         <div class="deuda-fechas">${deudaFechas.map(escapeHtml).join("<br>")}</div>
-       </div>`
-    : `<span style="opacity:.75;">0</span>`;
-
-  // Cabecera del jugador
-  const head = `
-    <tr class="player-head">
-      <td>
-        <div class="player-title">
-          <strong>${escapeHtml(p.nombre || "")}</strong>
-          <span class="baja-pill">Baja: ${fechaBaja}</span>
-        </div>
-        ${deudasBox}
-      </td>
-      <td colspan="6"></td>
-    </tr>
+  return `
+    <div class="deuda-cell">
+      <div class="deuda-count">${total}</div>
+      <div class="deuda-fechas">
+        ${fechas.map(escapeHtml).join("<br>")}
+      </div>
+    </div>
   `;
+};
 
-  const filas = pr.length ? pr.map((r, i) => {
-    const isLast = i === pr.length - 1;
+        // ✅ celda del jugador (se usa como rowspan en la 1ra fila)
+        const playerCell = `
+          <div class="player-title">
+            <strong>${escapeHtml(p.nombre || "")}</strong>
+            <span class="baja-pill">Baja: ${fechaBaja}</span>
+          </div>
+        `;
 
-    const cls = (r.kind === "otro") ? "row-otro" : "row-normal";
-    const labelHtml = r.label ? `<div class="row-label">${escapeHtml(r.label)}</div>` : "";
-    const saldoHtml = isLast ? `<strong>${formatMoney(p.saldo_fin_mes || 0)}</strong>` : "";
+        // ==========================
+        // SIN MOVIMIENTOS (fila única)
+        // ==========================
+        if (!pr.length) {
+          return `
+            <tr class="row-empty">
+              <td class="player-cell">
+                ${playerCell}
+              </td>
+              <td colspan="4">
+                Este aportante fue eliminado en este mes, pero <strong>no tiene aportes registrados en ${mes}/${anio}</strong>.<br>
+                Si quieres ver sus aportes, revisa <strong>meses anteriores</strong> en la planilla.
+              </td>
+              <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
+              <td class="right">${renderDeudasCell(p)}</td>
+            </tr>
+           
+            <tr class="player-total">
+              <td><strong>Total Aportes (Normales Del Mes)</strong></td>
+              <td colspan="3"></td>
+              <td class="right"><strong>${formatMoney(p.total_mes || 0)}</strong></td>
+              <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
+              <td></td>
+            </tr>
+            <tr class="player-sep"><td colspan="7"></td></tr>
+          `;
+        }
 
-    // ✅ Deudas SOLO en el último registro
-    const deudasCell = isLast ? deudasCellFull : "";
+        // ==========================
+        // CON MOVIMIENTOS
+        // ==========================
+        const rowsHtml = pr.map((r, i) => {
+          const isLast = i === pr.length - 1;
 
-    return `
-      <tr class="${cls}">
-        <td></td>
-        <td class="right">${r.n}</td>
-        <td>
-          ${escapeHtml(r.fecha || "")}
-          ${labelHtml}
-        </td>
-        <td class="right">${formatMoney(r.cantidad || 0)}</td>
-        <td class="right">${formatMoney(r.total || 0)}</td>
-        <td class="right">${saldoHtml}</td>
-        <td class="right">${deudasCell}</td>
-      </tr>
-    `;
-  }).join("") : `
-    <tr class="row-empty">
-      <td colspan="6" style="opacity:.85;">
-        Este aportante fue eliminado en este mes, pero <strong>no tiene aportes registrados en ${mes}/${anio}</strong>.<br>
-        Si quieres ver sus aportes, revisa <strong>meses anteriores</strong> en la planilla.
-      </td>
-      <td class="right">${deudasCellFull}</td>
-    </tr>
-  `;
+          const cls = (r.kind === "otro") ? "row-otro" : "row-normal";
+          const labelHtml = r.label ? `<div class="row-label">${escapeHtml(r.label)}</div>` : "";
 
-  const footJugador = `
-    <tr class="player-total">
-      <td><strong>Total aportes jugador (normales del mes)</strong></td>
-      <td colspan="3"></td>
-      <td class="right"><strong>${formatMoney(p.total_mes || 0)}</strong></td>
-      <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
-      <td class="right"><strong>${Number(p.deudas_total || 0)}</strong></td>
-    </tr>
-    <tr class="player-sep"><td colspan="7"></td></tr>
-  `;
+          // saldo + deudas solo en última fila
+          const saldoHtml = isLast ? `<strong>${formatMoney(p.saldo_fin_mes || 0)}</strong>` : "";
+          const deudasHtml = isLast ? renderDeudasCell(p) : "";
 
-  return head + filas + footJugador;
-}).join("")}
+          // ✅ primera fila: incluye la celda del jugador con rowspan
+          if (i === 0) {
+            return `
+                 <tr class="player-sep"><td colspan="7"></td></tr>
+              <tr class="${cls}">
+                <td class="player-cell" rowspan="${pr.length}">
+                  ${playerCell}
+                </td>
+                <td>${r.n}</td>
+                <td>
+                  ${escapeHtml(r.fecha || "")}
+                  ${labelHtml}
+                </td>
+                <td class="right">${formatMoney(r.cantidad || 0)}</td>
+                <td class="right">${formatMoney(r.total || 0)}</td>
+                <td class="right">${saldoHtml}</td>
+                <td class="right">${deudasHtml}</td>
+              </tr>
+            `;
+          }
 
+          // ✅ siguientes filas: ya NO llevan la 1ra columna
+          return `
+            <tr class="${cls}">
+              <td>${r.n}</td>
+              <td>
+                ${escapeHtml(r.fecha || "")}
+                ${labelHtml}
+              </td>
+              <td class="right">${formatMoney(r.cantidad || 0)}</td>
+              <td class="right">${formatMoney(r.total || 0)}</td>
+              <td class="right">${saldoHtml}</td>
+              <td class="right">${deudasHtml}</td>
+            </tr>
+          `;
+        }).join("");
+
+        const footJugador = `
+          <tr class="player-total">
+            <td><strong>Total aportes jugador (normales del mes)</strong></td>
+            <td colspan="3"></td>
+            <td class="right"><strong>${formatMoney(p.total_mes || 0)}</strong></td>
+            <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
+            <td></td>
+          </tr>
+          <tr class="player-sep"><td colspan="7"></td></tr>
+        `;
+
+        return rowsHtml + footJugador;
+      }).join("")}
     </tbody>
 
     <tfoot>
       <tr class="total-general">
-    <td><strong>Total General</strong></td>
-    <td colspan="3"></td>
-    <td class="right"><strong>${formatMoney(data.totales?.total_general_aportes || 0)}</strong></td>
-    <td class="right"><strong>${formatMoney(data.totales?.total_general_saldo || 0)}</strong></td>
-    <td></td>
-  </tr>
+        <td><strong>Total General</strong></td>
+        <td colspan="3"></td>
+        <td class="right"><strong>${formatMoney(data.totales?.total_general_aportes || 0)}</strong></td>
+        <td class="right"><strong>${formatMoney(data.totales?.total_general_saldo || 0)}</strong></td>
+        <td></td>
+      </tr>
     </tfoot>
   </table>
+</div>
 `;
       modal.classList.remove("hidden");
     });

@@ -283,7 +283,7 @@ include "conexion.php";
         <div id="modalEliminados" class="modal hidden">
           <div class="modal-card">
             <div class="modal-head">
-              <strong>Eliminados este mes</strong>
+              <strong>Eliminados Este Mes</strong>
               <button type="button" id="closeModalEliminados">✕</button>
             </div>
             <div id="modalEliminadosBody"></div>
