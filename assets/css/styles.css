@@ -260,8 +260,7 @@ padding: 15px;
 
 /* paneles */
 .left-panel, .middle-panel,.right-panel,.gastos-section {
-margin-top: -1% !important;
-margin-bottom: 0% !important;
+margin-top: -2% !important;
 background: transparent !important;
   display: flex;
   flex-direction: column;
@@ -573,7 +572,8 @@ font-size: 14px;
 margin-top: 2%;
 margin-bottom: 3%;
 justify-self: flex-end;
-text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
+text-shadow: -1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
 
 }
 .parcial-totals-mini-help{
@@ -581,13 +581,14 @@ display: flex;
 text-align: left;
 opacity:.98;
 margin:4% 2% 10% 2%; 
-color: rgba(121, 119, 0, 0.911) !important;
-text-shadow: -1px 1px 1px rgb(255, 255, 255),-1px 1px 1px rgb(255, 255, 255);
+color: rgba(114, 106, 1, 0.952) !important;
+text-shadow: -1px 1px 1px rgb(247, 247, 247),
+-1px 1px 1px rgb(255, 255, 255);
+border: 1px dotted rgba(161, 146, 76, 0.719);
 background-color: #ffffff85;
 padding:10px;
 border-radius: 12px;
 font-weight: bold;
-border: 1px dotted rgba(138, 138, 138, 0.788);
 font-style: oblique;
 font-size: 13px !important;
 }
@@ -699,13 +700,15 @@ margin-bottom: 2% !important;
 text-align: center;
   opacity:.95;
    margin:4% 2% 25% 2%; 
-color: rgba(90, 89, 1, 0.836) !important;
-text-shadow: -1px 1px 1px rgb(255, 255, 255),-1px 1px 1px rgb(255, 255, 255);
-background-color: #ffffff67;
+color: rgba(114, 106, 1, 0.952) !important;
+text-shadow: -1px 1px 1px rgb(247, 247, 247),
+-1px 1px 1px rgb(255, 255, 255);
+border: 1px dotted rgba(161, 146, 76, 0.719);
+background-color: #ffffff85;
 padding:10px;
 border-radius: 12px;
 font-weight: bold;
-border: 1px dotted rgba(199, 199, 199, 0.788);
+
 font-style: oblique;
 
   
@@ -781,11 +784,10 @@ display:none;
   overflow-x: auto !important;
   overflow-y: auto !important;
   max-width: fit-content;
-  max-width: 100%;
   width: 100%;
   justify-self: center;
   min-height: fit-content;
-  margin-top: 1% !important;
+  margin-top: 1px !important;
   height: fit-content;
   table-layout: fixed; /* CLAVE */
   border-collapse: collapse;
@@ -836,8 +838,8 @@ display:none;
   width: 100%;
   margin-bottom:0;
   background: linear-gradient(180deg,
-     rgba(247, 247, 247, 0.87),
-     rgba(255, 225, 230, 0.95));
+     rgba(253, 218, 218, 0.87),
+     rgba(255, 144, 144, 0.95));
 border: 0.80px solid rgba(211, 135, 145, 0.712);
 border-top-left-radius: 7px;
 border-top-right-radius: 7px;
@@ -853,9 +855,9 @@ font-size: medium;
 font-weight: bold;
 color: #ffffff !important;
 margin-left: 23%;
-text-shadow: -1px 1px 1px rgba(134, 0, 0, 0.986), 
--1px 1px 1px rgb(148, 0, 0),
--1px 1px 1px rgb(126, 0, 0) !important;
+text-shadow: -1px 1px 1px rgba(116, 0, 0, 0.986), 
+-1px 1px 1px rgb(133, 0, 0),
+-1px 1px 1px rgb(117, 0, 0) !important;
 }
 /* botón cerrar modal */
 .modal-head button {
@@ -901,7 +903,7 @@ border: 1px solid rgb(124, 221, 189);
 
 .table-mini thead th{
   position:sticky; top:0;
-  background:#fcf4f5f5;
+  background:#f8dde0f5;
   color:#000000;
   font-weight: bold;
   text-shadow: -1px 1px 1px white,-1px 1px 1px white;
@@ -920,27 +922,42 @@ border: 1px solid rgb(124, 221, 189);
 
 
 .table-mini tbody td{
-  padding:9px 10px;
+  padding:7px 10px;
 
 }
 /* Filas */
-/* Aporte normal (azul suave) */
+/* Aporte normal */
+
+.eliminados-detalle tr.row-normal td.player-cell,
+.eliminados-detalle tr.row-otro td.player-cell,
+.eliminados-detalle tr.row-empty td.player-cell{
+  background: #f8f4f4 !important;   /* o el color que quieras */
+
+}
 .row-normal td{
-background-color: #ffffff !important;
+background-color: #faf9f9 !important;
+border-bottom: 0.80px solid  #bdbdbdd0 !important;
 }
 
 
+.row-empty :nth-child(2){
+color: #f10303;
+font-weight: bold;
+text-shadow: -1px 1px 1px rgb(255, 255, 255),-1px 1px 1px rgb(255, 255, 255);
+background-color: #ffe5e5;
+text-align: center;
 
-.eliminados-detalle tr.row-otro{
-background-color: #fff2a8b9;
 }
-
+.row-otro td{
+  background-color: #c2edfacb !important;
+}
 .player-cell{
 background-color: #ffffff !important;
 
 }
-.player-total{
-background-color: #ecececfa !important;
+.player-total,.player-total td:last-child{
+
+  background:#e9eeee;
 
 }
 .player-total strong{
@@ -957,19 +974,20 @@ background-color: #ecececfa !important;
   display:flex;
   align-items:center;
   flex-direction: column;
-  gap:10px;
+  justify-content: center;
+  gap:1px;
   font-size: 11px;
 }
 .baja-pill{
   background:#ffe5e5;
   color:#8a1f1f;
-  border:1px solid rgba(138,31,31,.2);
-  padding:7px;
+  border:1px solid rgba(138, 31, 31, 0.363);
+  padding:4px 5px;
   border-radius:18px;
   font-size:10px;
   text-align: center;
   width: 100%;
-  margin: 5%;
+  margin: 2%;
 }
 
 
@@ -1048,15 +1066,15 @@ background-color: #ecececfa !important;
 
 /* Separador por jugador */
 .eliminados-detalle .player-sep td{
-  background:rgba(87, 19, 28, 0.712);
+   background:rgba(248, 132, 132, 0.233) !important;
   padding:0;
-  height:1px;
+  height:0.5px;
   border:0;
 }
 
 /* Total general */
 .eliminados-detalle tfoot .total-general td{
-  background:#fff7f7;
+  background:#d2ecde;
   border-top:2px solid rgba(0,0,0,.08);
   height: 40px;
   align-items: center;
@@ -1068,7 +1086,7 @@ background-color: #ecececfa !important;
 .eliminados-detalle tfoot .total-general td:nth-child(4){
 padding: 5px;
 text-align: center;
-background-color: #d0ecd6;
+background-color: #b1f5bf;
 }
 
 
@@ -2022,17 +2040,95 @@ border-bottom-right-radius: 18px;
 }
 
 
-.planilla tfoot tr td{
-  border-top: 0 !important; /* quita borde en filas intermedias */
+.planilla tfoot tr td:last-child{
+  border-top: none;
+  border-bottom-right-radius: 0%;
+
 }
+
+.planilla  tfoot .tfoot-base-sin-elim{
+position: relative;
+background: linear-gradient(380deg,#6ec585,
+rgba(0, 85, 50, 0.973)) !important;
+gap: 0 !important;
+
+}
+
+.planilla  tfoot .tfoot-base-sin-elim p{
+  
+  font-size: 13px !important;
+  text-align: left !important;
+  margin-left: 8px !important;
+  margin-bottom: 0%;
+  margin: auto;
+  padding: 5px 3px 0px 3px;
+  color: #fffc56;
+  
+}
+.planilla  tfoot td .tfoot-base-sin-elim-note{
+ color: #ffffff !important;
+ font-size: 12px;
+ padding-bottom: 5px;
+ text-align: left;
+ margin-top: 0%;
+margin-left: 8px !important;
+
+}
+
+.planilla  tfoot .tfoot-final-mes{
+  position: relative;
+background: linear-gradient(380deg,#6ec585,
+rgba(0, 85, 50, 0.973)) !important;
+gap: 0 !important;
+
+}
+.planilla  tfoot .tfoot-final-mes p{
+color: #fffc56;
+
+
+}
+
+.planilla  tfoot .tfoot-final-mes p{
+
+  font-size: 13px !important;
+  text-align: right !important;
+  margin-right: 6px !important;
+  margin-bottom: 0%;
+  padding: 8px;
+  margin: auto;
+  
+}
+
+
+.planilla tfoot .tfoot-final-info :first-child{
+ border-bottom-left-radius: 16px !important;
+}
+
+.planilla tfoot .tfoot-final-info :last-child{
+ border-bottom-right-radius: 16px !important;
+}
+
 
 .planilla tfoot tr.tfoot-final-mes td{
-  border-top: 2px solid rgba(0,0,0,.22) !important; /* SOLO la última fila fuerte */
+  border-top: 1px solid rgba(255, 255, 255, 0.863) !important;
 }
-
 .planilla tfoot tr.tfoot-base-sin-elim td{
   border-top: 0 !important;
 }
+
+
+
+.planilla tfoot .tfoot-final-info :nth-child(2){
+font-size:14px;
+ color:#ffffff;
+ text-align: right;
+ margin-left: 3%;
+ text-shadow: -1px 1px 1px black,
+-1px 1px 1px black,-1px 1px 1px black; 
+ padding:16px;
+ margin: 10%;
+}
+
 
 .middle-panel,
 .middle-panel.expanded {
@@ -2298,7 +2394,7 @@ text-shadow: -1px 1px 1px rgba(0,0,0,0.7), -1px 1px 1px rgba(0,0,0,0.7);
   grid-template-columns: repeat(2,1fr);
 grid-template-rows: 3,50px;
   gap: 5px;
-  margin:130px 5px;
+  margin:8.5% 2% 2% 2%;
   padding:  5px;
  
   position: absolute;
@@ -2357,6 +2453,8 @@ grid-row: 2  /  span 1;
 .totals-card{
 grid-column: 1 / span 1;
 grid-row: 2  /  span 1;
+margin-top: 2%;
+padding-bottom: 5% !important;
 }
 
 .totales-item-value{
@@ -2376,9 +2474,89 @@ font-size: 14px;
   .table-mini{ font-size:12px; }
   .table-mini thead th, .table-mini tbody td{ padding:8px;}
 
+
+/* =====  MODAL DE ELIMINADOS ===== */
+.modal{
+align-self: center;
+justify-items: center;
+height: 100dvh;
+}
+
+/* tarjeta */
+.modal-card{
+  width:min(920px, 70vw);
+  max-height:70dvh;
+  justify-self: center;
+  margin-top: 10%;
+}
+
+.modal-head strong{
+margin: auto;
+
+}
+/* botón cerrar modal */
+  .modal-head button:hover {
+  transform: scale(1.5);
+}
+
+
+/* Tabla mini más clara con bordes */
+
+.table-mini thead th{
+  padding:8px 10px;
+}
+
+.table-mini th, .table-mini td{
+  border-right:1px solid rgba(228, 228, 228, 0.37);
+}
+
+
+/* Filas */
+/* Aporte normal */
+
+.player-total strong{
+   font-size: 13px;
+}
+
+.baja-pill{
+  padding:3px 15px;
+  border-radius:18px;
+  font-size:11px !important;
+  width: 70%;
+}
+
+
+
+.deuda-fechas{
+  margin-top:2px;
+  font-size:11px !important;
+  color:#ec3f29;
+  line-height:1.60;
+  opacity:.95;
+  padding-right:12px;
+
+}
+
+
+.deuda-count{
+  font-size:12px;
+}
+
+.eliminados-detalle th:first-child,
+  .eliminados-detalle td.player-cell{
+    width: 45vw;
+    min-width: 180px;
+  }
+
+
+/* Total general */
+.eliminados-detalle tfoot .total-general td{
+  font-size: 14px;
+}
+
+
+
 /* SECCION DE OTROS PARTIDO INFO */
-
-
 .otros-partidos-info-card{
 
  grid-column: 2 / span 1;
@@ -2458,7 +2636,7 @@ text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
 
 .observaciones-container textarea { 
 font-size:14px;
-margin-bottom: 0% !important;
+margin-bottom: 5% !important;
 
 }
 
@@ -2725,6 +2903,11 @@ margin-top: 0%;
   font-size: large !important;
 }
 
+.parcial-totals-mini-help{
+  font-size: 12px !important;
+
+}
+
 .total-parcial-mini,.otros-saldo-mini,.totales-estimado-mini,.totales-finales-mini{
 display:block;
 justify-content: center;
@@ -2733,7 +2916,7 @@ gap: 10px;
 width: 100%;
 height: 100%;
 background-color: #dddfdd6b;
-padding: 20px;
+padding: 5px 20px;
 border-radius: 10px;
 }
 
@@ -2756,63 +2939,59 @@ margin-bottom: 0% !important;
 }
 
 
+.totales-gastos-mini{
+ padding: 5px 20px;
+margin-bottom: 0%;
+}
+
 .totales-aportantes-eliminados{
-align-items: center;
-gap: 5px;
-padding: 4px ;
+justify-content: space-around !important;
+flex-direction: column;
+margin-bottom: 1%;
+gap: 3px;
+padding: 0px ;
 
 }
+
+
 
 
 .totales-aportantes-eliminados h4{
+justify-self: center;
 font-size:15px !important;
 margin-top: 4%;
-margin-bottom: 4% !important; 
+margin-bottom: 2% !important; 
 }
 
+
 .eliminados-div-button{
-  position: relative;
-  display: flex;
-  flex-direction: row;
- top: 0 !important;
-  margin: 0% 2%;
-  gap: 3px !important;
- 
+align-self: center;
+align-content: center;
+align-items: center;
+margin: 0;
+width: 90% !important;
+
 }
 
 .mini-help{ 
-top: 0;
-font-size:13px; 
+padding:15px;
+border-radius: 12px;
+font-size: 12px !important;
+font-weight: bold;
+border: 1px dotted rgba(194, 176, 99, 0.719);
 text-align: left;
-width: 70%;
-margin:2%  0% 4% 0%;  
-  }
-
-
-.totales-aportantes-eliminados span{
-position: absolute;
-color: #00c73c;
-right: 6%;
-margin-bottom: 3%;
-font-weight:bold; 
-font-size: 15px;
-text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
-align-self: center;
+width: 100%;
+margin:1%  0% 9% 0%;
 }
 
+
 .btn-ver-eliminados{
-  
-  position:absolute;
-justify-self: flex-end !important;
-bottom: 23% !important;
-width: 25% !important;
+width: 40% !important;
 padding: 3px 6px;
 right: 0% !important;
 font-size: 12px !important;
 
 }
-
-
 
 
 

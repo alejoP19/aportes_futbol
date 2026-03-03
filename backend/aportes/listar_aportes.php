@@ -686,7 +686,7 @@ echo "<td style='background:#fff7cc;'>
       </td>";
 
 // ✅ OJO: aquí va el TOTAL MES SIN OTROS (55.000)
-echo "<td style='background:#ffffff;'>
+echo "<td>
         <strong>" . number_format($totales_parcial_footer, 0, ',', '.') . "</strong>
       </td>";
 
@@ -700,43 +700,42 @@ echo "</tr>";
 
 // ✅ NUEVO: fila de comparación (SIN ELIMINADOS / SIN OTROS)
 echo "<tr class='tfoot-base-sin-elim'>";
-echo "<td colspan='" . (1 + count($days) + 1 + 2) . "' style='text-align:right; font-weight:bold;'>
-        TOTAL FINAL MES (SIN APORTES ELIMINADOS / SIN OTROS APORTES)
-        <div style='font-size:11px; font-weight:500; opacity:.85; margin-top:3px;'>
-          Nota: esta cifra + <strong>aportes eliminados del mes</strong> = Total Mes (sin otros aportes).
-        </div>
+echo "<td colspan='" . (0 + count($days) + 2 + 2) . "'>
+      <p>TOTAL FINAL MES (Sin Aportes De Tabla Eliminados / Sin Otros Aportes de Ambas Tablas) = </p>
+       <div class='tfoot-base-sin-elim-note'>
+         Suma Esta Cifra Con Los Aportes Eliminados del Mes y Dará el = Total Mes (sin otros aportes de Ambas Tablas).
+     </div> 
       </td>";
 
-echo "<td style='background:#eef4ff;'>
+echo "<td>
         <strong>" . number_format($totales_base_sin_eliminados_footer, 0, ',', '.') . "</strong>
       </td>";
+echo "<td colspan='6'></td>";
 
-echo "<td><strong>" . number_format($saldo_total_footer, 0, ',', '.') . "</strong></td>";
-echo "<td></td><td></td><td></td>";
+
 echo "</tr>";
 
 
 // ===== Fila final: TOTAL FINAL MES CON OTROS (sin tocar eliminados, porque el total parcial ya los incluye) =====
 echo "<tr class='tfoot-final-mes'>";
-echo "<td colspan='" . (1 + count($days) + 1 + 2) . "' style='text-align:right; font-weight:bold;'>
-        TOTAL FINAL MES (CON OTROS APORTES)
+echo "<td colspan='" . (0 + count($days) + 2 + 2) . "'>
+       <p> TOTAL PARCIAL MES (Con Otros Aportes de Ambas Tablas)</p>
       </td>";
 
 echo "<td style='background:#cfeedd;'>
         <strong>" . number_format($totales_final_con_otros_footer, 0, ',', '.') . "</strong>
       </td>";
 
-echo "<td><strong>" . number_format($saldo_total_footer, 0, ',', '.') . "</strong></td>";
-echo "<td></td><td></td><td></td>";
+echo "<td colspan='6'></td>";
 echo "</tr>";
 
 
 // ===== Fila explicativa (si la quieres mantener) =====
-echo "<tr class='tfoot-info'>
-  <td colspan='" . (count($days)+6) . "'></td>
-  <td colspan='3' style='font-size:12px; color:#444; padding-top:6px;'>
-    ✔ Otros juegos del mes (registrados + esporádicos) suman: <strong>$ "
-    . number_format($total_otro_footer,0,',','.')
+echo "<tr class='tfoot-final-info'>
+  <td colspan='" . (count($days)+0) . "'></td>
+  <td colspan='12'>
+    ✔ Eliminados Del Mes Suman un Total de: <strong>$ "
+    . number_format($eliminados_mes_total_footer,0,',','.')
     . "</strong>
   </td>
 </tr>";

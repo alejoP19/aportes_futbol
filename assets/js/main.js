@@ -728,15 +728,15 @@ body.innerHTML = `
                 ${playerCell}
               </td>
               <td colspan="4">
-                Este aportante fue eliminado en este mes, pero <strong>no tiene aportes registrados en ${mes}/${anio}</strong>.<br>
-                Si quieres ver sus aportes, revisa <strong>meses anteriores</strong> en la planilla.
+                Aportante Eliminado Este Mes  (${mes}/${anio}),<br> <strong>Sin Aportes Registrados</strong>.<br>
+                Podrás Ver Sus Aportes de <strong>Meses Anteriores</strong> En Cada Planilla de Cada Mes.
               </td>
               <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
               <td class="right">${renderDeudasCell(p)}</td>
             </tr>
            
             <tr class="player-total">
-              <td><strong>Total Aportes (Normales Del Mes)</strong></td>
+              <td><strong>Total Aportes(Mes)</strong></td>
               <td colspan="3"></td>
               <td class="right"><strong>${formatMoney(p.total_mes || 0)}</strong></td>
               <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
@@ -798,7 +798,7 @@ body.innerHTML = `
 
         const footJugador = `
           <tr class="player-total">
-            <td><strong>Total aportes jugador (normales del mes)</strong></td>
+            <td><strong>Total Aportes</strong></td>
             <td colspan="3"></td>
             <td class="right"><strong>${formatMoney(p.total_mes || 0)}</strong></td>
             <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
