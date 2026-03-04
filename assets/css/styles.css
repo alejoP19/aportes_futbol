@@ -2055,7 +2055,7 @@ gap: 0 !important;
 }
 
 .planilla  tfoot .tfoot-base-sin-elim p{
-  
+  font-weight: bold;
   font-size: 13px !important;
   text-align: left !important;
   margin-left: 8px !important;
@@ -2066,6 +2066,7 @@ gap: 0 !important;
   
 }
 .planilla  tfoot td .tfoot-base-sin-elim-note{
+  font-weight: bold;
  color: #ffffff !important;
  font-size: 12px;
  padding-bottom: 5px;
@@ -2089,7 +2090,7 @@ color: #fffc56;
 }
 
 .planilla  tfoot .tfoot-final-mes p{
-
+font-weight: bold;
   font-size: 13px !important;
   text-align: right !important;
   margin-right: 6px !important;
@@ -2127,6 +2128,7 @@ font-size:14px;
 -1px 1px 1px black,-1px 1px 1px black; 
  padding:16px;
  margin: 10%;
+ font-weight: bold;
 }
 
 

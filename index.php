@@ -184,11 +184,11 @@ include "conexion.php";
         <h4 class="parcial-tot-title">Totales (COP)</h4>
         <div class="total-parcial-mini">
           <div class="parcial-totals-mini-help">Total Parcial Mes Suma: <br>
-             - Los Aportes de Cada Día (Miercoles / Sabado) <br>
-             - Aportes de (Cada Dia) la Columna Otro Juego de Ambas Planillas; Seleciona Cada Dia  de Los Registros en Tabla: Datos Columna Otro Juego para Corroborar. <br>
-          
-             - Incluye Aportes y Otros Aportes de Los Jugadores Eliminados; Estos se Pueden Ver en La Sección de Aportantes Eliminados Este Mes (Ver Detalle).
-        
+            - Los Aportes de Cada Día (Miercoles / Sabado) <br>
+            - Aportes de (Cada Dia) la Columna Otro Juego de Ambas Planillas; Seleciona Cada Dia de Los Registros en Tabla: Datos Columna Otro Juego para Corroborar. <br>
+
+            - Incluye Aportes y Otros Aportes de Los Jugadores Eliminados; Estos se Pueden Ver en La Sección de Aportantes Eliminados Este Mes (Ver Detalle).
+
 
           </div>
           <div class="total-parcial-mini-items">
@@ -202,8 +202,6 @@ include "conexion.php";
             <strong id="tParcialAnio" class="totales-item-value">$ 0</strong>
           </div>
         </div>
-
-
         <hr style="opacity:.25; margin:1px 0;">
         <div class="otros-saldo-mini">
           <div class="otros-aportes-items">
@@ -218,41 +216,21 @@ include "conexion.php";
             <strong id="tOtrosAnio" class="totales-item-value">$ 0</strong>
           </div>
 
-          <div class="otros-aportes-items">
-            <span> Saldos Actuales De Aportantes: </span>
-            <small>(Hasta Este Mes)</small>
-            <strong id="tSaldoTotal" class="totales-item-value">$ 0</strong>
-          </div>
         </div>
-
         <hr style="opacity:.25; margin:1px 0;">
         <div class="totales-aportantes-eliminados">
           <h4>Aportes De Aportantes Eliminados </h4>
           <div class="eliminados-div-button">
             <div class="mini-help"> - Aportantes Eliminados No Aparecen en Planilla <br> - Sus Aportes y Saldos Siguen Sumando en Totales Parciales. <br>
-               - Pueden Verse En la Tabla Aportes Eliminados </div>
-               <!-- <div> Solo Informativo Ya está Sumando en Total Parcial.</div> -->
-              
+              - Pueden Verse En la Tabla Aportes Eliminados </div>
+            <!-- <div> Solo Informativo Ya está Sumando en Total Parcial.</div> -->
+
             <!-- <span id="totalEliminadosMes"></span> -->
             <button type="button" id="btnVerEliminados" class="btn-ver-eliminados">Ver detalle</button>
           </div>
         </div>
 
-        <hr style="opacity:.25; margin:1px 0;">
-        <div class="totales-estimado-mini">
 
-          <div class="totales-estimado-mini-items">
-            <span>Total Estimado Mes</span>
-            <small>(Total Parcial Mes + Saldos (Actual), Sin gastos):</small>
-            <strong id="tEstimadoMes" class="totales-item-value">$ 0</strong>
-          </div>
-
-          <div class="totales-estimado-mini-items">
-            <span>Total Estimado Año</span>
-            <small>(Total Parcial Año + Saldos(Actual), Sin gastos):</small>
-            <strong id="tEstimadoAnio" class="totales-item-value">$ 0</strong>
-          </div>
-        </div>
 
         <hr style="opacity:.25; margin:1px 0;">
         <div class="totales-gastos-mini">
@@ -269,17 +247,78 @@ include "conexion.php";
         <hr style="opacity:.25; margin:1px 0;">
         <div class="totales-finales-mini">
           <div class="totales-finales-mini-item">
-            <span>Total Final Mes</span>
-            <small>(Total Estimado Mes - gastos)</small>
+            <span>Total Estimado Final Mes</span>
+            <small>(Total Parcial Mes - gastos / Sumable Por Mes / Sin Saldos)</small>
             <strong id="tFinalMes" class="totales-item-value">$ 0</strong>
           </div>
           <div class="totales-finales-mini-item">
-            <span>Total Final Año </span>
-            <small>(Total Estimado Mes - gastos)</small>
+            <span>Total Estimado Final Año</span>
+            <small>(Total Parcial Mes - gastos / Sumable Por Mes / Sin Saldos)</small>
             <strong id="tFinalAnio" class="totales-item-value">$ 0</strong>
           </div>
         </div>
 
+       
+          <div class="totales-estimado-mini">
+            <div class="otros-aportes-items">
+              <span>Saldos Actuales De Aportantes (De Este Mes)</span>
+              <small>(Saldo Mes / Delta)</small>
+              <strong id="tSaldoMes" class="totales-item-value">$ 0</strong>
+            </div>
+
+            <div class="otros-aportes-items">
+              <span>Saldos Actuales De Aportantes (Acumulado Hasta Este Mes)</span>
+              <small>(Saldo Acumulado / Foto)</small>
+              <strong id="tSaldoTotal" class="totales-item-value">$ 0</strong>
+            </div>
+          
+
+        </div>
+        <hr style="opacity:.25; margin:1px 0;">
+        <div class="totales-finales-mini">
+          
+           <!-- CON SALDO DEL MES (SUMABLE) -->
+  <div class="totales-finales-mini-item">
+    <span>Total Final Mes (con saldo del mes)</span>
+    <small>(Total Estimado Final Mes + Saldo de este mes)</small>
+    <strong id="tFinalMesConSaldoMes" class="totales-item-value">$ 0</strong>
+  </div>
+
+  <div class="totales-finales-mini-item">
+    <span>Total Final Año (con saldo del mes)</span>
+    <small>(Total Estimado Final Año + Suma de saldos mensuales)</small>
+    <strong id="tFinalAnioConSaldoMes" class="totales-item-value">$ 0</strong>
+  </div>
+
+          <hr style="opacity:.25; margin:8px 0;">
+
+  <!-- CON SALDO ACUMULADO (FOTO) -->
+  <div class="totales-finales-mini-item">
+    <span>Total Final Mes (con saldo acumulado)</span>
+    <small>(Total Estimado Final Mes + Saldo acumulado)</small>
+    <strong id="tFinalMesConSaldo" class="totales-item-value">$ 0</strong>
+  </div>
+
+  <div class="totales-finales-mini-item">
+    <span>Total Final Año (con saldo acumulado)</span>
+    <small>(Total Estimado Final Año + Saldo acumulado)</small>
+    <strong id="tFinalAnioConSaldo" class="totales-item-value">$ 0</strong>
+  </div>
+
+  <p style="margin:6px 0 0; font-size:.85em; opacity:.85;">
+    Nota: El “saldo acumulado” es una foto al corte. Si sumas los totales acumulados mes a mes, duplicas saldos anteriores.
+    Para sumar meses usa “saldo del mes”.
+  </p>
+        </div>
+        <hr style="opacity:.25; margin:1px 0;">
+        <div class="totales-finales-mini">
+          <div class="totales-finales-mini-item">
+  <span>Total Final Año (suma de meses con saldo acumulado)</span>
+  <small>(Cuadra si sumas los totales mensuales “con saldo acumulado”)</small>
+  <strong id="final_anio_con_saldo_acumulado_sumado" class="totales-item-value">$ 0</strong>
+</div>
+<p>Nota: este valor duplica saldos anteriores; es solo para que cuadre con la suma manual mes a mes.</p>
+        </div>
         <div id="modalEliminados" class="modal hidden">
           <div class="modal-card">
             <div class="modal-head">

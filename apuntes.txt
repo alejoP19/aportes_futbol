@@ -439,24 +439,29 @@ te explico, el reporte debe traer la tabla principal con las
 
 
 
-
-
-
-29.539.418
-25/06/1981
-3227122977
-marialiliaperezdiaz@gmail.com
+BUG --> 
 
 
 
 
+bueno , ahora o nada , se rompió todo: te envio el get_totals.php --- con tus ajustes (quitar lo que ya no se necesite); pero entonces que necesitamos?, necesitamos:
+
+1. Totales parciales mensuales con otros aportes (sin saldos), de ambas tablas 
+2. Otros Aportes Mes (Solo Informativo): 
+3. Otros Aportes Año (Solo Informativo): 
+4. Gastos del Mes: $
+5. Gastos del Año: $
+6. totlaes Estimados finales mensuales y anuales (sin saldos) ; es decir , despues de restar totales parciales menos gastos
+7. totales final  mensuales (sin saldo)
+8.  totales final anual (sin saldo)
+9. Saldos Actuales De Aportantes: (Hasta Este Mes). 
+10. total fnal  mensual (con saldo) 
+11. total anual l (con saldo)
 
 
 
 
-BUG --> Al eliminar un aportante con saldos, el saldo no se actualiza en el informativo 
-la seccion aportantes eliminados de ste mes sin refrescar la página
-
+otra opcion es mostrar dos saldos cada mes, ejemplo: Enero: Saldos Actuales De Aportantes (De Este Mes) :$ 1.000 Saldos Actuales De Aportantes (Acumulado Hasta Este Mes) :$ 1.000 Febrero: Saldos Actuales De Aportantes (De Este Mes) :$ 1.000 Saldos Actuales De Aportantes (Acumulado Hasta Este Mes) :$ 2.000 y en el total final mes se pone el toolip --> Suma solo el saldo mensual no el acumulado
 
 
 

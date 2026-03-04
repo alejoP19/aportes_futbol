@@ -583,95 +583,121 @@ async function loadTotals(mes, anio) {
   if (!j || !j.ok) return;
 
   // Parciales
-  document.getElementById("tParcialMes").innerText = formatMoney(j.parcial_mes);
+  document.getElementById("tParcialMes").innerText  = formatMoney(j.parcial_mes);
   document.getElementById("tParcialAnio").innerText = formatMoney(j.parcial_anio);
 
-  // Otros + Saldo
-  document.getElementById("tOtrosMes").innerText = formatMoney(j.otros_mes);
+  // Otros
+  document.getElementById("tOtrosMes").innerText  = formatMoney(j.otros_mes);
   document.getElementById("tOtrosAnio").innerText = formatMoney(j.otros_anio);
+
+  // Gastos
+  document.getElementById("tGastosMes").innerText  = formatMoney(j.gastos_mes);
+  document.getElementById("tGastosAnio").innerText = formatMoney(j.gastos_anio);
+
+  // Estimado final SIN saldo (sumable)
+  document.getElementById("tFinalMes").innerText  = formatMoney(j.final_neto_mes);
+  document.getElementById("tFinalAnio").innerText = formatMoney(j.final_anio_neto);
+
+  // ====== SALDOS (2) ======
+  const sMes = document.getElementById("tSaldoMes");
+  if (sMes) sMes.innerText = formatMoney(j.saldo_mes);
+
+  // saldo acumulado (ya existía)
   document.getElementById("tSaldoTotal").innerText = formatMoney(j.saldo_total);
 
-  // Estimados
-  document.getElementById("tEstimadoMes").innerText = formatMoney(j.estimado_mes);
-  document.getElementById("tEstimadoAnio").innerText = formatMoney(j.estimado_anio);
+  // ====== TOTALES FINALES (4) ======
 
-  // Finales
-  document.getElementById("tFinalMes").innerText = formatMoney(j.final_mes);
-  document.getElementById("tFinalAnio").innerText = formatMoney(j.final_anio);
+  // con saldo del mes (sumable)
+  const fmMes = document.getElementById("tFinalMesConSaldoMes");
+  if (fmMes) fmMes.innerText = formatMoney(j.final_mes_con_saldo_mes);
 
-  // (opcional) si quieres seguir mostrando gastos
-  const gMes = document.getElementById("tGastosMes");
-  if (gMes) gMes.innerText = formatMoney(j.gastos_mes);
+  const faMes = document.getElementById("tFinalAnioConSaldoMes");
+  if (faMes) faMes.innerText = formatMoney(j.final_anio_con_saldo_mes);
 
-  const gAnio = document.getElementById("tGastosAnio");
-  if (gAnio) gAnio.innerText = formatMoney(j.gastos_anio);
+  // con saldo acumulado (foto) - tus IDs existentes
+  const fMesFoto = document.getElementById("tFinalMesConSaldo");
+  if (fMesFoto) fMesFoto.innerText = formatMoney(j.final_mes_con_saldo);
 
-  // tarjeta eliminados del mes (si la usas)
-  // const el = document.getElementById("totalEliminadosMes");
-  // if (el) el.innerText = formatMoney(j.eliminados_mes_total || );
+  const fAnioFoto = document.getElementById("tFinalAnioConSaldo");
+  if (fAnioFoto) fAnioFoto.innerText = formatMoney(j.final_anio_con_saldo);
+
+  // (si mantienes tu bloque "Resultado suma meses", puedes seguir pintándolo)
+  const fMesSum = document.getElementById("final_mes_con_saldo_sumable");
+  if (fMesSum) fMesSum.innerText = formatMoney(j.final_con_saldo_mes_sumable);
+
+  const fAnioSum = document.getElementById("final_anio_con_saldo_sumable");
+  if (fAnioSum) fAnioSum.innerText = formatMoney(j.final_anio_con_saldo_sumable);
+
+  const fAnioAcumSum = document.getElementById("final_anio_con_saldo_acumulado_sumado");
+if (fAnioAcumSum) fAnioAcumSum.innerText = formatMoney(j.final_anio_con_saldo_acumulado_sumado);
 }
 
 
-// cache global (si no existe aún)
-window.__eliminadosMesCache = window.__eliminadosMesCache || null;
 
-async function cargarEliminadosMes(mes, anio) {
-  const el = document.getElementById("totalEliminadosMes");
-  const btn = document.getElementById("btnVerEliminados");
+// ================================
+// ELIMINADOS (MODAL) - FIX DEFINITIVO
+// ================================
+window.__eliminadosMesCache = window.__eliminadosMesCache || {}; // { "2026-2": data }
+
+function keyElim(anio, mes) {
+  return `${parseInt(anio, 10)}-${parseInt(mes, 10)}`;
+}
+
+async function fetchEliminadosMes(mes, anio) {
+  const mesN = parseInt(mes, 10);
+  const anioN = parseInt(anio, 10);
+  const url = `${API}/aportantes/get_eliminados_mes.php?mes=${mesN}&anio=${anioN}`;
+
+  const r = await fetch(url, { cache: "no-store", credentials: "include" });
+  const txt = await r.text();
+
+  let data;
+  try {
+    data = JSON.parse(txt);
+  } catch (e) {
+    console.error("Respuesta NO JSON get_eliminados_mes.php:", { url, status: r.status, txt });
+    throw e;
+  }
+  return data;
+}
+
+function renderModalEliminados(data, mes, anio) {
+  // 👇 OJO: SIEMPRE re-tomar elementos del DOM (por si loadSheet reemplazó algo)
   const modal = document.getElementById("modalEliminados");
-  const body = document.getElementById("modalEliminadosBody");
-  const close = document.getElementById("closeModalEliminados");
+  const body  = document.getElementById("modalEliminadosBody");
+  if (!modal || !body) return;
 
-  // Si el bloque no existe en este HTML, salir sin romper nada
-  if (!btn || !modal || !body || !close) return;
+  const players = Array.isArray(data.players) ? data.players : [];
+  const rows = Array.isArray(data.rows) ? data.rows : [];
 
-  // ✅ Bind del click SOLO una vez
-  if (!btn.dataset.bound) {
-    btn.dataset.bound = "1";
+  if (!players.length) {
+    body.innerHTML = `<div style="opacity:.85;">No hubo eliminados en este mes.</div>`;
+    modal.classList.remove("hidden");
+    modal.classList.remove("closing");
+    return;
+  }
 
-    btn.addEventListener("click", () => {
-      const data = window.__eliminadosMesCache;
+  // agrupar filas por jugador
+  const rowsByPlayer = new Map();
+  for (const r of rows) {
+    const k = String(r.jugador_id);
+    if (!rowsByPlayer.has(k)) rowsByPlayer.set(k, []);
+    rowsByPlayer.get(k).push(r);
+  }
 
-      if (!data || !data.ok) {
-        body.innerHTML = `<div style="opacity:.85;">No hay información disponible de eliminados para este mes.</div>`;
-        modal.classList.remove("hidden");
-        return;
-      }
-
-      const players = Array.isArray(data.players) ? data.players : [];
-      const rows = Array.isArray(data.rows) ? data.rows : [];
-
-      if (!players.length) {
-        body.innerHTML = `<div style="opacity:.85;">No hubo eliminados en este mes.</div>`;
-        modal.classList.remove("hidden");
-        return;
-      }
-
-      // agrupar filas por jugador_id
-      const rowsByPlayer = new Map();
-      for (const r of rows) {
-        const k = String(r.jugador_id);
-        if (!rowsByPlayer.has(k)) rowsByPlayer.set(k, []);
-        rowsByPlayer.get(k).push(r);
-      }
-
-      // ✅ helper: celda de deudas con scroll (muestra cantidad + fechas)
-      const renderDeudasCell = (p) => {
-        const total = Number(p.deudas_total || 0);
-        const fechas = Array.isArray(p.deudas_fechas) ? p.deudas_fechas : [];
-
-        if (!total) return `<span style="opacity:.75;">0</span>`;
-
-        return `
+  const renderDeudasCell = (pp) => {
+    const total = Number(pp.deudas_total || 0);
+    const fechas = Array.isArray(pp.deudas_fechas) ? pp.deudas_fechas : [];
+    if (!total) return `<span style="opacity:.6;">0</span>`;
+    return `
       <div class="deuda-cell">
         <div class="deuda-count"><strong>${total}</strong></div>
-        <div class="deuda-fechas">
-          ${fechas.map(escapeHtml).join("<br>")}
-        </div>
+        <div class="deuda-fechas">${fechas.map(escapeHtml).join("<br>")}</div>
       </div>
     `;
-      };
-body.innerHTML = `
+  };
+
+  body.innerHTML = `
 <div class="table-container">
   <table class="table-mini eliminados-detalle">
     <thead>
@@ -689,28 +715,14 @@ body.innerHTML = `
     <tbody>
       ${players.map(p => {
         const pr = rowsByPlayer.get(String(p.id)) || [];
+
+        const baja = (p.fecha_baja || "");
+        const bajaObj = baja ? new Date(baja + "T00:00:00") : null;
+        const bajaMes  = bajaObj ? (bajaObj.getMonth() + 1) : null;
+        const bajaAnio = bajaObj ? bajaObj.getFullYear() : null;
+        const bajaInfo = (bajaMes && bajaAnio) ? `${bajaMes}/${bajaAnio}` : "sin fecha";
         const fechaBaja = escapeHtml(p.fecha_baja || "");
 
-        // helper deudas (scroll)
-       const renderDeudasCell = (pp) => {
-  const total = Number(pp.deudas_total || 0);
-  const fechas = Array.isArray(pp.deudas_fechas) ? pp.deudas_fechas : [];
-
-  if (!total) {
-    return `<span style="opacity:.6;">0</span>`;
-  }
-
-  return `
-    <div class="deuda-cell">
-      <div class="deuda-count">${total}</div>
-      <div class="deuda-fechas">
-        ${fechas.map(escapeHtml).join("<br>")}
-      </div>
-    </div>
-  `;
-};
-
-        // ✅ celda del jugador (se usa como rowspan en la 1ra fila)
         const playerCell = `
           <div class="player-title">
             <strong>${escapeHtml(p.nombre || "")}</strong>
@@ -718,23 +730,19 @@ body.innerHTML = `
           </div>
         `;
 
-        // ==========================
-        // SIN MOVIMIENTOS (fila única)
-        // ==========================
+        // sin movimientos
         if (!pr.length) {
           return `
             <tr class="row-empty">
-              <td class="player-cell">
-                ${playerCell}
-              </td>
-              <td colspan="4">
-                Aportante Eliminado Este Mes  (${mes}/${anio}),<br> <strong>Sin Aportes Registrados</strong>.<br>
-                Podrás Ver Sus Aportes de <strong>Meses Anteriores</strong> En Cada Planilla de Cada Mes.
+              <td class="player-cell">${playerCell}</td>
+              <td colspan="4" style="opacity:.85;">
+                Este aportante fue eliminado en <strong>${bajaInfo}</strong>, pero <strong>no tiene aportes registrados en ${mes}/${anio}</strong>.<br>
+                Si quieres ver sus aportes, revisa <strong>meses anteriores</strong> en la planilla.
               </td>
               <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
               <td class="right">${renderDeudasCell(p)}</td>
             </tr>
-           
+
             <tr class="player-total">
               <td><strong>Total Aportes(Mes)</strong></td>
               <td colspan="3"></td>
@@ -742,36 +750,27 @@ body.innerHTML = `
               <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
               <td></td>
             </tr>
+
             <tr class="player-sep"><td colspan="7"></td></tr>
           `;
         }
 
-        // ==========================
-        // CON MOVIMIENTOS
-        // ==========================
+        // con movimientos
         const rowsHtml = pr.map((r, i) => {
           const isLast = i === pr.length - 1;
-
           const cls = (r.kind === "otro") ? "row-otro" : "row-normal";
           const labelHtml = r.label ? `<div class="row-label">${escapeHtml(r.label)}</div>` : "";
 
-          // saldo + deudas solo en última fila
-          const saldoHtml = isLast ? `<strong>${formatMoney(p.saldo_fin_mes || 0)}</strong>` : "";
+          const saldoHtml  = isLast ? `<strong>${formatMoney(p.saldo_fin_mes || 0)}</strong>` : "";
           const deudasHtml = isLast ? renderDeudasCell(p) : "";
 
-          // ✅ primera fila: incluye la celda del jugador con rowspan
           if (i === 0) {
             return `
-                 <tr class="player-sep"><td colspan="7"></td></tr>
+              <tr class="player-sep"><td colspan="7"></td></tr>
               <tr class="${cls}">
-                <td class="player-cell" rowspan="${pr.length}">
-                  ${playerCell}
-                </td>
+                <td class="player-cell" rowspan="${pr.length}">${playerCell}</td>
                 <td>${r.n}</td>
-                <td>
-                  ${escapeHtml(r.fecha || "")}
-                  ${labelHtml}
-                </td>
+                <td>${escapeHtml(r.fecha || "")}${labelHtml}</td>
                 <td class="right">${formatMoney(r.cantidad || 0)}</td>
                 <td class="right">${formatMoney(r.total || 0)}</td>
                 <td class="right">${saldoHtml}</td>
@@ -780,14 +779,10 @@ body.innerHTML = `
             `;
           }
 
-          // ✅ siguientes filas: ya NO llevan la 1ra columna
           return `
             <tr class="${cls}">
               <td>${r.n}</td>
-              <td>
-                ${escapeHtml(r.fecha || "")}
-                ${labelHtml}
-              </td>
+              <td>${escapeHtml(r.fecha || "")}${labelHtml}</td>
               <td class="right">${formatMoney(r.cantidad || 0)}</td>
               <td class="right">${formatMoney(r.total || 0)}</td>
               <td class="right">${saldoHtml}</td>
@@ -822,72 +817,81 @@ body.innerHTML = `
     </tfoot>
   </table>
 </div>
-`;
-      modal.classList.remove("hidden");
-    });
+  `;
 
-    function closeModal() {
-      if (modal.classList.contains("hidden")) return;
-      if (modal.classList.contains("closing")) return;
+  // abrir limpio
+  modal.classList.remove("closing");
+  modal.classList.remove("hidden");
+}
 
-      modal.classList.add("closing");
+// Bind UNA SOLA VEZ (y sin closures de mes/año)
+(function initEliminadosModalOnce(){
+  const btn = document.getElementById("btnVerEliminados");
+  if (!btn || btn.dataset.bound) return;
+  btn.dataset.bound = "1";
 
-      const card = modal.querySelector(".modal-card");
-      const DUR = 650; // un poquito > 600ms
+  btn.addEventListener("click", async () => {
+    const mesNow = parseInt(monthSelect.value, 10);
+    const anioNow = parseInt(yearSelect.value, 10);
+    const k = keyElim(anioNow, mesNow);
 
-      let done = false;
-      const finish = () => {
-        if (done) return;
-        done = true;
-        modal.classList.add("hidden");
-        modal.classList.remove("closing");
-        if (card) card.removeEventListener("animationend", onEnd);
-      };
-
-      const onEnd = (e) => {
-        if (e.target !== card) return;
-        finish();
-      };
-
-      if (card) card.addEventListener("animationend", onEnd);
-      setTimeout(finish, DUR);
-    }
-
-    close.onclick = closeModal;
-    modal.onclick = (e) => { if (e.target === modal) closeModal(); };
-    document.addEventListener("keydown", (ev) => {
-      if (ev.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
-    });
-
-  }
-
-  // ✅ Cargar data
-  try {
-    const url = `${API}/aportantes/get_eliminados_mes.php?mes=${mes}&anio=${anio}`;
-    const r = await fetch(url, { cache: "no-store", credentials: "include" });
-
-    const text = await r.text();
-
-    let data;
     try {
-      data = JSON.parse(text);
+      // si no está cacheado, lo trae ahora mismo
+      if (!window.__eliminadosMesCache[k]) {
+        window.__eliminadosMesCache[k] = await fetchEliminadosMes(mesNow, anioNow);
+      }
+      renderModalEliminados(window.__eliminadosMesCache[k], mesNow, anioNow);
     } catch (e) {
-      console.error("Respuesta NO JSON desde get_eliminados_mes.php:\n", text);
-      throw e;
+      console.error("Error eliminados:", e);
+      const modal = document.getElementById("modalEliminados");
+      const body  = document.getElementById("modalEliminadosBody");
+      if (body) body.innerHTML = `<div style="opacity:.85;">Error cargando eliminados. Revisa consola.</div>`;
+      if (modal) { modal.classList.remove("closing"); modal.classList.remove("hidden"); }
     }
+  });
 
-    window.__eliminadosMesCache = data;
+  // cerrar (simple y estable)
+  const close = document.getElementById("closeModalEliminados");
+  document.addEventListener("click", (e) => {
+    const modal = document.getElementById("modalEliminados");
+    if (!modal) return;
 
-    // total en la tarjeta
+    if (e.target === close || e.target === modal) {
+      modal.classList.add("hidden");
+      modal.classList.remove("closing");
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const modal = document.getElementById("modalEliminados");
+    if (!modal) return;
+    modal.classList.add("hidden");
+    modal.classList.remove("closing");
+  });
+})();
+
+// Esta función la sigues llamando desde refreshSheet() para:
+// - precargar cache
+// - actualizar total en la tarjeta
+async function cargarEliminadosMes(mes, anio) {
+  const el = document.getElementById("totalEliminadosMes");
+  const mesN = parseInt(mes, 10);
+  const anioN = parseInt(anio, 10);
+  const k = keyElim(anioN, mesN);
+
+  try {
+    const data = await fetchEliminadosMes(mesN, anioN);
+    window.__eliminadosMesCache[k] = data;
+
     const totalMes = data?.totales?.eliminados_mes || 0;
     if (el) el.textContent = formatMoney(totalMes);
-
-  } catch (err) {
-    window.__eliminadosMesCache = { ok: false };
+  } catch (e) {
+    window.__eliminadosMesCache[k] = { ok:false };
     if (el) el.textContent = formatMoney(0);
-    console.warn("No se pudo leer eliminados_mes:", err);
   }
 }
+
 
 // ----------- REFRESH COMPLETA -----------------
 
