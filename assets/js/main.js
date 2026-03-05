@@ -594,42 +594,19 @@ async function loadTotals(mes, anio) {
   document.getElementById("tGastosMes").innerText  = formatMoney(j.gastos_mes);
   document.getElementById("tGastosAnio").innerText = formatMoney(j.gastos_anio);
 
-  // Estimado final SIN saldo (sumable)
+  // Finales SIN saldos (sumables)
   document.getElementById("tFinalMes").innerText  = formatMoney(j.final_neto_mes);
   document.getElementById("tFinalAnio").innerText = formatMoney(j.final_anio_neto);
 
-  // ====== SALDOS (2) ======
+  // Saldos
   const sMes = document.getElementById("tSaldoMes");
   if (sMes) sMes.innerText = formatMoney(j.saldo_mes);
 
-  // saldo acumulado (ya existía)
   document.getElementById("tSaldoTotal").innerText = formatMoney(j.saldo_total);
 
-  // ====== TOTALES FINALES (4) ======
-
-  // con saldo del mes (sumable)
-  const fmMes = document.getElementById("tFinalMesConSaldoMes");
-  if (fmMes) fmMes.innerText = formatMoney(j.final_mes_con_saldo_mes);
-
-  const faMes = document.getElementById("tFinalAnioConSaldoMes");
-  if (faMes) faMes.innerText = formatMoney(j.final_anio_con_saldo_mes);
-
-  // con saldo acumulado (foto) - tus IDs existentes
-  const fMesFoto = document.getElementById("tFinalMesConSaldo");
-  if (fMesFoto) fMesFoto.innerText = formatMoney(j.final_mes_con_saldo);
-
-  const fAnioFoto = document.getElementById("tFinalAnioConSaldo");
-  if (fAnioFoto) fAnioFoto.innerText = formatMoney(j.final_anio_con_saldo);
-
-  // (si mantienes tu bloque "Resultado suma meses", puedes seguir pintándolo)
-  const fMesSum = document.getElementById("final_mes_con_saldo_sumable");
-  if (fMesSum) fMesSum.innerText = formatMoney(j.final_con_saldo_mes_sumable);
-
-  const fAnioSum = document.getElementById("final_anio_con_saldo_sumable");
-  if (fAnioSum) fAnioSum.innerText = formatMoney(j.final_anio_con_saldo_sumable);
-
-  const fAnioAcumSum = document.getElementById("final_anio_con_saldo_acumulado_sumado");
-if (fAnioAcumSum) fAnioAcumSum.innerText = formatMoney(j.final_anio_con_saldo_acumulado_sumado);
+  // ✅ Total real hasta la fecha (neto acumulado + saldo acumulado)
+  const tReal = document.getElementById("tTotalRealHastaFecha");
+  if (tReal) tReal.innerText = formatMoney(j.total_real_hasta_fecha);
 }
 
 
@@ -671,7 +648,7 @@ function renderModalEliminados(data, mes, anio) {
   const rows = Array.isArray(data.rows) ? data.rows : [];
 
   if (!players.length) {
-    body.innerHTML = `<div style="opacity:.85;">No hubo eliminados en este mes.</div>`;
+    body.innerHTML = `<div style="opacity:.85;">No Hubo Eliminados Este Mes.</div>`;
     modal.classList.remove("hidden");
     modal.classList.remove("closing");
     return;

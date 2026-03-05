@@ -46,6 +46,7 @@ text-align: center;
 border-top-left-radius: 0px;
 border-top-right-radius: 0px;
 align-items: center;
+width: 100%;
 }
 
 .brand { 
@@ -559,10 +560,15 @@ border: 1px solid   rgba(194, 198, 202, 0.95);
 } */
 
 
-.total-parcial-mini small,.otros-saldo-mini small,.totales-estimado-mini small,
+.total-parcial-mini small,.total-parcial-mini-items,  small,.otros-saldo-mini small,.totales-estimado-mini small,
 .totales-finales-mini small{
   font-size: 11px !important;
   color: #006b30;
+}
+.saldos-items small{
+  font-size: 11px !important;
+  color:rgb(151, 111, 0);
+
 }
 .totales-item-value{
 display: flex;
@@ -576,8 +582,19 @@ text-shadow: -1px 1px 1px rgb(0, 0, 0),
 -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
 
 }
+
+.parcial-totals-mini-help h6{
+color: rgba(255, 174, 0, 0.952) !important;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0) !important;
+font-size: 15px;
+text-align: center;
+margin-top: 2% !important;
+padding-bottom: 3% !important;
+
+}
+
 .parcial-totals-mini-help{
-display: flex;
 text-align: left;
 opacity:.98;
 margin:4% 2% 10% 2%; 
@@ -593,18 +610,32 @@ font-style: oblique;
 font-size: 13px !important;
 }
 
-.total-parcial-mini,.otros-saldo-mini,.totales-estimado-mini,.totales-finales-mini{
+
+.parcial-totals-mini-help,.total-parcial-mini,.total-parcial-mini-items,.otros-saldo-mini,.totales-estimado-mini,.saldos-mini,.totales-finales-mini{
 display:block;
 justify-content: center;
 align-items: center;
 gap: 10px;
 width: 100%;
 height: 100%;
-background-color: #dddfdd6b;
+background-color: #d1e6d19a;
 padding: 20px;
 border-radius: 10px;
 }
-.total-parcial-mini  span,.otros-saldo-mini  span,.totales-estimado-mini span,
+.total-parcial-mini{
+border: 1px dotted rgb(151, 141, 0);
+}
+.total-parcial-mini-items{
+border: 1px dotted rgb(0, 151, 45);
+}
+.otros-saldo-mini{
+border: 1px dotted rgb(0, 151, 126);
+background-color: #99b2c75e;
+}
+.saldos-mini{
+  border: 1px dotted rgb(151, 128, 0);
+}
+.total-parcial-mini  span,.total-parcial-mini-items,  span,.otros-saldo-mini  span,.totales-estimado-mini span,
 .totales-gastos-mini span,.totales-finales-mini span{
 color: #000;
 font-size: 15px;
@@ -647,7 +678,7 @@ justify-self: flex-end;
 }
 
 .totales-gastos-mini{
-  background: rgba(253, 113, 132, 0.144);
+  background: rgba(248, 159, 170, 0.486);
   border: 1px solid rgba(170, 103, 107, 0.363);
 }
  .gastos-item{
@@ -671,8 +702,8 @@ gap: 5px;
 padding: 4px ;
 border-radius: 12px;
 margin-bottom: 2%;
-background: rgba(238, 238, 238, 0.644);
-border: 1px solid rgba(250, 237, 116, 0.308);
+background: rgba(245, 221, 221, 0.644);
+border: 1px solid rgba(252, 35, 64, 0.308);
 }
 
 .totales-aportantes-eliminados h4{
@@ -695,11 +726,9 @@ margin-bottom: 2% !important;
 }
 
 .mini-help{ 
- display: flex;
-  font-size:13px; 
-text-align: center;
-  opacity:.95;
-   margin:4% 2% 25% 2%; 
+text-align: left;
+opacity:.98;
+margin:4% 2% 10% 2%; 
 color: rgba(114, 106, 1, 0.952) !important;
 text-shadow: -1px 1px 1px rgb(247, 247, 247),
 -1px 1px 1px rgb(255, 255, 255);
@@ -708,8 +737,8 @@ background-color: #ffffff85;
 padding:10px;
 border-radius: 12px;
 font-weight: bold;
-
 font-style: oblique;
+font-size: 13px !important;
 
   
   }
@@ -1092,7 +1121,6 @@ background-color: #b1f5bf;
 
 
 /* SECCION DE OTROS PARTIDO INFO */
-
 
 .otros-partidos-container-table{
 overflow:auto;
@@ -1525,7 +1553,7 @@ text-shadow: -1px 1px 1px black, -1px 1px 1px black, -1px 1px 1px black;
   border-radius: 10px;
   box-shadow: 0 6px 16px rgba(0,0,0,0.15);
   z-index: 90;
-  margin-bottom: 1%;
+
 
 }
 
@@ -1611,7 +1639,7 @@ font-style:italic;
   overflow: visible !important;
   min-width: 96%; 
   width: 96%;
-  top: 10%;
+  top: 13%;
   border-collapse: collapse; 
   min-height: fit-content;
 }
@@ -2907,7 +2935,21 @@ margin-top: 0%;
 
 .parcial-totals-mini-help{
   font-size: 12px !important;
+  flex-direction: column;
 
+}
+
+.total-parcial-mini{
+display:flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+gap: 10px;
+width: 100%;
+height: 100%;
+background-color: #dddfdd6b;
+padding: 5px 20px;
+border-radius: 10px;
 }
 
 .total-parcial-mini,.otros-saldo-mini,.totales-estimado-mini,.totales-finales-mini{
