@@ -111,7 +111,7 @@ include "conexion.php";
       </div>
 
 
-      <div class="otros-aportes-card">
+      <div class="showing-otros-aportes">
         <h4>Agregar Otro Aporte</h4>
         <label for="selectPlayerOtros">¿Quién va a Aportar?</label>
         <select id="selectPlayerOtros"></select>
@@ -182,128 +182,128 @@ include "conexion.php";
     <aside class="right-panel">
       <div class="totals-card">
         <h4 class="parcial-tot-title">Totales (COP)</h4>
-        <div class="total-parcial-mini">
-          <div class="parcial-totals-mini-help">
-            <h6> Total Parcial Mes Incluye: </h6> <br>
-            <strong style="color: rgba(255, 174, 0, 0.952); text-shadow:-1px 1px 1px black;">-</strong> Aportes de Cada Partido (Miercoles / Sabado) de Ambas Planillas <br>
-            <strong style="color: rgba(255, 174, 0, 0.952); text-shadow:-1px 1px 1px black;">-</strong> Aportes de Los Jugadores Eliminados;<br>
-            <strong style="color: rgba(255, 174, 0, 0.952); text-shadow:-1px 1px 1px black;"> Nota: </strong>
-            Estos se Pueden Ver en La Sección de Aportantes Eliminados (Registros)  <strong style="color: rgba(0, 255, 64, 0.95); text-shadow:-1px 1px 1px black,-1px 1px 1px black;">(Click en Ver Detalle).</strong> <br>
-            <strong style="color: rgba(255, 174, 0, 0.952); text-shadow:-1px 1px 1px black;">-</strong> Aportes de Cada Partido Columna (Otro Juego) de Ambas Planillas (Cada Dia); <br>
-            <strong style="color: rgba(255, 174, 0, 0.952); text-shadow:-1px 1px 1px black;">
-              Nota: </strong> Estos Juegos Quedan Registrados En La
-            <strong style="color: rgba(255, 208, 0, 0.95); text-shadow:-1px 1px 1px black,-1px 1px 1px black;">
-              << Seccion Datos Columna Otro Juego>>
-            </strong>,
-            Verifica Cada Ingreso de Estos Juegos Usando el
-            <strong style="color: rgba(0, 255, 64, 0.95); text-shadow:-1px 1px 1px black,-1px 1px 1px black;">Select Otro (Juego)</strong> <br>
-          </div>
+
+        <div class="parcial-totals-mini-help">
+          <h6> Total Parcial Mes Incluye: </h6> <br>
+          <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black;">-</strong> Aportes de Cada Partido (Miercoles / Sabado) de Ambas Planillas <br>
+          <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black;">-</strong> Aportes de Los Jugadores Eliminados.<br> <br>
+          <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black;"> Nota: </strong>
+          Estos se Pueden Ver en La Sección de Aportantes Eliminados (Registros) <strong style="color: rgba(0, 255, 64, 0.95); text-shadow:-1px 1px 1px black,-1px 1px 1px black;">(Click en Ver Detalle).</strong> <br><br>
+          <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black;">-</strong> Aportes de Columna (Otro Juego) de Ambas Planillas (Cada Dia Jugado); <br><br>
+          <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black;">
+            Nota: </strong> Estos Juegos Quedan Registrados En La Sección
+          <strong style="color:rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black;">
+            << Datos Columna Otro Juego>>
+          </strong>,
+          Verifica Cada Ingreso de Estos Juegos Usando el
+          <strong style="color: rgba(0, 255, 64, 0.95); text-shadow:-1px 1px 1px black,-1px 1px 1px black;">Select Otro (Juego)</strong> en la Planilla Principal. <br><br>
         </div>
-        <div class="total-parcial-mini-items">
+
+        <div class="total-parcial-mes-card">
           <span>Total Parcial Mes </span>
           <small>(Activos + Eliminados + Otros Aportes / Sin Saldo): </small>
-          <strong id="tParcialMes" class="totales-item-value">$ 0</strong>
+          <strong id="tParcialMes" class="totales-parcials-item-value">$ 0</strong>
         </div>
-        <div class="total-parcial-mini-items">
+        <div class="total-parcial-año-card">
           <span>Total Parcial Año </span>
           <small>(Activos + Eliminados + Otros Aportes / Sin Saldo): </small>
-          <strong id="tParcialAnio" class="totales-item-value">$ 0</strong>
+          <strong id="tParcialAnio" class="totales-parcials-item-value">$ 0</strong>
         </div>
+
+
+        <hr style="opacity:.25; margin:1px 0;">
+        <div class="showing-totales-gastos">
+          <div class="showing-totales-gastos-item">
+            <span>Gastos del Mes:</span>
+            <strong id="tGastosMes" class="gastos-item">0</strong>
+          </div>
+          <div class="showing-totales-gastos-item">
+            <span>Gastos del Año:</span>
+            <strong id="tGastosAnio" class="gastos-item">0</strong>
+          </div>
+        </div>
+
+        <hr style="opacity:.25; margin:1px 0;">
+        <div class="showing-totales-estimados">
+          <div class="showing-totales-estimados-item">
+            <span>Total Estimado Final Mes</span>
+            <small>(Total Parcial Mes - gastos / Sumable Por Mes / Sin Saldos)</small>
+            <strong id="tFinalMes" class="totales-blocks-item-value">$ 0</strong>
+          </div>
+          <div class="showing-totales-estimados-item">
+            <span>Total Estimado Final Año</span>
+            <small>(Total Parcial Mes - gastos / Sumable Por Mes / Sin Saldos)</small>
+            <strong id="tFinalAnio" class="totales-blocks-item-value">$ 0</strong>
+          </div>
+        </div>
+        <hr style="opacity:.25; margin:1px 0;">
+        <div class="showing-saldos">
+          <div class="showing-saldos-item ">
+            <span>Saldo Actual Mes</span>
+            <small>(Saldos Generados Este Mes)</small>
+            <strong id="tSaldoMes" class="totales-blocks-item-value saldo-mes">$ 0</strong>
+          </div>
+            <div class="showing-saldos-item">
+              <span>Saldos Acumulados</span>
+              <small>(Saldos Generados Este Mes + Heredados Meses Anteriores)</small>
+              <strong id="tSaldoTotal" class="totales-blocks-item-value saldo-acumulado">$ 0</strong>
+            </div>
+        </div>
+
+        <hr style="opacity:.25; margin:1px 0;">
+        <div class="showing-total-final">
+          <div class="showing-total-final-items">
+            <span>Total Final Año (Con Saldos Acumulados)</span>
+            <small>(Total Estimado Final Año + Saldo acumulado)</small>
+            <strong id="tTotalRealHastaFecha" class="totales-blocks-item-value">$ 0</strong>
+          </div>
+        </div>
+        <hr style="opacity:.25; margin:1px 0;">
       </div>
-      <hr style="opacity:.25; margin:1px 0;">
-      <div class="otros-saldo-mini">
-        <div class="otros-aportes-items">
+
+      <hr style="opacity:.25; margin:8px 0;">
+      <div class="showing-otros-aportes">
+        <div class="showing-otros-aportes-items">
           <span>Otros Aportes Mes</span>
           <small>(Solo Informativo):</small>
-          <strong id="tOtrosMes" class="totales-item-value">$ 0</strong>
+          <strong id="tOtrosMes" class="totales-blocks-item-value">$ 0</strong>
         </div>
 
-        <div class="otros-aportes-items">
+        <div class="showing-otros-aportes-items">
           <span>Otros Aportes Año </span>
           <small>(Solo Informativo):</small>
-          <strong id="tOtrosAnio" class="totales-item-value">$ 0</strong>
+          <strong id="tOtrosAnio" class="totales-blocks-item-value">$ 0</strong>
         </div>
 
       </div>
-      <hr style="opacity:.25; margin:1px 0;">
+    </aside>
+
+    <aside class="right-card-on-laptop">
+      <div class="otros-partidos-info-card">
+        <h4>Datos Columna Otro Juego</h4>
+        <div> <span><strong id="otrosPartidosInfo" class="totales-otros-card"></strong></span></div>
+      </div>
+
+      <hr style="opacity:.25; margin:8px 0;">
       <div class="totales-aportantes-eliminados">
         <h4>Aportantes Eliminados (Registros)</h4>
         <div class="eliminados-div-button">
-          <div class="mini-help"> 
-             <strong style="color: rgba(255, 174, 0, 0.952); text-shadow:-1px 1px 1px black;">-</strong> 
-             No Aparecen en Planilla <br>
-              <strong style="color: rgba(255, 174, 0, 0.952); text-shadow:-1px 1px 1px black;">-</strong>
-               Sus Aportes y Saldos Siguen Sumando en Totales Parciales. <br>
+          <div class="mini-help">
+            <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black;">-</strong>
+            No Aparecen en Planilla <br>
+            <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black;">-</strong>
+            Sus Aportes y Saldos Siguen Sumando en Totales Parciales. <br>
             <strong style="color: rgba(0, 202, 51, 0.95);  text-shadow:-1px 1px 1px black;">-</strong>
             <strong style="color: rgba(0, 202, 51, 0.95); text-shadow:-1px 1px 1px black;">
-              Para Ver Registros Haz CLick en el Botón</strong> </div>
+              Para Ver Registros Haz CLick en el Botón</strong>
+          </div>
           <!-- <div> Solo Informativo Ya está Sumando en Total Parcial.</div> -->
 
           <!-- <span id="totalEliminadosMes"></span> -->
           <button type="button" id="btnVerEliminados" class="btn-ver-eliminados">Ver detalle</button>
         </div>
       </div>
-
-
-
-      <hr style="opacity:.25; margin:1px 0;">
-      <div class="totales-gastos-mini">
-        <div class="totales-gastos-mini-item">
-          <span>Gastos del Mes:</span>
-          <strong id="tGastosMes" class="totales-item-value gastos-item">0</strong>
-        </div>
-        <div class="totales-gastos-mini-item">
-          <span>Gastos del Año:</span>
-          <strong id="tGastosAnio" class="totales-item-value  gastos-item">0</strong>
-        </div>
-      </div>
-
-      <hr style="opacity:.25; margin:1px 0;">
-      <div class="totales-finales-mini">
-        <div class="totales-finales-mini-item">
-          <span>Total Estimado Final Mes</span>
-          <small>(Total Parcial Mes - gastos / Sumable Por Mes / Sin Saldos)</small>
-          <strong id="tFinalMes" class="totales-item-value">$ 0</strong>
-        </div>
-        <div class="totales-finales-mini-item">
-          <span>Total Estimado Final Año</span>
-          <small>(Total Parcial Mes - gastos / Sumable Por Mes / Sin Saldos)</small>
-          <strong id="tFinalAnio" class="totales-item-value">$ 0</strong>
-        </div>
-      </div>
-
-
-      <div class="saldos-mini">
-        <div class="saldos-items">
-          <span>Saldos De Aportantes</span>
-          <small>(Saldos Generados y Acumulados Este Mes)</small>
-          <strong id="tSaldoMes" class="totales-item-value">$ 0</strong>
-        </div>
-
-        <div class="saldos-items">
-          <span>Saldos Actuales De Aportantes</span>
-          <small>(Saldos Generados Este Mes + Heredados Meses Anteriores)</small>
-          <strong id="tSaldoTotal" class="totales-item-value">$ 0</strong>
-        </div>
-
-
-      </div>
-      <hr style="opacity:.25; margin:1px 0;">
-      <div class="totales-finales-mini">
-        <hr style="opacity:.25; margin:8px 0;">
-        <div class="totales-finales-mini-item">
-          <span>Total Final Año (Con Saldos Acumulados)</span>
-          <small>(Total Estimado Final Año + Saldo acumulado)</small>
-          <strong id="tTotalRealHastaFecha" class="totales-item-value">$ 0</strong>
-        </div>
-
-        <p style="margin:6px 0 0; font-size:.85em; opacity:.85;">
-          Nota: El “saldo acumulado” es una foto al corte. Si sumas los totales acumulados mes a mes, duplicas saldos anteriores.
-          Para sumar meses usa “saldo del mes”.
-        </p>
-      </div>
-      <hr style="opacity:.25; margin:1px 0;">
-     
+      <hr style="opacity:.20; margin:1px 0;">
       <div id="modalEliminados" class="modal hidden">
         <div class="modal-card">
           <div class="modal-head">
@@ -314,10 +314,7 @@ include "conexion.php";
         </div>
       </div>
       </div>
-    </aside>
-    <div class="otros-partidos-info-card">
-      <h4>Datos Columna Otro Juego</h4>
-      <div> <span><strong id="otrosPartidosInfo" class="totales-otros-card"></strong></span></div>
+  
       <!-- Observaciones -->
       <div class="observaciones-container" id="gastosWrapper">
         <h3>Observaciones Del Mes</h3>
@@ -326,7 +323,8 @@ include "conexion.php";
         <button id="saveObsBtn" class="guardar-observaciones">Guardar Observaciones</button>
 
       </div>
-    </div>
+
+    </aside>
 
     <!-- <div class="notes-card">
      

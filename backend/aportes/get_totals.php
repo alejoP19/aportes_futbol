@@ -13,57 +13,43 @@ if ($anio < 1900) $anio = (int)date('Y');
 $TOPE = 3000;
 
 /**
- * Saldo robusto (foto) a una fecha de corte:
- * excedente acumulado (aportes-TOPE) - consumido acumulado, por jugador.
- * No depende de que el jugador exista/esté activo en "jugadores".
+ * Excedente acumulado (aportes - TOPE) a una fecha.
+ * Esto es lo que "genera saldo" (sin restar consumos).
  */
-function calcular_saldo_robusto(mysqli $cx, string $fechaCorte, int $TOPE): int {
+function calcular_excedente_robusto(mysqli $cx, string $fechaCorte, int $TOPE): int {
   $sql = "
-    SELECT IFNULL(SUM(
-      GREATEST(IFNULL(ex.excedente,0) - IFNULL(co.consumido,0), 0)
-    ),0) AS saldo
-    FROM (
-      SELECT id_jugador
-      FROM aportes
-      WHERE fecha <= '$fechaCorte'
-        AND id_jugador IS NOT NULL
-        AND tipo_aporte IS NULL
-      GROUP BY id_jugador
-
-      UNION
-
-      SELECT id_jugador
-      FROM aportes_saldo_moves
-      WHERE fecha_consumo <= '$fechaCorte'
-        AND id_jugador IS NOT NULL
-      GROUP BY id_jugador
-    ) ids
-    LEFT JOIN (
-      SELECT id_jugador, SUM(GREATEST(aporte_principal - $TOPE, 0)) AS excedente
-      FROM aportes
-      WHERE fecha <= '$fechaCorte'
-        AND id_jugador IS NOT NULL
-        AND tipo_aporte IS NULL
-      GROUP BY id_jugador
-    ) ex ON ex.id_jugador = ids.id_jugador
-    LEFT JOIN (
-      SELECT id_jugador, SUM(amount) AS consumido
-      FROM aportes_saldo_moves
-      WHERE fecha_consumo <= '$fechaCorte'
-        AND id_jugador IS NOT NULL
-      GROUP BY id_jugador
-    ) co ON co.id_jugador = ids.id_jugador
+    SELECT IFNULL(SUM(GREATEST(aporte_principal - $TOPE, 0)),0) AS excedente
+    FROM aportes
+    WHERE fecha <= '$fechaCorte'
+      AND id_jugador IS NOT NULL
+      AND tipo_aporte IS NULL
   ";
-  return (int)($cx->query($sql)->fetch_assoc()['saldo'] ?? 0);
+  return (int)($cx->query($sql)->fetch_assoc()['excedente'] ?? 0);
 }
 
 /**
- * Totales del mes (sin saldos) + saldo acumulado a corte.
- * - parcial_mes: month_total + esporadicos + otros
- * - final_neto_mes: parcial_mes - gastos_mes  (SUMABLE por meses)
- * - saldo_total: saldo acumulado (FOTO al corte)
- * - saldo_mes: diferencia vs mes anterior (solo informativo)
+ * Consumido acumulado a una fecha (saldo usado).
  */
+function calcular_consumido_robusto(mysqli $cx, string $fechaCorte): int {
+  $sql = "
+    SELECT IFNULL(SUM(amount),0) AS consumido
+    FROM aportes_saldo_moves
+    WHERE fecha_consumo <= '$fechaCorte'
+      AND id_jugador IS NOT NULL
+  ";
+  return (int)($cx->query($sql)->fetch_assoc()['consumido'] ?? 0);
+}
+
+/**
+ * Saldo robusto (foto) a una fecha:
+ * saldo = excedente acumulado - consumido acumulado, clamp a 0.
+ */
+function calcular_saldo_robusto(mysqli $cx, string $fechaCorte, int $TOPE): int {
+  $ex = calcular_excedente_robusto($cx, $fechaCorte, $TOPE);
+  $co = calcular_consumido_robusto($cx, $fechaCorte);
+  return (int)max(0, $ex - $co);
+}
+
 function calcular_totales_mes(mysqli $cx, int $anio, int $mes, int $TOPE = 3000): array {
   $fechaCorte     = date('Y-m-t', strtotime("$anio-$mes-01"));
   $fechaCortePrev = date('Y-m-t', strtotime("$anio-$mes-01 -1 month"));
@@ -119,12 +105,16 @@ function calcular_totales_mes(mysqli $cx, int $anio, int $mes, int $TOPE = 3000)
     WHERE mes=$mes AND anio=$anio
   ")->fetch_assoc()['s'] ?? 0);
 
-  // 5) Saldo acumulado (foto) + saldo mes (delta, informativo)
-  $saldo_corte = calcular_saldo_robusto($cx, $fechaCorte, $TOPE);
-  $saldo_prev  = calcular_saldo_robusto($cx, $fechaCortePrev, $TOPE);
-  $saldo_mes   = (int)($saldo_corte - $saldo_prev); // puede ser negativo si consumen
+  // 5) Saldos:
+  // saldo_total = foto real al corte (excedente - consumido)
+  $saldo_total = calcular_saldo_robusto($cx, $fechaCorte, $TOPE);
 
-  // 6) Cálculos sin saldos (lo que el usuario sí suma)
+  // saldo_mes = SOLO saldo generado este mes (excedente nuevo), NUNCA negativo
+  $ex_corte = calcular_excedente_robusto($cx, $fechaCorte, $TOPE);
+  $ex_prev  = calcular_excedente_robusto($cx, $fechaCortePrev, $TOPE);
+  $saldo_mes = (int)max(0, $ex_corte - $ex_prev);
+
+  // 6) Cálculos sin saldos (lo que el usuario suma)
   $parcial_mes    = (int)($month_total + $esporadicos_mes + $otros_mes);
   $final_neto_mes = (int)($parcial_mes - $gastos_mes);
 
@@ -137,8 +127,9 @@ function calcular_totales_mes(mysqli $cx, int $anio, int $mes, int $TOPE = 3000)
     "parcial_mes"     => $parcial_mes,
     "final_neto_mes"  => $final_neto_mes,
 
-    "saldo_total"     => $saldo_corte, // acumulado (foto)
-    "saldo_mes"       => $saldo_mes,   // delta (informativo)
+    // 2 saldos que pintas:
+    "saldo_mes"       => $saldo_mes,    // generado este mes (NO negativo)
+    "saldo_total"     => $saldo_total,  // acumulado real al corte (foto)
   ];
 }
 
@@ -150,9 +141,9 @@ $mesActual = calcular_totales_mes($conexion, $anio, $mes, $TOPE);
 // =======================
 // AÑO hasta mes seleccionado (SUMA de meses SIN saldos)
 // =======================
-$parcial_anio   = 0;
-$otros_anio     = 0;
-$gastos_anio    = 0;
+$parcial_anio    = 0;
+$otros_anio      = 0;
+$gastos_anio     = 0;
 $final_anio_neto = 0;
 
 for ($m = 1; $m <= $mes; $m++) {
@@ -164,10 +155,10 @@ for ($m = 1; $m <= $mes; $m++) {
   $final_anio_neto += (int)$tmp["final_neto_mes"];
 }
 
-// Saldo acumulado (foto) a corte del mes seleccionado
+// saldo acumulado (foto) a corte del mes seleccionado
 $saldo_total = (int)$mesActual["saldo_total"];
 
-// ✅ Total real hasta la fecha: (neto acumulado sin saldos) + (saldo acumulado)
+// total real hasta la fecha
 $total_real_hasta_fecha = (int)($final_anio_neto + $saldo_total);
 
 echo json_encode([
@@ -189,11 +180,11 @@ echo json_encode([
   "final_neto_mes"  => (int)$mesActual["final_neto_mes"],
   "final_anio_neto" => (int)$final_anio_neto,
 
-  // Saldos (informativo)
-  "saldo_mes"   => (int)$mesActual["saldo_mes"],   // generado este mes (delta)
-  "saldo_total" => (int)$saldo_total,              // acumulado (foto)
+  // Saldos (informativo, pero ahora SIN negativos)
+  "saldo_mes"   => (int)$mesActual["saldo_mes"],   // generado este mes (solo excedente nuevo)
+  "saldo_total" => (int)$saldo_total,              // acumulado real al corte (foto)
 
-  // ✅ Lo que el usuario realmente quiere ver
+  // Total real hasta fecha
   "total_real_hasta_fecha" => (int)$total_real_hasta_fecha,
 
 ], JSON_UNESCAPED_UNICODE);

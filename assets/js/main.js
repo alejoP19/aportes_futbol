@@ -354,6 +354,24 @@ async function loadSheet(mes, anio) {
       eliminarJugador(btn.dataset.id);
     });
   });
+
+    // Click en teléfono
+  container.querySelectorAll(".telefono-cell").forEach(cell => {
+    cell.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      const numero = (cell.dataset.full || cell.textContent || "").trim();
+      if (!numero) return;
+
+      Swal.fire({
+        title: "Teléfono del aportante",
+        html: `<strong style="font-size:18px;">${numero}</strong>`,
+        icon: "info",
+        confirmButtonText: "Cerrar",
+        confirmButtonColor: "#0a9f6f"
+      });
+    });
+  });
 }
 
 /* ==========================================================
@@ -577,6 +595,7 @@ async function addOtroAporte() {
 //   });
 // }
 
+
 async function loadTotals(mes, anio) {
   const res = await fetch(`${API}/aportes/get_totals.php?mes=${mes}&anio=${anio}`, { cache: "no-store" });
   const j = await res.json();
@@ -594,22 +613,21 @@ async function loadTotals(mes, anio) {
   document.getElementById("tGastosMes").innerText  = formatMoney(j.gastos_mes);
   document.getElementById("tGastosAnio").innerText = formatMoney(j.gastos_anio);
 
-  // Finales SIN saldos (sumables)
+  // Finales sin saldo (sumables)
   document.getElementById("tFinalMes").innerText  = formatMoney(j.final_neto_mes);
   document.getElementById("tFinalAnio").innerText = formatMoney(j.final_anio_neto);
 
-  // Saldos
+  // Saldos (2)
   const sMes = document.getElementById("tSaldoMes");
   if (sMes) sMes.innerText = formatMoney(j.saldo_mes);
 
-  document.getElementById("tSaldoTotal").innerText = formatMoney(j.saldo_total);
+  const sTot = document.getElementById("tSaldoTotal");
+  if (sTot) sTot.innerText = formatMoney(j.saldo_total);
 
-  // ✅ Total real hasta la fecha (neto acumulado + saldo acumulado)
-  const tReal = document.getElementById("tTotalRealHastaFecha");
-  if (tReal) tReal.innerText = formatMoney(j.total_real_hasta_fecha);
+  // Total real hasta la fecha (si lo pintas)
+  const tr = document.getElementById("tTotalRealHastaFecha");
+  if (tr) tr.innerText = formatMoney(j.total_real_hasta_fecha);
 }
-
-
 
 // ================================
 // ELIMINADOS (MODAL) - FIX DEFINITIVO
@@ -1476,20 +1494,6 @@ document.addEventListener("click", (e) => {
   });
 });
 
-
-document.addEventListener("click", (e) => {
-  const cell = e.target.closest(".telefono-cell");
-  if (!cell) return;
-
-  const numero = cell.dataset.full || cell.textContent.trim();
-
-  Swal.fire({
-    title: "Teléfono",
-    text: numero,
-    icon: "info",
-    confirmButtonText: "Cerrar"
-  });
-});
 
 
 function findColumnIndex(table, headerText) {

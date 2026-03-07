@@ -289,8 +289,8 @@ echo "<tr class='header-tr-one'>";
 echo "<th>Nombres</th>";
 echo "<th colspan='{$colspanDias}' data-group='dias'>Días de los juegos</th>";
 echo "<th colspan='2' data-group='otros'>Otros aportes</th>";
-echo "<th data-group='total'>Total Mes</th>";
-echo "<th data-group='saldo'>Saldo</th>";
+echo "<th class='th-total-mes' data-group='total'>Total Mes</th>";
+echo "<th class='th-saldo' data-group='saldo'>Saldo</th>";
 echo "<th>Acciones</th>";
 echo "<th>Deudas</th>";
 echo "<th></th>";
@@ -304,8 +304,8 @@ echo "<th id='thOtroJuego' data-group='otro' data-dia='{$otroDia}'>Otro juego ({
 
 echo "<th data-group='otros'>Tipo</th>";
 echo "<th data-group='otros'>Valor</th>";
-echo "<th data-group='total'>Por Jugador</th>";
-echo "<th data-group='saldo'>Tu Saldo</th>";
+echo "<th class='th-total-mes' data-group='total'>Por Jugador</th>";
+echo "<th class='th-saldo' data-group='saldo'>Tu Saldo</th>";
 echo "<th>Editar / Eliminar</th>";
 echo "<th>Tu Deuda</th>";
 echo "<th>Teléfono</th>";
@@ -496,10 +496,10 @@ foreach ($jugadores as $jug) {
 
     echo "<td>" . (empty($tipos) ? '' : implode("<br>", $tipos)) . "</td>";
     echo "<td>" . ($valor_otros ? number_format($valor_otros, 0, ',', '.') : '') . "</td>";
-    echo "<td><strong>" . number_format($total_jugador_mes, 0, ',', '.') . "</strong></td>";
+   echo "<td class='col-total-mes'><strong>" . number_format($total_jugador_mes, 0, ',', '.') . "</strong></td>";
 
-    $saldoAcumulado = get_saldo_acumulado($conexion, $jugId, $mes, $anio);
-    echo "<td><strong>" . number_format($saldoAcumulado, 0, ',', '.') . "</strong></td>";
+$saldoAcumulado = get_saldo_acumulado($conexion, $jugId, $mes, $anio);
+echo "<td class='col-saldo'><strong>" . number_format($saldoAcumulado, 0, ',', '.') . "</strong></td>";
     $total_saldo_global += $saldoAcumulado;
 
     $nombreSafe   = htmlspecialchars($jug['nombre'], ENT_QUOTES, 'UTF-8');
