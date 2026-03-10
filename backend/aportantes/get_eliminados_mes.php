@@ -14,7 +14,6 @@ require_once __DIR__ . "/../../conexion.php";
 require_once __DIR__ . "/../auth/auth.php";
 protegerAdmin();
 
-
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 function column_exists(mysqli $cx, string $table, string $col): bool {
@@ -36,7 +35,7 @@ function column_exists(mysqli $cx, string $table, string $col): bool {
 }
 
 function saldo_a_fecha(mysqli $cx, int $jid, string $fechaCorte, int $TOPE): int {
-  // excedente acumulado hasta fecha (aportes - TOPE)
+  // excedente acumulado hasta fecha
   $qEx = $cx->prepare("
     SELECT IFNULL(SUM(GREATEST(aporte_principal - ?, 0)), 0) AS ex
     FROM aportes
@@ -65,7 +64,6 @@ function saldo_a_fecha(mysqli $cx, int $jid, string $fechaCorte, int $TOPE): int
 }
 
 function deudas_hasta_fecha(mysqli $cx, int $jid, string $fechaCorte): array {
-  // devuelve: ["total" => int, "fechas" => [ "YYYY-MM-DD", ... ]]
   $stmt = $cx->prepare("
     SELECT DATE(fecha) AS f
     FROM deudas_aportes
@@ -100,7 +98,7 @@ try {
   $inicioMes = sprintf("%04d-%02d-01", $anio, $mes);
   $finMes    = date('Y-m-t', strtotime($inicioMes));
 
-  // ✅ eliminados EN ESTE MES (los que se dieron de baja dentro del rango)
+  // eliminados en este mes
   $stmt = $conexion->prepare("
     SELECT id, nombre, fecha_baja
     FROM jugadores
@@ -114,26 +112,29 @@ try {
   $stmt->execute();
   $res = $stmt->get_result();
 
-  // Detectar columna de fecha para otros_aportes
+  // detectar columna fecha para otros_aportes
   $hasFechaOtros = column_exists($conexion, "otros_aportes", "fecha");
   $hasCreatedOtros = !$hasFechaOtros && column_exists($conexion, "otros_aportes", "created_at");
 
   $players = [];
   $rows    = [];
 
-  $total_eliminados_mes   = 0; // aportes normales (registrados) del mes
-  $total_otros_elim_mes   = 0; // otros aportes del mes (tabla otros_aportes + esporadico_otro si aplica)
-  $total_general_aportes  = 0; // total listado en modal (normales + otros)
-  $total_general_saldo    = 0; // saldo fin mes por eliminado
+  $total_eliminados_mes   = 0; // aportes tipo_aporte NULL del mes (incluye otros juegos)
+  $total_otros_elim_mes   = 0; // informativo: otros_aportes del mes
+  $total_general_aportes  = 0; // footer modal (como lo manejas hoy)
+  $total_general_saldo    = 0;
 
   while ($j = $res->fetch_assoc()) {
     $jid = (int)$j["id"];
 
-    // ✅ saldo fin del mes (foto al corte)
     $saldo_fin_mes = saldo_a_fecha($conexion, $jid, $finMes, $TOPE);
     $deudas = deudas_hasta_fecha($conexion, $jid, $finMes);
+
     // =====================================================
-    // 1) APORTES NORMALES DEL MES (SOLO MES, NO HISTÓRICO)
+    // 1) APORTES tipo_aporte NULL del mes
+    //    Aquí entran:
+    //    - aportes normales de miércoles/sábado
+    //    - aportes de otros juegos
     // =====================================================
     $qAportes = $conexion->prepare("
       SELECT
@@ -152,14 +153,14 @@ try {
       WHERE a.id_jugador = ?
         AND a.tipo_aporte IS NULL
         AND YEAR(a.fecha) = ?
-       AND MONTH(a.fecha) = ?
+        AND MONTH(a.fecha) = ?
       ORDER BY a.fecha ASC, a.id ASC
     ");
     $qAportes->bind_param("iiiii", $TOPE, $TOPE, $jid, $anio, $mes);
     $qAportes->execute();
     $rr = $qAportes->get_result();
 
-    $movs = []; // movimientos del mes (normales + otros) para este jugador
+    $movs = [];
     $sum_normales_mes = 0;
 
     while ($r = $rr->fetch_assoc()) {
@@ -168,21 +169,24 @@ try {
 
       $sum_normales_mes += $cantidad;
 
+      $dow = (int)date('N', strtotime($fecha)); // 3=Mié, 6=Sáb
+      $esOtroJuego = !in_array($dow, [3, 6], true);
+
       $movs[] = [
-        "jugador_id" => $jid,
-        "fecha"      => $fecha,
-        "kind"       => "normal",     // ✅ para CSS/JS
-        "label"      => "Aporte",
-        "cantidad"   => $cantidad,
-        "total"      => $cantidad,    // no acumulado
-        "saldo"      => $saldo_fin_mes
-        
+        "jugador_id"    => $jid,
+        "fecha"         => $fecha,
+        "kind"          => $esOtroJuego ? "otro_juego" : "normal",
+        "label"         => $esOtroJuego ? "Aporte otro juego" : "Aporte",
+        "es_otro_juego" => $esOtroJuego ? 1 : 0,
+        "cantidad"      => $cantidad,
+        "total"         => $cantidad,
+        "saldo"         => $saldo_fin_mes
       ];
     }
     $qAportes->close();
 
     // =====================================================
-    // 2) OTROS APORTES DEL MES (SOLO MES) con fecha visible
+    // 2) OTROS APORTES DEL MES (tabla otros_aportes)
     // =====================================================
     if ($hasFechaOtros) {
       $qOtros = $conexion->prepare("
@@ -205,7 +209,6 @@ try {
       ");
       $qOtros->bind_param("iii", $jid, $anio, $mes);
     } else {
-      // fallback: no hay fecha real -> usamos el primer día del mes
       $qOtros = $conexion->prepare("
         SELECT tipo, valor, ? AS fecha_item
         FROM otros_aportes
@@ -232,24 +235,34 @@ try {
       $sum_otros_mes += $valor;
 
       $movs[] = [
-        "jugador_id" => $jid,
-        "fecha"      => $fecha_item,
-        "kind"       => "otro",
-        "label"      => "Otro: " . $tipo,
-        "cantidad"   => $valor,
-        "total"      => $valor,
-        "saldo"      => $saldo_fin_mes
+        "jugador_id"    => $jid,
+        "fecha"         => $fecha_item,
+        "kind"          => "otro",
+        "label"         => "Otro: " . $tipo,
+        "es_otro_juego" => 0,
+        "cantidad"      => $valor,
+        "total"         => $valor,
+        "saldo"         => $saldo_fin_mes
       ];
     }
     $qOtros->close();
 
     // =====================================================
-    // 3) Numerar y ordenar por fecha (y tipo)
+    // 3) Ordenar por fecha y tipo
+    //    normal -> otro_juego -> otro
     // =====================================================
-    usort($movs, function($a, $b){
+    $ordenKind = [
+      "normal"     => 1,
+      "otro_juego" => 2,
+      "otro"       => 3,
+    ];
+
+    usort($movs, function($a, $b) use ($ordenKind){
       if ($a["fecha"] === $b["fecha"]) {
-        // normales primero, luego otros (o al revés si prefieres)
-        return strcmp($a["kind"], $b["kind"]);
+        $oa = $ordenKind[$a["kind"]] ?? 99;
+        $ob = $ordenKind[$b["kind"]] ?? 99;
+        if ($oa === $ob) return 0;
+        return $oa <=> $ob;
       }
       return strcmp($a["fecha"], $b["fecha"]);
     });
@@ -262,39 +275,30 @@ try {
     }
 
     // =====================================================
-    // Totales por jugador (SOLO DEL MES LISTADO)
+    // 4) Totales por jugador
     // =====================================================
-// ✅ Total aportes jugador (CONTABLE) = SOLO normales
-$total_listado_jugador = (int)$sum_normales_mes;
+    $total_listado_jugador = (int)$sum_normales_mes; // como lo vienes manejando
+    $total_listado_otros   = (int)$sum_otros_mes;    // informativo
 
-// ✅ Informativo (otros del mes)
-$total_listado_otros = (int)$sum_otros_mes;
+    $players[] = [
+      "id"               => $jid,
+      "nombre"           => $j["nombre"],
+      "fecha_baja"       => $j["fecha_baja"],
+      "total_mes"        => $sum_normales_mes,    // incluye otros juegos tipo_aporte NULL
+      "total_otros_mes"  => $sum_otros_mes,       // informativo
+      "total_listado"    => $total_listado_jugador,
+      "saldo_fin_mes"    => $saldo_fin_mes,
+      "deudas_total"     => (int)$deudas["total"],
+      "deudas_fechas"    => $deudas["fechas"],
+    ];
 
-   $players[] = [
-  "id"             => $jid,
-  "nombre"         => $j["nombre"],
-  "fecha_baja"     => $j["fecha_baja"],
-
-  "total_mes"      => $sum_normales_mes,      // ✅ SOLO normales
-  "total_otros_mes"=> $sum_otros_mes,         // ✅ informativo
-  "total_listado"  => $total_listado_jugador, // ✅ SOLO normales
-  "saldo_fin_mes"  => $saldo_fin_mes,
-  "deudas_total"  => (int)$deudas["total"],
-  "deudas_fechas" => $deudas["fechas"],
-];
-
-    // Totales generales (modal)
-  // Totales generales (modal)
-// ✅ eliminados_mes = SOLO aportes normales del mes
-$total_eliminados_mes  += $sum_normales_mes;
-
-// ✅ informativo: otros aportes del mes (NO se suman a total_general_aportes)
-$total_otros_elim_mes  += $sum_otros_mes;
-
-// ✅ total_general_aportes = SOLO aportes normales (para cuadrar con planilla)
-$total_general_aportes += $sum_normales_mes;
-
-$total_general_saldo   += $saldo_fin_mes;
+    // =====================================================
+    // 5) Totales generales modal
+    // =====================================================
+    $total_eliminados_mes  += $sum_normales_mes;
+    $total_otros_elim_mes  += $sum_otros_mes;
+    $total_general_aportes += $sum_normales_mes;
+    $total_general_saldo   += $saldo_fin_mes;
   }
 
   $stmt->close();
@@ -304,18 +308,13 @@ $total_general_saldo   += $saldo_fin_mes;
     "mes" => $mes,
     "anio" => $anio,
     "totales" => [
-      // card (si quieres que el card sea SOLO normales como antes)
-      "eliminados_mes" => $total_eliminados_mes,
-
-      // informativos
+      "eliminados_mes"       => $total_eliminados_mes,
       "otros_eliminados_mes" => $total_otros_elim_mes,
-
-      // footer modal (lo que realmente estás listando)
-      "total_general_aportes" => $total_general_aportes,
-      "total_general_saldo"   => $total_general_saldo
+      "total_general_aportes"=> $total_general_aportes,
+      "total_general_saldo"  => $total_general_saldo
     ],
     "players" => $players,
-    "rows" => $rows
+    "rows"    => $rows
   ], JSON_UNESCAPED_UNICODE);
 
 } catch (Throwable $e) {

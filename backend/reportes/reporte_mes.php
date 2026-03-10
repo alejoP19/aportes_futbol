@@ -2,6 +2,7 @@
 include "../../conexion.php";
 header("Content-Type: text/html; charset=utf-8");
 
+
 // =========================
 // CONFIG
 // =========================
@@ -35,8 +36,8 @@ $anio = intval($_GET['anio'] ?? date('Y'));
 if ($mes < 1 || $mes > 12) $mes = (int)date('n');
 if ($anio < 1900) $anio = (int)date('Y');
 
-$mesName      = date('F', mktime(0, 0, 0, $mes, 1));
-$fechaCorteMes= date('Y-m-t', strtotime("$anio-$mes-01"));
+$mesName        = date('F', mktime(0, 0, 0, $mes, 1));
+$fechaCorteMes  = date('Y-m-t', strtotime("$anio-$mes-01"));
 $fechaInicioMes = date('Y-m-01', strtotime("$anio-$mes-01"));
 
 // =========================
@@ -46,7 +47,7 @@ $days = [];
 $days_count = cal_days_in_month(CAL_GREGORIAN, $mes, $anio);
 for ($d = 1; $d <= $days_count; $d++) {
   $w = date('N', strtotime("$anio-$mes-$d"));
-  if ($w == 3 || $w == 6) $days[] = $d; // 3=Mié, 6=Sáb (PHP date('N'))
+  if ($w == 3 || $w == 6) $days[] = $d; // 3=Mié, 6=Sáb
 }
 
 // =========================
@@ -62,7 +63,7 @@ function pick_default_otro_dia($days, $days_count){
 $otroDia = pick_default_otro_dia($days, $days_count);
 
 // =========================
-// FUNCIONES (tu lógica base)
+// FUNCIONES BASE
 // =========================
 function get_aporte_real($conexion, $id, $fecha){
   $q = $conexion->prepare("SELECT aporte_principal FROM aportes WHERE id_jugador=? AND fecha=? LIMIT 1");
@@ -87,7 +88,6 @@ function get_consumo_saldo_target($conexion, $id_jugador, $fecha){
   return (int)($row['c'] ?? 0);
 }
 
-// aporte efectivo del día: cap + consumo_target, cap 3000
 function get_aporte_efectivo_dia($conexion, $id_jugador, $fecha, $TOPE = 3000){
   $real    = get_aporte_real($conexion, $id_jugador, $fecha);
   $cashCap = min($real, $TOPE);
@@ -206,96 +206,7 @@ function get_obs($conexion, $mes, $anio){
 }
 
 // =========================
-// FUNCIÓN CLAVE: TOTALES “ADMIN-LIKE” POR MES (para poder sumar el AÑO igual que Admin)
-// =========================
-function calcular_mes_admin_like($conexion, $anio, $mes, $TOPE){
-  $fechaCorteMes = date('Y-m-t', strtotime("$anio-$mes-01"));
-
-  $reg_mes = q_scalar_assoc($conexion, "
-    SELECT IFNULL(SUM(
-      LEAST(LEAST(IFNULL(a.aporte_principal,0), $TOPE) + IFNULL(t.consumido,0), $TOPE)
-    ),0) AS s
-    FROM aportes a
-    LEFT JOIN (
-      SELECT target_aporte_id, SUM(amount) AS consumido
-      FROM aportes_saldo_moves
-      GROUP BY target_aporte_id
-    ) t ON t.target_aporte_id=a.id
-    WHERE YEAR(a.fecha)=$anio AND MONTH(a.fecha)=$mes
-      AND a.id_jugador IS NOT NULL
-      AND a.tipo_aporte IS NULL
-  ", "s");
-
-  $esp_mes = q_scalar_assoc($conexion, "
-    SELECT IFNULL(SUM(aporte_principal),0) s
-    FROM aportes
-    WHERE tipo_aporte='esporadico'
-      AND YEAR(fecha)=$anio AND MONTH(fecha)=$mes
-  ", "s");
-
-  $otros_tabla_mes = q_scalar_assoc($conexion, "
-    SELECT IFNULL(SUM(valor),0) s
-    FROM otros_aportes
-    WHERE anio=$anio AND mes=$mes
-  ", "s");
-
-  $otros_esp_mes = q_scalar_assoc($conexion, "
-    SELECT IFNULL(SUM(aporte_principal),0) s
-    FROM aportes
-    WHERE tipo_aporte='esporadico_otro'
-      AND YEAR(fecha)=$anio AND MONTH(fecha)=$mes
-  ", "s");
-
-  $otros_mes = (int)$otros_tabla_mes + (int)$otros_esp_mes;
-
-  $saldo_mes = q_scalar_assoc($conexion, "
-    SELECT IFNULL(SUM(
-      GREATEST(IFNULL(ex.excedente,0) - IFNULL(co.consumido,0), 0)
-    ),0) AS saldo
-    FROM jugadores j
-    LEFT JOIN (
-      SELECT id_jugador, SUM(GREATEST(aporte_principal - $TOPE, 0)) AS excedente
-      FROM aportes
-      WHERE fecha <= '$fechaCorteMes'
-        AND id_jugador IS NOT NULL
-        AND tipo_aporte IS NULL
-      GROUP BY id_jugador
-    ) ex ON ex.id_jugador=j.id
-    LEFT JOIN (
-      SELECT id_jugador, SUM(amount) AS consumido
-      FROM aportes_saldo_moves
-      WHERE fecha_consumo <= '$fechaCorteMes'
-      GROUP BY id_jugador
-    ) co ON co.id_jugador=j.id
-  ", "saldo");
-
-  $gasto_mes = q_scalar_row($conexion, "
-    SELECT IFNULL(SUM(valor),0)
-    FROM gastos
-    WHERE anio=$anio AND mes=$mes
-  ");
-
-  // Admin: Parcial = registrados + esporádicos (incluye eliminados)
-  $parcial_mes = (int)$reg_mes + (int)$esp_mes;
-
-  // Admin: Estimado = parcial + otros + saldos (sin gastos)
-  $estimado_mes = (int)$parcial_mes + (int)$otros_mes + (int)$saldo_mes;
-
-  // Final = estimado - gastos
-  $final_mes = (int)$estimado_mes - (int)$gasto_mes;
-
-  return [
-    "parcial_mes"  => $parcial_mes,
-    "otros_mes"    => $otros_mes,
-    "saldo_mes"    => $saldo_mes,
-    "estimado_mes" => $estimado_mes,
-    "gasto_mes"    => $gasto_mes,
-    "final_mes"    => $final_mes,
-  ];
-}
-
-// =========================
-// JUGADORES VISIBLES (igual que Admin / PDF)
+// JUGADORES VISIBLES (igual que interfaz)
 // =========================
 $jug_res = $conexion->query("
   SELECT id, nombre, activo, fecha_baja
@@ -341,7 +252,7 @@ while ($r = $res->fetch_assoc()) {
 }
 
 // =========================
-// ELIMINADOS (ids) para secciones + “otros aportes eliminados”
+// ELIMINADOS
 // =========================
 $elimIdsMes = [];
 $stmt = $conexion->prepare("
@@ -376,10 +287,15 @@ $inMes   = build_in_clause_ids($elimIdsMes);
 $inHasta = build_in_clause_ids($elimIdsHasta);
 
 // =========================
-// FOOTERS TABLA PRINCIPAL (solo visibles)
+// TABLA PRINCIPAL - FOOTERS (SOLO ESTA TABLA)
+// Incluye:
+// - miércoles/sábado visibles
+// - otros_aportes visibles
+// NO incluye:
+// - otros juegos
+// - esporádicos
 // =========================
 $totales_por_dia_principal = [];
-$total_otro_dia_principal = 0;
 $total_otros_aportes_principal = 0;
 $total_mes_principal = 0;
 
@@ -411,32 +327,6 @@ foreach ($days as $d) {
 }
 $stmtDay->close();
 
-$fechaOtro = sprintf("%04d-%02d-%02d", $anio, $mes, (int)$otroDia);
-$stmtOtro = $conexion->prepare("
-  SELECT IFNULL(SUM(
-    LEAST(
-      LEAST(IFNULL(a.aporte_principal,0), ?) + IFNULL(m.consumido,0),
-      ?
-    )
-  ),0) AS total
-  FROM aportes a
-  LEFT JOIN (
-    SELECT target_aporte_id, IFNULL(SUM(amount),0) AS consumido
-    FROM aportes_saldo_moves
-    GROUP BY target_aporte_id
-  ) m ON m.target_aporte_id = a.id
-  WHERE a.fecha = ?
-    AND a.id_jugador IN ($inJugVisibles)
-    AND (a.tipo_aporte IS NULL OR a.tipo_aporte NOT IN ('esporadico','esporadico_otro'))
-");
-$stmtOtro->bind_param("iis", $TOPE, $TOPE, $fechaOtro);
-$stmtOtro->execute();
-$row = $stmtOtro->get_result()->fetch_assoc();
-$total_otro_dia_principal = (int)($row['total'] ?? 0);
-$stmtOtro->close();
-
-$total_mes_principal += $total_otro_dia_principal;
-
 $total_otros_aportes_principal = q_scalar_assoc($conexion, "
   SELECT IFNULL(SUM(valor),0) s
   FROM otros_aportes
@@ -453,10 +343,15 @@ foreach ($jugadores as $j) {
 }
 
 // =========================
-// FOOTER ESPORÁDICOS (resumen)
+// TABLA ESPORÁDICOS - FOOTER (SOLO ESTA TABLA)
+// Incluye:
+// - miércoles/sábado esporádicos
+// - esporadico_otro
+// NO incluye:
+// - otros juegos esporádicos
 // =========================
 $totales_por_dia_esp = [];
-$total_esp_otros_aportes = 0; // esporadico_otro
+$total_esp_otros_aportes = 0;
 $total_mes_esp = 0;
 
 $stmtEspDay = $conexion->prepare("
@@ -484,15 +379,20 @@ $total_esp_otros_aportes = q_scalar_assoc($conexion, "
   WHERE tipo_aporte='esporadico_otro'
     AND YEAR(fecha)=$anio AND MONTH(fecha)=$mes
 ", "s");
+
 $total_mes_esp += $total_esp_otros_aportes;
 
 // =========================
-// TABLA ÚNICA: OTROS JUEGOS (Principal + Esporádico)
+// TABLA ÚNICA: OTROS JUEGOS (Principal + Esporádicos)
+// OJO:
+// - principal visibles
+// - esporádicos
+// - NO incluye otros juegos de eliminados para no duplicar visualmente
 // =========================
 $otros_juegos_items = [];
 $total_otros_juegos = 0;
 
-// Principal (no mié/sáb) SOLO visibles
+// Principal visibles (no mié/sáb)
 $stmtOP = $conexion->prepare("
   SELECT a.fecha,
     IFNULL(SUM(
@@ -532,7 +432,7 @@ while ($row = $resOP->fetch_assoc()) {
 }
 $stmtOP->close();
 
-// Esporádico (no mié/sáb)
+// Esporádicos (no mié/sáb)
 $stmtOPE = $conexion->prepare("
   SELECT fecha, IFNULL(SUM(aporte_principal),0) AS total
   FROM aportes
@@ -566,44 +466,328 @@ usort($otros_juegos_items, function ($a, $b) {
 });
 
 // =========================
-// TOTALES (COP) - EXACTO COMO ADMIN (MES directo + AÑO sumando mes a mes)
+// ELIMINADOS - CÁLCULOS DEL MES PARA RESUMEN
+// Para no duplicar:
+// - aportes normales mié/sáb de eliminados NO visibles
+// - otros juegos de eliminados
+// - otros aportes de eliminados
 // =========================
-$acc_parcial_anio   = 0;
-$acc_otros_anio     = 0;
-$acc_saldo_anio     = 0;
-$acc_estimado_anio  = 0;
-$acc_gasto_anio     = 0;
-$acc_final_anio     = 0;
 
-$mes_calc = null;
-for ($mm = 1; $mm <= $mes; $mm++){
-  $tmp = calcular_mes_admin_like($conexion, $anio, $mm, $TOPE);
-  if ($mm === $mes) $mes_calc = $tmp;
+// 1) eliminados del mes no visibles en la planilla principal
+$elimNoVisiblesMes = array_values(array_diff($elimIdsMes, $jugIds));
+$inElimNoVisMes = build_in_clause_ids($elimNoVisiblesMes);
 
-  $acc_parcial_anio  += (int)$tmp["parcial_mes"];
-  $acc_otros_anio    += (int)$tmp["otros_mes"];
-  $acc_saldo_anio    += (int)$tmp["saldo_mes"];
-  $acc_estimado_anio += (int)$tmp["estimado_mes"];
-  $acc_gasto_anio    += (int)$tmp["gasto_mes"];
-  $acc_final_anio    += (int)$tmp["final_mes"];
+// 2) aportes normales (mié/sáb) del mes de eliminados NO visibles
+$eliminados_normales_mes_no_visibles = q_scalar_assoc($conexion, "
+  SELECT IFNULL(SUM(
+    LEAST(
+      LEAST(IFNULL(a.aporte_principal,0), $TOPE) + IFNULL(t.consumido,0),
+      $TOPE
+    )
+  ),0) AS s
+  FROM aportes a
+  LEFT JOIN (
+    SELECT target_aporte_id, SUM(amount) AS consumido
+    FROM aportes_saldo_moves
+    GROUP BY target_aporte_id
+  ) t ON t.target_aporte_id = a.id
+  WHERE YEAR(a.fecha)=$anio
+    AND MONTH(a.fecha)=$mes
+    AND DAYOFWEEK(a.fecha) IN (4,7)
+    AND a.id_jugador IN ($inElimNoVisMes)
+    AND a.tipo_aporte IS NULL
+", "s");
+
+// 3) otros juegos de eliminados del mes
+$eliminados_otros_juegos_mes = q_scalar_assoc($conexion, "
+  SELECT IFNULL(SUM(
+    LEAST(
+      LEAST(IFNULL(a.aporte_principal,0), $TOPE) + IFNULL(t.consumido,0),
+      $TOPE
+    )
+  ),0) AS s
+  FROM aportes a
+  LEFT JOIN (
+    SELECT target_aporte_id, SUM(amount) AS consumido
+    FROM aportes_saldo_moves
+    GROUP BY target_aporte_id
+  ) t ON t.target_aporte_id = a.id
+  WHERE YEAR(a.fecha)=$anio
+    AND MONTH(a.fecha)=$mes
+    AND DAYOFWEEK(a.fecha) NOT IN (4,7)
+    AND a.id_jugador IN ($inMes)
+    AND a.tipo_aporte IS NULL
+", "s");
+
+// 4) otros aportes de eliminados del mes
+$eliminados_otros_aportes_mes = q_scalar_assoc($conexion, "
+  SELECT IFNULL(SUM(valor),0) AS s
+  FROM otros_aportes
+  WHERE anio=$anio
+    AND mes=$mes
+    AND id_jugador IN ($inMes)
+", "s");
+
+// =========================
+// RESUMEN GENERAL NUEVO
+// =========================
+
+// principal + esporádicos + otros juegos + eliminados faltantes + otros aportes eliminados/no eliminados
+$total_parcial_mes_resumen =
+  (int)$total_mes_principal
+  + (int)$total_mes_esp
+  + (int)$total_otros_juegos
+  + (int)$eliminados_normales_mes_no_visibles
+  + (int)$eliminados_otros_juegos_mes
+  + (int)$eliminados_otros_aportes_mes;
+
+// año = suma mes a mes con misma lógica
+$total_parcial_anio_resumen = 0;
+$otros_aportes_anio_info = 0;
+
+for ($mm = 1; $mm <= $mes; $mm++) {
+  $fechaCorteTmp = date('Y-m-t', strtotime("$anio-$mm-01"));
+  $fechaInicioTmp = date('Y-m-01', strtotime("$anio-$mm-01"));
+
+  // visibles de ese mes
+  $jugTmp = [];
+  $resTmp = $conexion->query("
+    SELECT id
+    FROM jugadores
+    WHERE activo = 1
+      OR (activo = 0 AND (fecha_baja IS NULL OR fecha_baja > '$fechaCorteTmp'))
+  ");
+  while ($r = $resTmp->fetch_assoc()) $jugTmp[] = (int)$r['id'];
+  $inJugTmp = build_in_clause_ids($jugTmp);
+
+  // eliminados del mes
+  $elimTmp = [];
+  $stmtTmp = $conexion->prepare("
+    SELECT id
+    FROM jugadores
+    WHERE activo = 0
+      AND fecha_baja IS NOT NULL
+      AND fecha_baja >= ?
+      AND fecha_baja <= ?
+  ");
+  $stmtTmp->bind_param("ss", $fechaInicioTmp, $fechaCorteTmp);
+  $stmtTmp->execute();
+  $resTmp2 = $stmtTmp->get_result();
+  while ($r = $resTmp2->fetch_assoc()) $elimTmp[] = (int)$r['id'];
+  $stmtTmp->close();
+
+  $elimNoVisTmp = array_values(array_diff($elimTmp, $jugTmp));
+  $inElimNoVisTmp = build_in_clause_ids($elimNoVisTmp);
+  $inElimTmp = build_in_clause_ids($elimTmp);
+
+  // principal visible mier/sab
+  $principal_dias_tmp = q_scalar_assoc($conexion, "
+    SELECT IFNULL(SUM(
+      LEAST(
+        LEAST(IFNULL(a.aporte_principal,0), $TOPE) + IFNULL(t.consumido,0),
+        $TOPE
+      )
+    ),0) AS s
+    FROM aportes a
+    LEFT JOIN (
+      SELECT target_aporte_id, SUM(amount) AS consumido
+      FROM aportes_saldo_moves
+      GROUP BY target_aporte_id
+    ) t ON t.target_aporte_id = a.id
+    WHERE YEAR(a.fecha)=$anio
+      AND MONTH(a.fecha)=$mm
+      AND DAYOFWEEK(a.fecha) IN (4,7)
+      AND a.id_jugador IN ($inJugTmp)
+      AND a.tipo_aporte IS NULL
+  ", "s");
+
+  // otros aportes visibles
+  $principal_otros_tmp = q_scalar_assoc($conexion, "
+    SELECT IFNULL(SUM(valor),0) AS s
+    FROM otros_aportes
+    WHERE anio=$anio
+      AND mes=$mm
+      AND id_jugador IN ($inJugTmp)
+  ", "s");
+
+  // esporádicos mier/sab
+  $esp_dias_tmp = q_scalar_assoc($conexion, "
+    SELECT IFNULL(SUM(aporte_principal),0) AS s
+    FROM aportes
+    WHERE tipo_aporte='esporadico'
+      AND YEAR(fecha)=$anio
+      AND MONTH(fecha)=$mm
+      AND DAYOFWEEK(fecha) IN (4,7)
+  ", "s");
+
+  // esporadico_otro
+  $esp_otros_tmp = q_scalar_assoc($conexion, "
+    SELECT IFNULL(SUM(aporte_principal),0) AS s
+    FROM aportes
+    WHERE tipo_aporte='esporadico_otro'
+      AND YEAR(fecha)=$anio
+      AND MONTH(fecha)=$mm
+  ", "s");
+
+  // otros juegos visibles
+  $otros_juegos_vis_tmp = q_scalar_assoc($conexion, "
+    SELECT IFNULL(SUM(
+      LEAST(
+        LEAST(IFNULL(a.aporte_principal,0), $TOPE) + IFNULL(t.consumido,0),
+        $TOPE
+      )
+    ),0) AS s
+    FROM aportes a
+    LEFT JOIN (
+      SELECT target_aporte_id, SUM(amount) AS consumido
+      FROM aportes_saldo_moves
+      GROUP BY target_aporte_id
+    ) t ON t.target_aporte_id = a.id
+    WHERE YEAR(a.fecha)=$anio
+      AND MONTH(a.fecha)=$mm
+      AND DAYOFWEEK(a.fecha) NOT IN (4,7)
+      AND a.id_jugador IN ($inJugTmp)
+      AND a.tipo_aporte IS NULL
+  ", "s");
+
+  // otros juegos esporádicos
+  $otros_juegos_esp_tmp = q_scalar_assoc($conexion, "
+    SELECT IFNULL(SUM(aporte_principal),0) AS s
+    FROM aportes
+    WHERE tipo_aporte='esporadico'
+      AND YEAR(fecha)=$anio
+      AND MONTH(fecha)=$mm
+      AND DAYOFWEEK(fecha) NOT IN (4,7)
+  ", "s");
+
+  // eliminados no visibles normales mier/sab
+  $elim_norm_no_vis_tmp = q_scalar_assoc($conexion, "
+    SELECT IFNULL(SUM(
+      LEAST(
+        LEAST(IFNULL(a.aporte_principal,0), $TOPE) + IFNULL(t.consumido,0),
+        $TOPE
+      )
+    ),0) AS s
+    FROM aportes a
+    LEFT JOIN (
+      SELECT target_aporte_id, SUM(amount) AS consumido
+      FROM aportes_saldo_moves
+      GROUP BY target_aporte_id
+    ) t ON t.target_aporte_id = a.id
+    WHERE YEAR(a.fecha)=$anio
+      AND MONTH(a.fecha)=$mm
+      AND DAYOFWEEK(a.fecha) IN (4,7)
+      AND a.id_jugador IN ($inElimNoVisTmp)
+      AND a.tipo_aporte IS NULL
+  ", "s");
+
+  // eliminados otros juegos
+  $elim_otros_juegos_tmp = q_scalar_assoc($conexion, "
+    SELECT IFNULL(SUM(
+      LEAST(
+        LEAST(IFNULL(a.aporte_principal,0), $TOPE) + IFNULL(t.consumido,0),
+        $TOPE
+      )
+    ),0) AS s
+    FROM aportes a
+    LEFT JOIN (
+      SELECT target_aporte_id, SUM(amount) AS consumido
+      FROM aportes_saldo_moves
+      GROUP BY target_aporte_id
+    ) t ON t.target_aporte_id = a.id
+    WHERE YEAR(a.fecha)=$anio
+      AND MONTH(a.fecha)=$mm
+      AND DAYOFWEEK(a.fecha) NOT IN (4,7)
+      AND a.id_jugador IN ($inElimTmp)
+      AND a.tipo_aporte IS NULL
+  ", "s");
+
+  // eliminados otros aportes
+  $elim_otros_aportes_tmp = q_scalar_assoc($conexion, "
+    SELECT IFNULL(SUM(valor),0) AS s
+    FROM otros_aportes
+    WHERE anio=$anio
+      AND mes=$mm
+      AND id_jugador IN ($inElimTmp)
+  ", "s");
+
+  $parcial_mes_tmp =
+    (int)$principal_dias_tmp
+    + (int)$principal_otros_tmp
+    + (int)$esp_dias_tmp
+    + (int)$esp_otros_tmp
+    + (int)$otros_juegos_vis_tmp
+    + (int)$otros_juegos_esp_tmp
+    + (int)$elim_norm_no_vis_tmp
+    + (int)$elim_otros_juegos_tmp
+    + (int)$elim_otros_aportes_tmp;
+
+  $total_parcial_anio_resumen += (int)$parcial_mes_tmp;
+  $otros_aportes_anio_info += (int)$principal_otros_tmp + (int)$esp_otros_tmp + (int)$elim_otros_aportes_tmp;
 }
 
-// Mes
-$parcial_mes            = (int)$mes_calc["parcial_mes"];
-$otros_mes_real         = (int)$mes_calc["otros_mes"];
-$saldo_total_hasta_mes  = (int)$mes_calc["saldo_mes"];   // “Saldos actuales”
-$estimado_mes           = (int)$mes_calc["estimado_mes"];
-$gasto_mes              = (int)$mes_calc["gasto_mes"];
-$final_mes              = (int)$mes_calc["final_mes"];
+// gastos
+$gastos_mes_resumen = q_scalar_row($conexion, "
+  SELECT IFNULL(SUM(valor),0)
+  FROM gastos
+  WHERE anio=$anio AND mes=$mes
+");
 
-// Año (sumado mes a mes)
-$parcial_anio           = (int)$acc_parcial_anio;
-$otros_anio_real        = (int)$acc_otros_anio;
-$estimado_anio          = (int)$acc_estimado_anio;
-$gasto_anio             = (int)$acc_gasto_anio;
-$final_anio             = (int)$acc_final_anio;
+$gastos_anio_resumen = q_scalar_row($conexion, "
+  SELECT IFNULL(SUM(valor),0)
+  FROM gastos
+  WHERE anio=$anio AND mes<=$mes
+");
 
-// “Aportantes eliminados este mes” (solo INFORMACIÓN, como Admin)
+// estimados finales sin saldos
+$total_estimado_final_mes  = (int)$total_parcial_mes_resumen  - (int)$gastos_mes_resumen;
+$total_estimado_final_anio = (int)$total_parcial_anio_resumen - (int)$gastos_anio_resumen;
+
+// saldo actual mes = excedentes generados este mes
+$saldo_actual_mes = q_scalar_assoc($conexion, "
+  SELECT IFNULL(SUM(GREATEST(aporte_principal - $TOPE, 0)),0) AS s
+  FROM aportes
+  WHERE YEAR(fecha)=$anio
+    AND MONTH(fecha)=$mes
+    AND id_jugador IS NOT NULL
+    AND tipo_aporte IS NULL
+", "s");
+
+// saldo acumulado = saldo total disponible al corte
+$saldo_total_hasta_mes = q_scalar_assoc($conexion, "
+  SELECT IFNULL(SUM(
+    GREATEST(IFNULL(ex.excedente,0) - IFNULL(co.consumido,0), 0)
+  ),0) AS saldo
+  FROM jugadores j
+  LEFT JOIN (
+    SELECT id_jugador, SUM(GREATEST(aporte_principal - $TOPE, 0)) AS excedente
+    FROM aportes
+    WHERE fecha <= '$fechaCorteMes'
+      AND id_jugador IS NOT NULL
+      AND tipo_aporte IS NULL
+    GROUP BY id_jugador
+  ) ex ON ex.id_jugador=j.id
+  LEFT JOIN (
+    SELECT id_jugador, SUM(amount) AS consumido
+    FROM aportes_saldo_moves
+    WHERE fecha_consumo <= '$fechaCorteMes'
+    GROUP BY id_jugador
+  ) co ON co.id_jugador=j.id
+", "saldo");
+
+$saldos_acumulados = (int)$saldo_total_hasta_mes;
+
+// total final año con saldos
+$total_final_anio_con_saldos = (int)$total_estimado_final_anio + (int)$saldos_acumulados;
+
+// otros aportes informativos
+$otros_aportes_mes_info = (int)(
+  $total_otros_aportes_principal
+  + $total_esp_otros_aportes
+  + $eliminados_otros_aportes_mes
+);
+
+// informativos eliminados
 $eliminados_mes_total = q_scalar_assoc($conexion, "
   SELECT IFNULL(SUM(
     LEAST(LEAST(IFNULL(a.aporte_principal,0), $TOPE) + IFNULL(t.consumido,0), $TOPE)
@@ -619,7 +803,6 @@ $eliminados_mes_total = q_scalar_assoc($conexion, "
     AND a.tipo_aporte IS NULL
 ", "s");
 
-// Saldo eliminados (solo INFORMACIÓN)
 $saldo_eliminados_hasta_mes = q_scalar_assoc($conexion, "
   SELECT IFNULL(SUM(
     GREATEST(IFNULL(ex.excedente,0) - IFNULL(co.consumido,0), 0)
@@ -655,16 +838,14 @@ $obs = trim(get_obs($conexion, $mes, $anio));
   <h3 class="keep-title">Aportantes y Aportes</h3>
 
   <?php
-  // ====== ANCHOS DINÁMICOS ======
   $nDias = count($days);
-  $wNombre  = 14;
-  $wEsp     = 12;   // Otro Juego
-  $wOtros   = 12;   // Otros Aportes
-  $wTotal   = 12;
+  $wNombre  = 16;
+  $wOtros   = 13;
+  $wTotal   = 13;
   $wSaldo   = 12;
-  $wDeuda   = 16;
+  $wDeuda   = 18;
 
-  $fixed = $wNombre + $wEsp + $wOtros + $wTotal + $wSaldo + $wDeuda;
+  $fixed = $wNombre + $wOtros + $wTotal + $wSaldo + $wDeuda;
   $wDia = ($nDias > 0) ? max(2.6, (100 - $fixed) / $nDias) : 0;
   ?>
 
@@ -672,7 +853,6 @@ $obs = trim(get_obs($conexion, $mes, $anio));
     <colgroup>
       <col width="<?= $wNombre ?>%">
       <?php foreach ($days as $_): ?><col width="<?= $wDia ?>%"><?php endforeach; ?>
-      <col width="<?= $wEsp ?>%">
       <col width="<?= $wOtros ?>%">
       <col width="<?= $wTotal ?>%">
       <col width="<?= $wSaldo ?>%">
@@ -683,7 +863,6 @@ $obs = trim(get_obs($conexion, $mes, $anio));
       <tr>
         <th class="col-jugador" style="width:<?= $wNombre ?>%;">Jugador</th>
         <?php foreach ($days as $d): ?><th class="col-dia"><?= (int)$d ?></th><?php endforeach; ?>
-        <th class="col-especial">Otro Juego<br></th>
         <th class="col-otros">Otros<br>Aportes</th>
         <th class="col-total">Total<br>Mes</th>
         <th class="col-saldo">Saldo</th>
@@ -713,18 +892,6 @@ $obs = trim(get_obs($conexion, $mes, $anio));
               <?php endif; ?>
             </td>
           <?php endforeach; ?>
-
-          <?php
-          $fEsp = sprintf("%04d-%02d-%02d", $anio, $mes, (int)$otroDia);
-          $vEsp = get_aporte_efectivo_dia($conexion, $jid, $fEsp, $TOPE);
-          $totalJugador += $vEsp;
-          ?>
-          <td class="td-num">
-            <?= $vEsp ? (int)$vEsp : "" ?>
-            <?php if (!empty($deudas_mes[$jid][(int)$otroDia])): ?>
-              <span class="deuda-dot">&#9679;</span>
-            <?php endif; ?>
-          </td>
 
           <?php
           $otros = get_otros($conexion, $jid, $mes, $anio);
@@ -761,7 +928,6 @@ $obs = trim(get_obs($conexion, $mes, $anio));
           <td class="td-total"><strong><?= number_format((int)($totales_por_dia_principal[(int)$d] ?? 0), 0, ',', '.') ?></strong></td>
         <?php endforeach; ?>
 
-        <td class="td-total"><strong><?= number_format((int)$total_otro_dia_principal, 0, ',', '.') ?></strong></td>
         <td class="td-total"><strong><?= number_format((int)$total_otros_aportes_principal, 0, ',', '.') ?></strong></td>
         <td class="td-total"><strong><?= number_format((int)$total_mes_principal, 0, ',', '.') ?></strong></td>
         <td class="td-total"><strong><?= number_format((int)$total_saldo_visibles, 0, ',', '.') ?></strong></td>
@@ -769,10 +935,13 @@ $obs = trim(get_obs($conexion, $mes, $anio));
       </tr>
     </tfoot>
   </table>
+<div class="note" style="margin-top:6px;">
+  Nota: El Total Mes de la Tabla Principal ya incluye el Total Mes de la Tabla Aportes Esporádicos (De Abajo).
+</div>
+  <div class="note" style="margin-top:6px;">
+    Nota: Los Aportes de la columna “Otros Aportes” de Las Dos Tablas (Registrados/Esporádicos) se muestran en cada Tabla; pero se Sumán en la Sección Resumen General Totales (COP).
+  </div> <br>
 
-    <div class="note" style="margin-top:6px;">
-      Nota: Los Aportes de la columna “Otros Aportes” de Las Dos Tablas (Registrados /Esporádicos) se muestran en cada Tabla; pero se Suman en la Sección Resumen General Totales (COP) “Otros Aportes Mes/Año” (abajo).
-    </div>
   <div class="section-block">
     <h3 class="keep-title">Planilla Aportes Esporádicos (Resumen)</h3>
 
@@ -906,7 +1075,6 @@ $obs = trim(get_obs($conexion, $mes, $anio));
 
             $aportes = get_aportes_eliminado_hasta_mes($conexion, $jid, $anio, $mes, $TOPE);
 
-            // Otros aportes del eliminado (tabla otros_aportes)
             $otros_eliminado_mes = q_scalar_assoc($conexion, "
               SELECT IFNULL(SUM(valor),0) s
               FROM otros_aportes
@@ -945,7 +1113,10 @@ $obs = trim(get_obs($conexion, $mes, $anio));
 
                 $saldoEnFecha = get_saldo_hasta_fecha($conexion, $jid, $f, $TOPE);
                 $esMesActual = ((int)date("Y", strtotime($f)) === (int)$anio) && ((int)date("n", strtotime($f)) === (int)$mes);
+                $esOtroJuego = ((int)date('N', strtotime($f)) !== 3 && (int)date('N', strtotime($f)) !== 6);
+
                 $rowCls = $esMesActual ? "row-mes-actual" : "row-mes-previo";
+                if ($esOtroJuego) $rowCls .= " elim-otros";
 
                 $aportanteCell = "";
                 if ($n === 1) {
@@ -953,11 +1124,16 @@ $obs = trim(get_obs($conexion, $mes, $anio));
                 } elseif ($n === 2) {
                   $aportanteCell = "<span class='baja-pill'>Baja: " . htmlspecialchars($fechaBajaLabel) . "</span>";
                 }
+
+                $fechaLabel = htmlspecialchars(date("d-m-Y", strtotime($f)));
+                if ($esOtroJuego) {
+                  $fechaLabel .= "<br><span class='note'>(Aporte otro juego)</span>";
+                }
                 ?>
                 <tr class="<?= $rowCls ?>">
                   <td><?= $aportanteCell ?></td>
                   <td style="text-align:right;"><?= $n ?></td>
-                  <td><?= htmlspecialchars(date("d-m-Y", strtotime($f))) ?></td>
+                  <td><?= $fechaLabel ?></td>
                   <td style="text-align:right;"><?= number_format($efectivo, 0, ',', '.') ?></td>
                   <td style="text-align:right;"><?= number_format($acumRunning, 0, ',', '.') ?></td>
                   <td style="text-align:right;"><strong><?= number_format($saldoEnFecha, 0, ',', '.') ?></strong></td>
@@ -1014,17 +1190,91 @@ $obs = trim(get_obs($conexion, $mes, $anio));
       <table class="totales-table">
         <tr>
           <td class="label">
-            <strong>Total Parcial Mes</strong>
-            <div class="note">(Registrados + Esporádicos. Incluye eliminados porque están en aportes)</div>
+            <strong>Total Parcial Mes Incluye:</strong>
+            <div class="note">
+              - Aportes de Cada Partido (Miércoles / Sábado) de Ambas Planillas<br>
+              - Aportes de Los Jugadores Eliminados de la tabla Aportantes Eliminados (Detalle)<br>
+              - Aportes de Tabla Otros Juegos (Principal + Esporádicos)<br>
+              - Otros Aportes de Ambas Tablas
+            </div>
           </td>
-          <td class="money">$ <?= number_format((int)$parcial_mes, 0, ',', '.') ?></td>
+          <td class="money"></td>
+        </tr>
+      </table>
+
+      <div class="sep"></div>
+
+      <table class="totales-table">
+        <tr>
+          <td class="label">
+            <strong>Total Parcial Mes</strong>
+            <div class="note">(Activos + Eliminados + Otros Aportes / Sin Saldo)</div>
+          </td>
+          <td class="money">$ <?= number_format((int)$total_parcial_mes_resumen, 0, ',', '.') ?></td>
         </tr>
         <tr>
           <td class="label">
             <strong>Total Parcial Año</strong>
-            <div class="note">(Suma mes a mes: Parcial Ene + Parcial Feb + ...)</div>
+            <div class="note">(Activos + Eliminados + Otros Aportes / Sin Saldo)</div>
           </td>
-          <td class="money">$ <?= number_format((int)$parcial_anio, 0, ',', '.') ?></td>
+          <td class="money">$ <?= number_format((int)$total_parcial_anio_resumen, 0, ',', '.') ?></td>
+        </tr>
+      </table>
+
+      <div class="sep"></div>
+
+      <table class="totales-table">
+        <tr>
+          <td class="label"><strong>Gastos del Mes</strong></td>
+          <td class="money neg">$ <?= number_format((int)$gastos_mes_resumen, 0, ',', '.') ?></td>
+        </tr>
+        <tr>
+          <td class="label"><strong>Gastos del Año</strong></td>
+          <td class="money neg">$ <?= number_format((int)$gastos_anio_resumen, 0, ',', '.') ?></td>
+        </tr>
+      </table>
+
+      <div class="sep"></div>
+
+      <table class="totales-table">
+        <tr>
+          <td class="label">
+            <strong>Total Estimado Final Mes</strong>
+            <div class="note">(Total Parcial Mes - gastos / Sumable Por Mes / Sin Saldos)</div>
+          </td>
+          <td class="money strong">$ <?= number_format((int)$total_estimado_final_mes, 0, ',', '.') ?></td>
+        </tr>
+        <tr>
+          <td class="label">
+            <strong>Total Estimado Final Año</strong>
+            <div class="note">(Total Parcial Año - gastos / Sumable Por Mes / Sin Saldos)</div>
+          </td>
+          <td class="money strong">$ <?= number_format((int)$total_estimado_final_anio, 0, ',', '.') ?></td>
+        </tr>
+      </table>
+
+      <div class="sep"></div>
+
+      <table class="totales-table">
+        <tr>
+          <td class="label"><strong>Saldo Actual Mes</strong><div class="note">(Saldos Generados Este Mes)</div></td>
+          <td class="money">$ <?= number_format((int)$saldo_actual_mes, 0, ',', '.') ?></td>
+        </tr>
+        <tr>
+          <td class="label"><strong>Saldos Acumulados</strong><div class="note">(Saldos Generados Este Mes + Heredados Meses Anteriores)</div></td>
+          <td class="money">$ <?= number_format((int)$saldos_acumulados, 0, ',', '.') ?></td>
+        </tr>
+      </table>
+
+      <div class="sep"></div>
+
+      <table class="totales-table final">
+        <tr>
+          <td class="label">
+            <strong>Total Final Año (Con Saldos Acumulados)</strong>
+            <div class="note">(Total Estimado Final Año + Saldo acumulado)</div>
+          </td>
+          <td class="money strong">$ <?= number_format((int)$total_final_anio_con_saldos, 0, ',', '.') ?></td>
         </tr>
       </table>
 
@@ -1034,90 +1284,16 @@ $obs = trim(get_obs($conexion, $mes, $anio));
         <tr>
           <td class="label">
             <strong>Otros Aportes Mes</strong>
-            <div class="note">(otros_aportes + esporadico_otro)</div>
+            <div class="note">(Solo Informativo)</div>
           </td>
-          <td class="money">$ <?= number_format((int)$otros_mes_real, 0, ',', '.') ?></td>
+          <td class="money">$ <?= number_format((int)$otros_aportes_mes_info, 0, ',', '.') ?></td>
         </tr>
         <tr>
           <td class="label">
             <strong>Otros Aportes Año</strong>
-            <div class="note">(Suma mes a mes: Otros Ene + Otros Feb + ...)</div>
+            <div class="note">(Solo Informativo)</div>
           </td>
-          <td class="money">$ <?= number_format((int)$otros_anio_real, 0, ',', '.') ?></td>
-        </tr>
-        <tr>
-          <td class="label"><strong>Saldos Actuales De Aportantes (Hasta Este Mes)</strong></td>
-          <td class="money">$ <?= number_format((int)$saldo_total_hasta_mes, 0, ',', '.') ?></td>
-        </tr>
-      </table>
-
-      <div class="sep"></div>
-
-      <table class="totales-table">
-        <tr>
-          <td class="label">
-            <strong>Aportes de Aportantes Eliminados (este mes)</strong>
-            <div class="note">No aparecen en planilla, pero sus aportes están dentro del Parcial.</div>
-          </td>
-          <td class="money">$ <?= number_format((int)$eliminados_mes_total, 0, ',', '.') ?></td>
-        </tr>
-        <tr>
-          <td class="label">
-            <strong>Saldo eliminados hasta mes</strong>
-            <div class="note">Saldo acumulado de eliminados al corte del mes.</div>
-          </td>
-          <td class="money">$ <?= number_format((int)$saldo_eliminados_hasta_mes, 0, ',', '.') ?></td>
-        </tr>
-      </table>
-
-      <div class="sep"></div>
-
-      <table class="totales-table">
-        <tr>
-          <td class="label">
-            <strong>Total Estimado Mes</strong>
-            <div class="note">(Parcial Mes + Otros Mes + Saldo Mes, sin gastos)</div>
-          </td>
-          <td class="money strong">$ <?= number_format((int)$estimado_mes, 0, ',', '.') ?></td>
-        </tr>
-        <tr>
-          <td class="label">
-            <strong>Total Estimado Año</strong>
-            <div class="note">(Suma mes a mes: Estimado Ene + Estimado Feb + ...)</div>
-          </td>
-          <td class="money strong">$ <?= number_format((int)$estimado_anio, 0, ',', '.') ?></td>
-        </tr>
-      </table>
-
-      <div class="sep"></div>
-
-      <table class="totales-table">
-        <tr>
-          <td class="label"><strong>Gastos del Mes</strong></td>
-          <td class="money neg">$ <?= number_format((int)$gasto_mes, 0, ',', '.') ?></td>
-        </tr>
-        <tr>
-          <td class="label"><strong>Gastos del Año</strong></td>
-          <td class="money neg">$ <?= number_format((int)$gasto_anio, 0, ',', '.') ?></td>
-        </tr>
-      </table>
-
-      <div class="sep"></div>
-
-      <table class="totales-table final">
-        <tr>
-          <td class="label">
-            <strong>Total Final Mes</strong>
-            <div class="note">(estimado - gastos)</div>
-          </td>
-          <td class="money strong">$ <?= number_format((int)$final_mes, 0, ',', '.') ?></td>
-        </tr>
-        <tr>
-          <td class="label">
-            <strong>Total Final Año</strong>
-            <div class="note">(Suma mes a mes: Final Ene + Final Feb + ...)</div>
-          </td>
-          <td class="money strong">$ <?= number_format((int)$final_anio, 0, ',', '.') ?></td>
+          <td class="money">$ <?= number_format((int)$otros_aportes_anio_info, 0, ',', '.') ?></td>
         </tr>
       </table>
 

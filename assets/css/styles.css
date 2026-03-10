@@ -1114,8 +1114,8 @@ background-color: #b1f5bf;
 /* SECCION DE OTROS PARTIDO INFO */
 
 .otros-partidos-container-table{
-overflow:auto;
 height: fit-content;
+overflow: auto;
 }
 
 .otros-partidos-title span,.otros-partidos-tfoot-table span{
@@ -1130,7 +1130,6 @@ font-style:italic;
 
 }
 .otros-partidos-table{
-width:100%; 
 border-collapse:collapse; 
 font-size:13px;
 margin-top: 2%;
@@ -1147,8 +1146,9 @@ color: #fdf79c;
 font-weight: lighter !important;
 font-size: 15px;
 text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
+width: 130%;
+margin:auto;
 
- 
 }
 
 .otros-partidos-table thead tr th :first-child {
@@ -1189,19 +1189,19 @@ text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
 }
 
 .otros-partidos-tfoot-table{
-
- display: block;
- flex-direction: row;
- left: 9%;
- width: 100%;
- min-height:fit-content;
- height: 35px !important;
+display: flex;
+flex-direction: row;
+left: 9%;
+width: 130%;
+min-height:36px;
 align-content: center;
-top: 0%;
-  padding: 7px 5px;
-  border-radius: 10px;
-  background: rgba(226, 240, 230, 0.774);
-  border: 1px solid rgba(0, 199, 60, 0.534);
+height: 36px !important;
+margin-top: 3px;
+align-items: center;
+padding: 3px 5px;
+border-radius: 6px;
+background: rgba(226, 240, 230, 0.774);
+border: 1px solid rgba(0, 199, 60, 0.534);
 
 
 }
@@ -1234,6 +1234,43 @@ text-shadow: -1px 1px 1px rgb(0, 0, 0);
 
 }
 
+/* móvil/tablet: solo compactar un poco sin tocar layout */
+.otros-partidos-table thead tr th{
+  font-size: 12px !important;
+  padding: 6px 5px !important;
+}
+
+.otros-partidos-table tbody tr td{
+  font-size: 11px !important;
+  padding: 7px 5px !important;
+}
+
+.otros-partidos-table tbody tr td:nth-child(2){
+  text-align: left !important;
+}
+
+.otros-partidos-table tbody tr td:last-child{
+  font-size: 12px !important;
+}
+
+ .otros-partidos-container-table::-webkit-scrollbar{
+    width: 3px;
+    height: 4px;
+  }
+
+  .otros-partidos-container-table::-webkit-scrollbar-track{
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+  }
+
+  .otros-partidos-container-table::-webkit-scrollbar-thumb{
+    background: rgba(98, 194, 135, 0.829);
+    border-radius: 10px;
+  }
+
+  .otros-partidos-container-table::-webkit-scrollbar-thumb:hover{
+    background: rgba(0, 187, 47, 0.85);
+  }
 
 
 /* OBSERVACIONES CARD */
@@ -2651,14 +2688,54 @@ font-size: 14px;
 }
 .otros-partidos-table{
   font-size:13px;
+  width: 100%;
+
 }
+
+
+.otros-partidos-tfoot-table{
+display: flex;
+flex-direction: row;
+left: 0%;
+width: 100%;
+margin-top: 3px;
+min-height:36px;
+align-content: center;
+justify-content: center;
+height: 36px !important;
+border-radius: 5px;
+align-items: center;
+padding: 3px 5px;
+
+
+}
+.otros-general-total-label-span{
+  display: block;
+  flex-direction: row;
+padding: 0 !important;
+color: #f1c500;
+font-weight:bold; 
+font-size: 16px;
+margin-left: 13%;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),
+ -1px 1px 1px rgb(0, 0, 0), -1px 1px 1px rgb(0, 0, 0);
+}
+
+
+.otros-general-total-value-span{
+color: #00c73c !important;
+font-size: 15px;
+
+}
+
 .otros-partidos-tfoot-table p{
-  padding: 2%;
+padding: 2%;
 font-size: 16px;
 
 }
 .otros-partidos-tfoot-table span{
 font-size: 14px;
+justify-self: center;
 }
 
 

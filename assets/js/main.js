@@ -657,7 +657,6 @@ async function fetchEliminadosMes(mes, anio) {
 }
 
 function renderModalEliminados(data, mes, anio) {
-  // 👇 OJO: SIEMPRE re-tomar elementos del DOM (por si loadSheet reemplazó algo)
   const modal = document.getElementById("modalEliminados");
   const body  = document.getElementById("modalEliminadosBody");
   if (!modal || !body) return;
@@ -672,7 +671,6 @@ function renderModalEliminados(data, mes, anio) {
     return;
   }
 
-  // agrupar filas por jugador
   const rowsByPlayer = new Map();
   for (const r of rows) {
     const k = String(r.jugador_id);
@@ -725,7 +723,6 @@ function renderModalEliminados(data, mes, anio) {
           </div>
         `;
 
-        // sin movimientos
         if (!pr.length) {
           return `
             <tr class="row-empty">
@@ -750,10 +747,12 @@ function renderModalEliminados(data, mes, anio) {
           `;
         }
 
-        // con movimientos
         const rowsHtml = pr.map((r, i) => {
           const isLast = i === pr.length - 1;
-          const cls = (r.kind === "otro") ? "row-otro" : "row-normal";
+
+          let cls = "row-normal";
+          if (r.kind === "otro" || r.kind === "otro_juego") cls = "row-otro";
+
           const labelHtml = r.label ? `<div class="row-label">${escapeHtml(r.label)}</div>` : "";
 
           const saldoHtml  = isLast ? `<strong>${formatMoney(p.saldo_fin_mes || 0)}</strong>` : "";
@@ -814,7 +813,6 @@ function renderModalEliminados(data, mes, anio) {
 </div>
   `;
 
-  // abrir limpio
   modal.classList.remove("closing");
   modal.classList.remove("hidden");
 }
@@ -1721,11 +1719,16 @@ async function loadOtrosPartidosInfo(mes, anio) {
 
   const rows = (j.items || []).map((it, idx) => {
     const fecha = it.fecha_label || it.fecha;
+    const nombre = escapeHtml(it.nombre || "");
+    const tabla = escapeHtml(it.tabla || "");
     const valFmt = Number(it.efectivo_total || 0).toLocaleString("es-CO");
+
     return `
       <tr>
-        <td style="padding:6px 8px;">Partido ${idx + 1}</td>
+        <td style="padding:6px 8px;">${idx + 1}</td>
+        <td style="padding:6px 8px;">${nombre}</td>
         <td style="padding:6px 8px;">${fecha}</td>
+        <td style="padding:6px 8px;">${tabla}</td>
         <td style="padding:6px 8px; text-align:right;"><strong>${valFmt}</strong></td>
       </tr>
     `;
@@ -1733,38 +1736,36 @@ async function loadOtrosPartidosInfo(mes, anio) {
 
   box.innerHTML = `
     <div>
-      <div class='otros-partidos-title'">
-        <span>Otros partidos (${cantidad})<span>
+      <div class='otros-partidos-title'>
+        <span>Otros partidos (${cantidad})</span>
       </div>
 
       <div class='otros-partidos-container-table'>
         <table class='otros-partidos-table'>
           <thead>
             <tr>
-              <th>Partido</th>
+              <th>#</th>
+              <th>Aportante</th>
               <th>Fecha</th>
-              <th>Total</th>
+              <th>Tabla</th>
+              <th>Valor</th>
             </tr>
           </thead>
           <tbody>
             ${rows}
           </tbody>
+        </table>
 
+        <div class='otros-partidos-tfoot-table'>
+    
+            <span class="otros-general-total-label-span">Total otros partidos:</span>
+            <span class="otros-general-total-value-span">${totalGeneralFmt}</span>
           
-          </table>
-          <div class='otros-partidos-tfoot-table' style="margin-top:10px;">
-              <div>
-                <span class="otros-general-total-label-span">Total otros partidos:
-                <span class="otros-general-total-value-span">${totalGeneralFmt}</span></span>
-          
-              </div>
-          </div>
+        </div>
       </div>
-
     </div>
   `;
 }
-
 
 async function cargarAportesEsporadicos(mes, anio, otroDia) {
   const wrap = document.getElementById("esporadicosWrap");

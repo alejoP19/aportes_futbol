@@ -442,26 +442,64 @@ te explico, el reporte debe traer la tabla principal con las
 BUG --> 
 
 
+ La sección de resumen general es la que debemos corregir y dejarla tal como está en la interfaz de admin; la forma es la siguiete:
+
+Totales (COP)
+Total Parcial Mes Incluye:
+
+- Aportes de Cada Partido (Miercoles / Sabado) de Ambas Planillas
+- Aportes de Los Jugadores Eliminados. de la tabla Aportantes Eliminados (Detalle)
 
 
-bueno , ahora o nada , se rompió todo: te envio el get_totals.php --- con tus ajustes (quitar lo que ya no se necesite); pero entonces que necesitamos?, necesitamos:
-
-1. Totales parciales mensuales con otros aportes (sin saldos), de ambas tablas 
-2. Otros Aportes Mes (Solo Informativo): 
-3. Otros Aportes Año (Solo Informativo): 
-4. Gastos del Mes: $
-5. Gastos del Año: $
-6. totlaes Estimados finales mensuales y anuales (sin saldos) ; es decir , despues de restar totales parciales menos gastos
-7. totales final  mensuales (sin saldo)
-8.  totales final anual (sin saldo)
-9. Saldos Actuales De Aportantes: (Hasta Este Mes). 
-10. total fnal  mensual (con saldo) 
-11. total anual l (con saldo)
+- Aportes de Tabla Otros Juegos (Principal + Esporádicos) (Cada Dia Jugado); 
 
 
 
 
-otra opcion es mostrar dos saldos cada mes, ejemplo: Enero: Saldos Actuales De Aportantes (De Este Mes) :$ 1.000 Saldos Actuales De Aportantes (Acumulado Hasta Este Mes) :$ 1.000 Febrero: Saldos Actuales De Aportantes (De Este Mes) :$ 1.000 Saldos Actuales De Aportantes (Acumulado Hasta Este Mes) :$ 2.000 y en el total final mes se pone el toolip --> Suma solo el saldo mensual no el acumulado
+Total Parcial Mes
+(Activos + Eliminados + Otros Aportes / Sin Saldo):
+$  
+Total Parcial Año
+(Activos + Eliminados + Otros Aportes / Sin Saldo):
+$  
+
+
+Gastos del Mes:
+$  
+Gastos del Año:
+$ 
+
+ 
+Total Estimado Final Mes
+(Total Parcial Mes - gastos / Sumable Por Mes / Sin Saldos)
+$  
+Total Estimado Final Año
+(Total Parcial Mes - gastos / Sumable Por Mes / Sin Saldos)
+$  
+
+
+Saldo Actual Mes(Saldos Generados Este Mes)$ 0
+Saldos Acumulados(Saldos Generados Este Mes + Heredados Meses Anteriores)$ 0
+
+
+
+Total Final Año (Con Saldos Acumulados)
+(Total Estimado Final Año + Saldo acumulado)
+$  
+
+Otros Aportes Mes
+(Solo Informativo):
+$  
+Otros Aportes Año
+(Solo Informativo):
+$ 
+
+
+
+
+
+
+
 
 
 
