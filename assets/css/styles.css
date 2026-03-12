@@ -2043,6 +2043,13 @@ input[type="number"] {
     appearance: textfield;      /* estándar */
     -moz-appearance: textfield; /* Firefox */
 }
+/* BODY Otro Aporte Tipo / Valor*/
+.tipo,.valor{
+  font-size: 12px;
+  text-align: center !important;
+  justify-content: center !important;
+ 
+}
 
 /* BODY Total Mes */
 .planilla td.col-total-mes{
@@ -3111,7 +3118,10 @@ font-size: 14px;
 font-size: 12px;
 }
 
-
+.tipo,.valor{
+  font-size: 12px;
+ 
+}
 /* BOTONES PLANILLA MOSTRAR GASTOS EDITAR - ELIMINAR  */
 
 .acciones-buttons {

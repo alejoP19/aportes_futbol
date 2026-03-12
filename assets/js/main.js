@@ -629,6 +629,7 @@ async function loadTotals(mes, anio) {
   if (tr) tr.innerText = formatMoney(j.total_real_hasta_fecha);
 }
 
+
 // ================================
 // ELIMINADOS (MODAL) - FIX DEFINITIVO
 // ================================
@@ -1083,7 +1084,6 @@ if (btnLogout) {
     });
   });
 }
-
 
 
 async function eliminarJugador(id) {
@@ -1686,7 +1686,6 @@ function initSaldoFromHTML(container) {
   });
 }
 
-
 async function loadOtrosPartidosInfo(mes, anio) {
   const box = document.getElementById("otrosPartidosInfo");
   if (!box) return;
@@ -1766,6 +1765,7 @@ async function loadOtrosPartidosInfo(mes, anio) {
     </div>
   `;
 }
+
 
 async function cargarAportesEsporadicos(mes, anio, otroDia) {
   const wrap = document.getElementById("esporadicosWrap");

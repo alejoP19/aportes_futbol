@@ -302,8 +302,8 @@ echo "<th></th>";
 foreach ($days as $d) echo "<th data-group='dias'>{$d}</th>";
 echo "<th id='thOtroJuego' data-group='otro' data-dia='{$otroDia}'>Otro juego ({$otroLabel})</th>";
 
-echo "<th data-group='otros'>Tipo</th>";
-echo "<th data-group='otros'>Valor</th>";
+echo "<th data-group='otros' class='tipo'>Tipo</th>";
+echo "<th data-group='otros'  class='valor'>Valor</th>";
 echo "<th class='th-total-mes' data-group='total'>Por Jugador</th>";
 echo "<th class='th-saldo' data-group='saldo'>Tu Saldo</th>";
 echo "<th>Editar / Eliminar</th>";
@@ -494,8 +494,8 @@ foreach ($jugadores as $jug) {
 
     $total_otros_global += $valor_otros;
 
-    echo "<td>" . (empty($tipos) ? '' : implode("<br>", $tipos)) . "</td>";
-    echo "<td>" . ($valor_otros ? number_format($valor_otros, 0, ',', '.') : '') . "</td>";
+    echo "<td class='tipo'>" . (empty($tipos) ? '' : implode("<br>", $tipos)) . "</td>";
+    echo "<td class='valor'>" . ($valor_otros ? number_format($valor_otros, 0, ',', '.') : '') . "</td>";
    echo "<td class='col-total-mes'><strong>" . number_format($total_jugador_mes, 0, ',', '.') . "</strong></td>";
 
 $saldoAcumulado = get_saldo_acumulado($conexion, $jugId, $mes, $anio);
