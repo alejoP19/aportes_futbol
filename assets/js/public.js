@@ -2,6 +2,8 @@
 const API_JSON = "/APORTES_FUTBOL/backend/public_data/listado_publico.php";
 const API_PDF  = "../public/public/public_reportes/reporte_mes_publico.php";
 const API_ELIMINADOS_PUBLICO = "/APORTES_FUTBOL/backend/public_data/get_eliminados_mes_publico.php";
+const API_OTROS_PARTIDOS_PUBLICO = "/APORTES_FUTBOL/backend/public_data/get_otros_partidos_info_publico.php";
+const API_ESP_PUBLIC_GET = "/APORTES_FUTBOL/backend/public_data/aportes_esporadicos_public/get_esporadicos_publico.php";
 
 document.addEventListener("DOMContentLoaded", () => {
   cargarSelects();
@@ -53,12 +55,11 @@ function cargarSelects() {
 async function cargarDatos() {
   const mes  = document.getElementById("selectMes").value;
   const anio = document.getElementById("selectAnio").value;
-   const storedOtro = getStoredOtroDia(mes, anio);
+  const storedOtro = getStoredOtroDia(mes, anio);
   const otroParam = storedOtro ? `&otro=${storedOtro}` : "";
 
-  
   const url = `${API_JSON}?mes=${mes}&anio=${anio}${otroParam}`;
-  const r = await fetch(url);
+  const r = await fetch(url, { cache: "no-store" });
 
   if (!r.ok) {
     document.getElementById("contenedorTabla").innerHTML = "<p>Error cargando datos</p>";
@@ -67,44 +68,43 @@ async function cargarDatos() {
 
   const data = await r.json();
 
-  // ✅ pintar selector (después de tener data.otro_dia y days)
   renderSelectOtroDia(data, mes, anio);
 
-  renderTablaPublic(data);
+  const espData = await cargarAportesEsporadicosPublico(mes, anio, data.otro_dia);
 
-  // ✅ si ya había texto escrito, re-aplicar filtro después del render
-  const inp = document.querySelector("#contenedorTabla #searchPublic");
-  if (inp && inp.value.trim()) {
-    aplicarFiltroPublico(document.getElementById("contenedorTabla"), inp.value);
+  let otrosJuegosData = { ok:false, cantidad:0, total_general:0, items:[] };
+  try {
+    const rOtros = await fetch(`${API_OTROS_PARTIDOS_PUBLICO}?mes=${mes}&anio=${anio}`, {
+      cache: "no-store"
+    });
+    otrosJuegosData = await rOtros.json();
+  } catch (e) {
+    console.warn("No se pudo cargar otros juegos:", e);
   }
 
+  renderTablaPublic(data);
   renderTotales(data);
   renderObservaciones(data.observaciones);
   renderGastos(data, mes, anio);
   renderOtrosAportesPublico(data, mes, anio);
-  renderOtrosPartidosPublico(data);
+  renderOtrosPartidosPublico(otrosJuegosData);
   await cargarEliminadosMes(mes, anio);
 
+  const inp = document.querySelector("#contenedorTabla #searchPublic");
+  if (inp && inp.value.trim()) {
+    aplicarFiltroPublico(document.getElementById("contenedorTabla"), inp.value);
+  }
 }
-
-
-
-
-
-/* ==========================================================
-    TABLA PRINCIPAL
-========================================================== */
 
 function renderTablaPublic(data) {
   const cont = document.getElementById("contenedorTabla");
+  if (!cont) return;
 
-  const dias          = data.dias_validos;
-  const fechaEspecial = data.otro_dia;
-
-  const totalCols = dias.length + 7;
+  const dias = Array.isArray(data.dias_validos) ? data.dias_validos : [];
+  const fechaEspecial = Number(data.otro_dia || 0);
+  const tf = data.tfoot || {};
 
   let html = `
-  
     <div class="public-search-bar">
       <div class="public-search-wrap">
         <span class="icono-buscar">🔍</span>
@@ -119,110 +119,94 @@ function renderTablaPublic(data) {
 
     <table class="planilla">
       <thead>
+        <tr class="header-tr-one">
+          <th>Nombres</th>
+          <th colspan="${dias.length + 1}">Días de los juegos</th>
+          <th colspan="2">Otros aportes</th>
+          <th>Total Mes</th>
+          <th>Saldo</th>
+          <th>Deudas</th>
+        </tr>
+        <tr class="header-tr-two">
+          <th></th>
+          ${dias.map(d => `<th>${d}</th>`).join("")}
+          <th>Otro juego (${String(fechaEspecial).padStart(2, "0")})</th>
+          <th>Tipo</th>
+          <th>Valor</th>
+          <th>Por Jugador</th>
+          <th>Tu Saldo</th>
+          <th>Tu Deuda</th>
+        </tr>
+      </thead>
+      <tbody>
   `;
 
-  // --- CABECERAS (igual que antes, pero YA SIN public-search-row) ---
-  html += `<tr>`;
-  html += `<th>Nombres</th>`;
-  html += `<th colspan="${dias.length + 1}">Días de los juegos</th>`;
-  html += `<th colspan="2">Otros aportes</th>`;
-  html += `<th>Total Mes</th>`;
-  html += `<th>Saldo</th>`;
-  html += `<th>Deudas</th>`;
-  html += `</tr>`;
-
-  html += `<tr class="encabezado-dos" ><th></th>`;
-  dias.forEach(d => html += `<th>${d}</th>`);
-  html += `<th>Otra Fecha (${fechaEspecial})</th>`;
-  html += `<th>Tipo</th><th>Valor</th>`;
-  html += `<th>Por Jugador</th>`;
-  html += `<th>Tu Saldo</th>`;
-  html += `<th>Tu Deuda</th>`;
-  html += `</tr></thead><tbody>`;
-
-  // ... resto igual ...
-
-
-  /* ==========================================================
-      FILAS POR JUGADOR
-  ========================================================== */
   data.rows.forEach(row => {
-    const deudas = row.deudas || {};
-    const claseEliminado = row.activo === 0 ? "eliminado" : "";
+    if (Number(row.activo) === 0) return;
 
-    html += `<tr data-player="${row.id}" class="${claseEliminado}">`;
+    const deudas = row.deudas || {};
+
+    html += `<tr data-player="${row.id}">`;
     html += `<td class="player-name">${escapeHtml(row.nombre)}</td>`;
 
-    // DÍAS NORMALES
-    row.dias.forEach((v, idx) => {
-      const realArr = row.real_dias || [];
-      const real    = realArr[idx] !== undefined ? Number(realArr[idx]) : Number(v || 0);
-      const visible = Number(v || 0);
+    row.dias.forEach((visible, idx) => {
+      const real = Number((row.real_dias || [])[idx] ?? visible ?? 0);
+      const consumo = Number((row.consumo_dias || [])[idx] ?? 0);
+      const diaNumero = dias[idx];
+      const hayDeuda = deudas[diaNumero] === true;
+      const hayExcedente = real > 3000 && Number(visible || 0) > 0;
 
-      const hayExcedente = real > visible && visible > 0;
-      const diaNumero    = dias[idx];
-      const hayDeuda     = deudas[diaNumero] === true;
+      const deudaHtml = hayDeuda
+        ? `<span class="deuda-x-publica" title="Día no pagado">✖</span>`
+        : "";
 
-      const consumoArr = row.consumo_dias || [];
-      const consumo = Number(consumoArr[idx] || 0);
-      const showPlus = consumo > 0;
-
-      let prefix = "";
-      if (hayDeuda) {
-        prefix = `<span class="deuda-x-publica" title="Día no pagado">✖</span>`;
-      }
-
-      const plusHtml = showPlus
+      const plusHtml = consumo > 0
         ? `<span class="saldo-plus-public" data-saldo="${consumo}" title="Tomó del saldo: ${formatMoney(consumo)}">✚</span>`
         : "";
 
       if (hayExcedente) {
         html += `
-          <td class="celda-aporte aporte-excedente"
-              title="Aportó ${formatMoney(real)}"
-              data-real="${real}">
-              ${prefix} ${plusHtml} ⭐ ${formatMoney(visible)}
-          </td>`;
+          <td class="celda-aporte aporte-excedente" title="Aportó ${formatMoney(real)}" data-real="${real}">
+            ${deudaHtml} ${plusHtml} ⭐ ${Number(visible || 0) ? formatMoney(visible) : ""}
+          </td>
+        `;
       } else {
         html += `
           <td class="celda-aporte">
-              ${prefix} ${plusHtml} ${visible ? formatMoney(visible) : ""}
-          </td>`;
+            ${deudaHtml} ${plusHtml} ${Number(visible || 0) ? formatMoney(visible) : ""}
+          </td>
+        `;
       }
     });
 
-    // ---------- FECHA ESPECIAL ----------
-    const realEsp    = Number(row.real_especial ?? 0);
-    const visibleEsp = Number(row.especial ?? 0);
-
+    const realEsp = Number(row.real_especial || 0);
+    const visibleEsp = Number(row.especial || 0);
     const consumoEsp = Number(row.consumo_especial || 0);
+    const hayExcEsp = realEsp > 3000 && visibleEsp > 0;
+    const hayDeudaEsp = deudas[fechaEspecial] === true;
+
+    const deudaEsp = hayDeudaEsp
+      ? `<span class="deuda-x-publica" title="Día no pagado">✖</span>`
+      : "";
+
     const plusEsp = consumoEsp > 0
       ? `<span class="saldo-plus-public" data-saldo="${consumoEsp}" title="Tomó del saldo: ${formatMoney(consumoEsp)}">✚</span>`
       : "";
 
-    const hayExcEsp   = realEsp > visibleEsp && visibleEsp > 0;
-    const hayDeudaEsp = deudas[fechaEspecial] === true;
-
-    let prefixEsp = "";
-    if (hayDeudaEsp) {
-      prefixEsp = `<span class="deuda-x-publica" title="Día no pagado">✖</span>`;
-    }
-
     if (hayExcEsp) {
       html += `
-        <td class="celda-aporte aporte-excedente"
-            title="Aportó ${formatMoney(realEsp)}"
-            data-real="${realEsp}">
-            ${prefixEsp} ${plusEsp} ⭐ ${formatMoney(visibleEsp)}
-        </td>`;
+        <td class="celda-aporte aporte-excedente" title="Aportó ${formatMoney(realEsp)}" data-real="${realEsp}">
+          ${deudaEsp} ${plusEsp} ⭐ ${visibleEsp ? formatMoney(visibleEsp) : ""}
+        </td>
+      `;
     } else {
       html += `
         <td class="celda-aporte">
-            ${prefixEsp} ${plusEsp} ${visibleEsp ? formatMoney(visibleEsp) : ""}
-        </td>`;
+          ${deudaEsp} ${plusEsp} ${visibleEsp ? formatMoney(visibleEsp) : ""}
+        </td>
+      `;
     }
 
-    // ---------- OTROS ----------
     let tiposHtml = "";
     let valorOtros = 0;
 
@@ -230,24 +214,22 @@ function renderTablaPublic(data) {
       tiposHtml = row.otros
         .map(o => `${escapeHtml(o.tipo)} (${formatMoney(o.valor)})`)
         .join("<br>");
-      valorOtros = row.otros.reduce((s, o) => s + Number(o.valor), 0);
+      valorOtros = row.otros.reduce((s, o) => s + Number(o.valor || 0), 0);
     }
 
     html += `<td class="otros-tipos"><div class="cell-scroll">${tiposHtml}</div></td>`;
     html += `<td class="otros-valor">${valorOtros ? formatMoney(valorOtros) : ""}</td>`;
 
-    // ---------- TOTAL MES Y SALDO ----------
     html += `<td class="total-por-jugador"><strong>${row.total_mes ? formatMoney(row.total_mes) : ""}</strong></td>`;
-    html += `<td class="total-por-jugador">${row.saldo ? formatMoney(row.saldo) : ""}</td>`;
+    html += `<td class="col-saldo"><strong>${row.saldo ? formatMoney(row.saldo) : ""}</strong></td>`;
 
-    // ---------- DEUDA ----------
     const diasDeuda = Number(row.total_deudas ?? 0);
     const lista = row.deudas_lista || [];
 
     if (diasDeuda > 0) {
       html += `
         <td class="columna-deuda">
-          <strong>Debe: ${diasDeuda}</strong>
+          <strong>Deudas: ${diasDeuda}</strong>
           <div class="cell-scroll deuda-fechas-public">
             ${lista.map(f => `<div class="deuda-fecha-item">${escapeHtml(f)}</div>`).join("")}
           </div>
@@ -259,53 +241,69 @@ function renderTablaPublic(data) {
     html += `</tr>`;
   });
 
-  html += `</tbody>`;
+  html += `</tbody><tfoot>`;
 
-  /* ==========================================================
-      PIE DE TABLA
-  ========================================================== */
-  html += `<tfoot><tr><td><h2 class="tfoot-totals-names">Totales Diarios</h2></td>`;
+  // FILA 1
+  html += `<tr class="tfoot-total-dia">`;
+  html += `<td><strong>TOTAL DÍA</strong></td>`;
 
-  const totalsPorDia = Array(dias.length).fill(0);
-  let totalEspecial = 0;
-  let totalOtros = 0;
-  let totalVisibleMes = 0;
-  let totalSaldosMes = 0;
-
-  data.rows.forEach(r => {
-    r.dias.forEach((v, i) => totalsPorDia[i] += Number(v || 0));
-    totalEspecial += Number(r.especial || 0);
-
-    if (r.otros?.length) totalOtros += r.otros.reduce((s, o) => s + Number(o.valor), 0);
+  (tf.totales_por_dia_footer || []).forEach(v => {
+    html += `<td><strong>${Number(v || 0).toLocaleString("es-CO")}</strong></td>`;
   });
 
-  data.rows.forEach(r => {
-    totalVisibleMes += Number(r.total_mes || 0);
-    totalSaldosMes  += Number(r.saldo || 0);
-  });
+  html += `<td><strong>${Number(tf.total_otro_footer || 0).toLocaleString("es-CO")}</strong></td>`;
+  html += `<td></td>`;
+  html += `<td><strong>${Number(tf.total_otros_aportes_footer || 0).toLocaleString("es-CO")}</strong></td>`;
+  html += `<td><strong>${Number(tf.totales_parcial_footer || 0).toLocaleString("es-CO")}</strong></td>`;
+  html += `<td><strong>${Number(tf.saldo_total_footer || 0).toLocaleString("es-CO")}</strong></td>`;
+  html += `<td></td>`;
+  html += `</tr>`;
 
-  totalsPorDia.forEach(v => {
-    html += `<td class="total-footer-dias"><strong>${v ? formatMoney(v) : "0"}</strong></td>`;
-  });
+  // FILA 2
+  html += `
+    <tr class="tfoot-base-sin-elim">
+      <td colspan="${dias.length + 4}">
+        <p>TOTAL FINAL MES (Sin Aportes De Tabla Eliminados / Sin Otros Aportes de Ambas Tablas) =</p>
+        <div class="tfoot-base-sin-elim-note">
+          Sumando esta cifra con los Aportes Eliminados del Mes saldrá el Total Mes (sin otros aportes de Ambas Tablas).
+        </div>
+      </td>
+      <td><strong>${Number(tf.totales_base_sin_eliminados_footer || 0).toLocaleString("es-CO")}</strong></td>
+      <td></td>
+      <td></td>
+    </tr>
+  `;
 
-  html += `<td><strong>${totalEspecial ? formatMoney(totalEspecial) : "0"}</strong></td>`;
-  html += `<td><h2 class="tfoot-totals-names">Total Otros</h2></td>`;
-  html += `<td class="otros-valor"><strong>${totalOtros ? formatMoney(totalOtros) : "0"}</strong></td>`;
-  html += `<td><strong>${totalVisibleMes ? formatMoney(totalVisibleMes) : "0"}</strong></td>`;
-  html += `<td><strong>${totalSaldosMes ? formatMoney(totalSaldosMes) : "0"}</strong></td>`;
-  html += `<td><strong></strong></td>`;
-  html += `</tr></tfoot></table>`;
+  // FILA 3
+  html += `
+    <tr class="tfoot-final-mes">
+      <td colspan="${dias.length + 4}">
+        <p>TOTAL PARCIAL MES (Incluye Otros Aportes de Ambas Tablas)</p>
+      </td>
+      <td><strong>${Number(tf.totales_final_con_otros_footer || 0).toLocaleString("es-CO")}</strong></td>
+      <td></td>
+      <td></td>
+    </tr>
+  `;
+
+  // FILA 4
+  html += `
+    <tr class="tfoot-final-info">
+      <td colspan="${dias.length + 7}">
+        ✔ Eliminados Del Mes Suman un Total de: <strong>$ ${Number(tf.eliminados_mes_total_footer || 0).toLocaleString("es-CO")}</strong>
+      </td>
+    </tr>
+  `;
+
+  html += `</tfoot></table>`;
 
   cont.innerHTML = html;
 
-  // ✅ activar buscador (SIEMPRE después del innerHTML)
   setupPublicSearch(cont);
 
-  // ✅ activar highlight columnas (después de pintar la tabla)
   const tabla = cont.querySelector("table.planilla");
   if (tabla) setupHeaderColumnHighlight(tabla);
 
-  // selección fila
   const filas = cont.querySelectorAll("tbody tr");
   filas.forEach(tr => {
     tr.addEventListener("click", () => {
@@ -314,7 +312,6 @@ function renderTablaPublic(data) {
     });
   });
 }
-
 /* ==========================================================
    BUSCADOR PÚBLICO (dentro del thead)
 ========================================================== */
@@ -501,7 +498,7 @@ function renderGastos(data, mes, anio) {
    OTROS APORTES (CARD)
 ========================================================== */
 
-  function renderOtrosAportesPublico(data, mes, anio){
+function renderOtrosAportesPublico(data, mes, anio){
   const box = document.getElementById("otrosAportesPublico");
   if (!box) return;
 
@@ -515,12 +512,12 @@ function renderGastos(data, mes, anio) {
     detalle.forEach(o => {
       const tipo  = o.tipo ?? "";
       const valor = Number(o.valor ?? 0);
+
       html += `
         <li>
-          <label> ${escapeHtml(tipo)}</label>
+          <label>${escapeHtml(tipo)}</label>
           <p>${formatMoney(valor)}</p>
         </li>
-        
       `;
     });
     html += `</ul>`;
@@ -530,14 +527,22 @@ function renderGastos(data, mes, anio) {
 
   html += `
     <div class="totales-otros-aportes">
-      <label class="total-otros-label">Total Otros Aportes de este mes</label>
-      <p class="total-otros-valor">${formatMoney(t.otros_mes_total || 0)}</p>
+      <div class="totales-otros-aportes-item">
+        <label class="total-otros-label">Total Otros Aportes de este mes</label>
+        <p class="total-otros-valor">${formatMoney(t.otros_mes || 0)}</p>
+      </div>
     </div>
+    <div class="totales-otros-aportes">
+      <div class="totales-otros-aportes-item">
+        <label class="total-otros-label">Total Otros Aportes del año</label>
+        <p class="total-otros-valor">${formatMoney(t.otros_anio || 0)}</p>
+      </div>
+    </div>
+
   `;
 
   box.innerHTML = html;
 }
-
 
 
 
@@ -612,30 +617,23 @@ function renderTotales(data) {
     if (el) el.textContent = formatMoney(Number(val || 0));
   };
 
-  // Parciales
   set("tParcialMes",  t.parcial_mes);
   set("tParcialAnio", t.parcial_anio);
 
-  // Otros + saldo
-  set("tOtrosMes",   t.otros_mes);
-  set("tOtrosAnio",  t.otros_anio);
-  set("tSaldoTotal", t.saldo_hasta_mes);
+  set("tOtrosMes",  t.otros_mes);
+  set("tOtrosAnio", t.otros_anio);
 
-  // Eliminados
-  set("tEliminadosMes",  t.eliminados_mes);
-  set("tEliminadosAnio", t.eliminados_anio);
-
-  // Estimados
-  set("tEstimadoMes",  t.estimado_mes);
-  set("tEstimadoAnio", t.estimado_anio);
-
-  // Gastos
   set("tGastosMes",  t.gastos_mes);
   set("tGastosAnio", t.gastos_anio);
 
-  // Finales
-  set("tFinalMes",  t.final_mes);
-  set("tFinalAnio", t.final_anio);
+  set("tFinalMes",  t.final_neto_mes);
+  set("tFinalAnio", t.final_anio_neto);
+
+  set("tSaldoMes",   t.saldo_mes);
+  set("tSaldoTotal", t.saldo_total);
+  set("tTotalRealHastaFecha", t.total_real_hasta_fecha);
+  
+    set("tEliminadosMes",  data?.tfoot?.eliminados_mes_total_footer || 0);
 }
 
 /* ==========================================================
@@ -759,64 +757,228 @@ function renderOtrosPartidosPublico(data){
   const box = document.getElementById("otrosPartidosPublico");
   if (!box) return;
 
-  const info = data.otros_partidos_info || {};
-  const cantidad = Number(info.cantidad || 0);
-  const total = Number(info.total_general || 0);
-  const items = Array.isArray(info.items) ? info.items : [];
+  const cantidad = Number(data?.cantidad || 0);
+  const total = Number(data?.total_general || 0);
+  const items = Array.isArray(data?.items) ? data.items : [];
 
-  let html = `<h3 class="partidos-extra-titulo">Otros Partidos (no Mié/Sáb)</h3>`;
+  let html = `<h3 class="partidos-extra-titulo">Datos Columna Otro Juego</h3>`;
+
+  if (!cantidad){
+    html += `
+      <div class="alert-no-otros-partidos">
+        <p class="alert-no-otros-partidos-label">No Hay Registros de Otros Partidos Jugados (Días NO miércoles/sábado).</p>
+      </div>
+    `;
+    box.innerHTML = html;
+    return;
+  }
 
   html += `
     <div>
       <div class="partidos-extra-subtitle">
-          <span>Cantidad(${cantidad})</span>
+        <span>Otros partidos (${cantidad})</span>
       </div>
+
       <div class="partidos-extra-container-table">
         <table class="partidos-extra-table">
           <thead>
             <tr>
               <th>#</th>
+              <th>Aportante</th>
               <th>Fecha</th>
-              <th>Total</th>
+              <th>Tabla</th>
+              <th>Valor</th>
             </tr>
           </thead>
           <tbody>
             ${items.map((it, i) => `
               <tr>
-                <td>${i+1}</td>
-                <td>${escapeHtml(it.fecha_label || it.fecha)}</td>
+                <td>${i + 1}</td>
+                <td>${escapeHtml(it.nombre || "")}</td>
+                <td>${escapeHtml(it.fecha_label || it.fecha || "")}</td>
+                <td>${escapeHtml(it.tabla || "")}</td>
                 <td class="partidos-extra-total"><strong>${formatMoney(it.efectivo_total || 0)}</strong></td>
               </tr>
             `).join("")}
           </tbody>
-          </table>
-          <div class="partidos-extra-tfoot-table">
-             <p>Total otros partidos: <span>${formatMoney(total)}</span> </p>
-          </div>
+        </table>
+
+        <div class="partidos-extra-tfoot-table">
+          <p>Total otros partidos: <span>${formatMoney(total)}</span></p>
+        </div>
       </div>
-        
     </div>
   `;
- if (!cantidad){
-    html += `
-      <div class="alert-no-otros-partidos">
-    <p class="alert-no-otros-partidos-label">No Hay Registros de Otros Partidos Jugados (Días NO miércoles/sábado).</p>
-     </div>
-    `;
-    
-  }
+
   box.innerHTML = html;
 }
 
 
+let __eliminadosMesCache = {};
 
-let __eliminadosMesCache = null;
+function keyElim(anio, mes) {
+  return `${parseInt(anio, 10)}-${parseInt(mes, 10)}`;
+}
 
+function renderModalEliminadosPublic(data, mes, anio) {
+  const modal = document.getElementById("modalEliminados");
+  const body  = document.getElementById("modalEliminadosBody");
+  if (!modal || !body) return;
+
+  const players = Array.isArray(data.players) ? data.players : [];
+  const rows = Array.isArray(data.rows) ? data.rows : [];
+
+  if (!players.length) {
+    body.innerHTML = `<div style="opacity:.85;">No Hubo Eliminados Este Mes.</div>`;
+    modal.classList.remove("hidden");
+    modal.classList.remove("closing");
+    return;
+  }
+
+  const rowsByPlayer = new Map();
+  for (const r of rows) {
+    const k = String(r.jugador_id);
+    if (!rowsByPlayer.has(k)) rowsByPlayer.set(k, []);
+    rowsByPlayer.get(k).push(r);
+  }
+
+  const renderDeudasCell = (pp) => {
+    const total = Number(pp.deudas_total || 0);
+    const fechas = Array.isArray(pp.deudas_fechas) ? pp.deudas_fechas : [];
+    if (!total) return `<span style="opacity:.6;">0</span>`;
+    return `
+      <div class="deuda-cell">
+        <div class="deuda-count"><strong>${total}</strong></div>
+        <div class="deuda-fechas">${fechas.map(escapeHtml).join("<br>")}</div>
+      </div>
+    `;
+  };
+
+  body.innerHTML = `
+    <div class="table-container">
+      <table class="table-mini eliminados-detalle">
+        <thead>
+          <tr>
+            <th style="width:40%;">Aportante</th>
+            <th style="width:6%;">#</th>
+            <th style="width:25%;">Fecha</th>
+            <th style="width:14%;" class="right">Cantidad</th>
+            <th style="width:10%;" class="right">Totales</th>
+            <th style="width:10%;" class="right">Saldo</th>
+            <th style="width:10%;" class="right">Deudas</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${players.map(p => {
+            const pr = rowsByPlayer.get(String(p.id)) || [];
+            const fechaBaja = escapeHtml(p.fecha_baja || "");
+
+            const baja = (p.fecha_baja || "");
+            const bajaObj = baja ? new Date(baja + "T00:00:00") : null;
+            const bajaMes  = bajaObj ? (bajaObj.getMonth() + 1) : null;
+            const bajaAnio = bajaObj ? bajaObj.getFullYear() : null;
+            const bajaInfo = (bajaMes && bajaAnio) ? `${bajaMes}/${bajaAnio}` : "sin fecha";
+
+            const playerCell = `
+              <div class="player-title">
+                <strong>${escapeHtml(p.nombre || "")}</strong>
+                <span class="baja-pill">Baja: ${fechaBaja}</span>
+              </div>
+            `;
+
+            if (!pr.length) {
+              return `
+                <tr class="row-empty">
+                  <td class="player-cell">${playerCell}</td>
+                  <td colspan="4" style="opacity:.85;">
+                    Este aportante fue eliminado en <strong>${bajaInfo}</strong>, pero <strong>no tiene aportes registrados en ${mes}/${anio}</strong>.<br>
+                    Si quieres ver sus aportes, revisa <strong>meses anteriores</strong> en la planilla.
+                  </td>
+                  <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
+                  <td class="right">${renderDeudasCell(p)}</td>
+                </tr>
+
+                <tr class="player-total">
+                  <td><strong>Total Aportes(Mes)</strong></td>
+                  <td colspan="3"></td>
+                  <td class="right"><strong>${formatMoney(p.total_mes || 0)}</strong></td>
+                  <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
+                  <td></td>
+                </tr>
+
+                <tr class="player-sep"><td colspan="7"></td></tr>
+              `;
+            }
+
+            const rowsHtml = pr.map((r, i) => {
+              const isLast = i === pr.length - 1;
+              let cls = "row-normal";
+              if (r.kind === "otro" || r.kind === "otro_juego") cls = "row-otro";
+
+              const labelHtml = r.label ? `<div class="row-label">${escapeHtml(r.label)}</div>` : "";
+              const saldoHtml  = isLast ? `<strong>${formatMoney(p.saldo_fin_mes || 0)}</strong>` : "";
+              const deudasHtml = isLast ? renderDeudasCell(p) : "";
+
+              if (i === 0) {
+                return `
+                  <tr class="player-sep"><td colspan="7"></td></tr>
+                  <tr class="${cls}">
+                    <td class="player-cell" rowspan="${pr.length}">${playerCell}</td>
+                    <td>${r.n}</td>
+                    <td>${escapeHtml(r.fecha || "")}${labelHtml}</td>
+                    <td class="right">${formatMoney(r.cantidad || 0)}</td>
+                    <td class="right">${formatMoney(r.total || 0)}</td>
+                    <td class="right">${saldoHtml}</td>
+                    <td class="right">${deudasHtml}</td>
+                  </tr>
+                `;
+              }
+
+              return `
+                <tr class="${cls}">
+                  <td>${r.n}</td>
+                  <td>${escapeHtml(r.fecha || "")}${labelHtml}</td>
+                  <td class="right">${formatMoney(r.cantidad || 0)}</td>
+                  <td class="right">${formatMoney(r.total || 0)}</td>
+                  <td class="right">${saldoHtml}</td>
+                  <td class="right">${deudasHtml}</td>
+                </tr>
+              `;
+            }).join("");
+
+            const footJugador = `
+              <tr class="player-total">
+                <td><strong>Total Aportes</strong></td>
+                <td colspan="3"></td>
+                <td class="right"><strong>${formatMoney(p.total_mes || 0)}</strong></td>
+                <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
+                <td></td>
+              </tr>
+              <tr class="player-sep"><td colspan="7"></td></tr>
+            `;
+
+            return rowsHtml + footJugador;
+          }).join("")}
+        </tbody>
+
+        <tfoot>
+          <tr class="total-general">
+            <td><strong>Total General</strong></td>
+            <td colspan="3"></td>
+            <td class="right"><strong>${formatMoney(data.totales?.total_general_aportes || 0)}</strong></td>
+            <td class="right"><strong>${formatMoney(data.totales?.total_general_saldo || 0)}</strong></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  `;
+
+  modal.classList.remove("closing");
+  modal.classList.remove("hidden");
+}
 
 async function cargarEliminadosMes(mes, anio){
-  const elMes  = document.getElementById("tEliminadosMes");
-  const elAnio = document.getElementById("tEliminadosAnio");
-
   const btn   = document.getElementById("btnVerEliminados");
   const modal = document.getElementById("modalEliminados");
   const body  = document.getElementById("modalEliminadosBody");
@@ -824,12 +986,13 @@ async function cargarEliminadosMes(mes, anio){
 
   if (!btn || !modal || !body || !close) return;
 
-  // Bind 1 vez
+  const k = keyElim(anio, mes);
+
   if (!btn.dataset.bound) {
     btn.dataset.bound = "1";
 
     btn.addEventListener("click", () => {
-      const data = __eliminadosMesCache;
+      const data = __eliminadosMesCache[k];
 
       if (!data || data.ok !== true) {
         body.innerHTML = `<div style="opacity:.85;">No hay información disponible de eliminados para este mes.</div>`;
@@ -837,53 +1000,7 @@ async function cargarEliminadosMes(mes, anio){
         return;
       }
 
-      const items = Array.isArray(data.items) ? data.items : [];
-
-      if (!items.length){
-        body.innerHTML = `<div style="opacity:.85;">No hubo eliminados en este mes.</div>`;
-      } else {
-
-        const totMes  = Number(data.totales?.eliminados_mes || 0);
-        const totAnio = Number(data.totales?.eliminados_anio || 0);
-        const totSal  = Number(data.totales?.saldo_eliminados || 0);
-
-        body.innerHTML = `
-          <div class="table-mini-wrap">
-            <table class="table-mini">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Fecha baja</th>
-                  <th class="right">Total Mes</th>
-                  <th class="right">Total Año</th>
-                  <th class="right">Saldo</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${items.map(it => `
-                  <tr>
-                    <td>${escapeHtml(it.nombre || "")}</td>
-                    <td>${escapeHtml(it.fecha_baja || "")}</td>
-                    <td class="right"><strong>${formatMoney(it.total_mes || 0)}</strong></td>
-                    <td class="right">${formatMoney(it.total_anio || 0)}</td>
-                    <td class="right">${formatMoney(it.saldo || 0)}</td>
-                  </tr>
-                `).join("")}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colspan="2"><strong>Totales</strong></td>
-                  <td class="right"><strong>${formatMoney(totMes)}</strong></td>
-                  <td class="right"><strong>${formatMoney(totAnio)}</strong></td>
-                  <td class="right"><strong>${formatMoney(totSal)}</strong></td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        `;
-      }
-
-      modal.classList.remove("hidden");
+      renderModalEliminadosPublic(data, mes, anio);
     });
 
     function closeModal(){
@@ -901,27 +1018,125 @@ async function cargarEliminadosMes(mes, anio){
     });
   }
 
-  // Cargar data
   try {
     const r = await fetch(`${API_ELIMINADOS_PUBLICO}?mes=${mes}&anio=${anio}`, { cache:"no-store" });
-
-    // si backend devuelve HTML/redirect, aquí lo detectas rápido:
     const ct = r.headers.get("content-type") || "";
-    if (!ct.includes("application/json")) throw new Error("Respuesta no es JSON (posible redirect/auth)");
+    if (!ct.includes("application/json")) throw new Error("Respuesta no es JSON");
 
     const data = await r.json();
-    __eliminadosMesCache = data;
-
-    const totMes  = Number(data?.totales?.eliminados_mes || 0);
-    const totAnio = Number(data?.totales?.eliminados_anio || 0);
-
-    if (elMes)  elMes.textContent  = formatMoney(totMes);
-    if (elAnio) elAnio.textContent = formatMoney(totAnio);
+    __eliminadosMesCache[k] = data;
 
   } catch (err) {
-    __eliminadosMesCache = { ok:false };
-    if (elMes)  elMes.textContent  = formatMoney(0);
-    if (elAnio) elAnio.textContent = formatMoney(0);
+    __eliminadosMesCache[k] = { ok:false };
     console.warn("No se pudo leer eliminados_publico:", err);
   }
+}
+
+
+
+async function cargarAportesEsporadicosPublico(mes, anio, otroDia) {
+  const wrap = document.getElementById("esporadicosWrapPublic");
+  if (!wrap) return null;
+
+  try {
+    const url = `${API_ESP_PUBLIC_GET}?mes=${mes}&anio=${anio}&otro=${otroDia || ""}&slots=10`;
+    const r = await fetch(url, { cache: "no-store" });
+    const txt = await r.text();
+
+    let data = null;
+    try {
+      data = JSON.parse(txt);
+    } catch (e) {
+      console.error("Respuesta NO JSON esporádicos público:", { url, txt });
+      wrap.innerHTML = `<div style="opacity:.85;">No se pudo cargar la tabla esporádica.</div>`;
+      return null;
+    }
+
+    if (!r.ok || !data?.ok) {
+      wrap.innerHTML = `<div style="opacity:.85;">No se pudo cargar la tabla esporádica.</div>`;
+      return null;
+    }
+
+    renderTablaEsporadicosPublico(wrap, data);
+    return data;
+  } catch (e) {
+    console.error("Error esporádicos público:", e);
+    wrap.innerHTML = `<div style="opacity:.85;">No se pudo cargar la tabla esporádica.</div>`;
+    return null;
+  }
+}
+
+function renderTablaEsporadicosPublico(wrap, data) {
+  const dias = Array.isArray(data.dias_validos) ? data.dias_validos : [];
+  const anio = Number(data.anio);
+  const mes = Number(data.mes);
+  const otroDia = Number(data.otro_dia);
+  const fechaOtro = data.fecha_otro;
+  const rows = Array.isArray(data.rows) ? data.rows : [];
+  const meta = data.meta_by_slot || {};
+  const totals = data.totals_by_date || {};
+
+  const fechasDias = dias.map(d => `${anio}-${String(mes).padStart(2, "0")}-${String(d).padStart(2, "0")}`);
+
+  let html = `
+    <div class="esp-public-wrap">
+      <table class="esp-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            ${dias.map(d => `<th>${d}</th>`).join("")}
+            <th>Otra Fecha (${String(otroDia).padStart(2, "0")})</th>
+            <th>Otro Aporte</th>
+            <th>Nota</th>
+          </tr>
+        </thead>
+        <tbody>
+  `;
+
+  rows.forEach(row => {
+    const slot = Number(row.slot);
+    const m = meta[slot] || {};
+    const metaOtro = Number(m.otro_aporte || 0);
+    const metaNota = m.nota || "";
+
+    html += `<tr>`;
+    html += `<td><strong>${slot}</strong></td>`;
+
+    fechasDias.forEach(f => {
+      const v = Number(row.dias?.[f] || 0);
+      html += `<td>${cellEspHtmlReadOnly(v)}</td>`;
+    });
+
+    html += `<td>${cellEspHtmlReadOnly(Number(row.otro || 0))}</td>`;
+    html += `<td><span class="esp-readonly-text">${metaOtro ? formatMoney(metaOtro) : "$0"}</span></td>`;
+    html += `<td><span class="esp-readonly-note">${escapeHtml(metaNota || "—")}</span></td>`;
+    html += `</tr>`;
+  });
+
+  html += `</tbody><tfoot class="esp-tfoot"><tr><td>Totales</td>`;
+
+  fechasDias.forEach(f => {
+    html += `<td><strong>${formatMoney(Number(totals[f] || 0))}</strong></td>`;
+  });
+
+  html += `<td><strong>${formatMoney(Number(totals[fechaOtro] || 0))}</strong></td>`;
+
+  const totalOtrosMeta = Object.values(meta).reduce((acc, m) => acc + Number(m?.otro_aporte || 0), 0);
+  html += `<td><strong>${formatMoney(totalOtrosMeta)}</strong></td>`;
+  html += `<td></td>`;
+  html += `</tr></tfoot></table></div>`;
+
+  wrap.innerHTML = html;
+}
+
+function cellEspHtmlReadOnly(valor) {
+  const v = Number(valor || 0);
+  const chipClass = v > 0 ? "esp-chip" : "esp-chip zero";
+  const chipText = v > 0 ? formatMoney(v) : "$0";
+
+  return `
+    <div class="esp-cell esp-readonly-cell">
+      <span class="${chipClass}">${chipText}</span>
+    </div>
+  `;
 }

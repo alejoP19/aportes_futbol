@@ -40,140 +40,105 @@
     <select id="selectOtroDia" class="form-select"></select>
   </div>
 
-  <section id="contenedorTabla">
-  </section>
+ <section id="contenedorTabla"></section>
 
+<section class="public-esporadicos-section">
+  <details class="esporadicos-details" closed>
+    <summary class="esporadicos-summary">
+      Aportes Esporádicos
+      <small>— se suman automáticamente a totales diarios, mensuales y anuales</small>
+    </summary>
+
+    <div class="esporadicos-toolbar public-readonly-toolbar">
+      <span class="esp-hint">Solo informativo · Sin edición</span>
+    </div>
+
+    <div id="esporadicosWrapPublic"></div>
+
+    <div class="esp-note">
+      Los aportes esporádicos se suman automáticamente a los totales diarios, mensuales y anuales de la planilla principal.
+    </div>
+  </details>
+</section>
+ 
   <div class="gast-tot-obs-container">
     <!-- Nueva sección para mostrar gastos del mes / año -->
-    <section id="gastosMesPublico" class="observaciones-box"></section>
-    <section id="otrosAportesPublico" class="observaciones-box"></section>
-    <section id="totales" class="totals-card public-totals-card">
-      <h4 class="parcial-tot-title">Totales (COP)</h4>
+    <section id="gastosMesPublico"></section>
+    <section id="otrosAportesPublico"></section>
+   <section id="totales" class="totals-card public-totals-card">
+  <h4 class="parcial-tot-title">Totales (COP)</h4>
 
-      <!-- 1) PARCIALES -->
-      <div class="total-parcial-mini">
-        <small class="parcial-totals-mini-help">
-          Parciales: solo aportes del mes/año (sin saldos, sin otros aportes, sin eliminados).
-        </small>
+  <div class="parcial-totals-mini-help">
+    <div>
+      <h6>Total Parcial Mes Incluye:</h6>
+      <div>- Aportes de Cada Partido (Miércoles / Sábado) de Ambas Planillas</div>
+      <div>- Aportes de Los Jugadores Eliminados.</div>
+      <div>- Aportes de Columna (Otro Juego) de Ambas Planillas (Cada Día Jugado)</div>
+    </div>
+  </div>
 
-        <div class="tot-row">
-          <span>
-            Total Parcial del Mes
-            <small class="op-hint">(Aportes activos del mes)</small>
-          </span>
-          <strong id="tParcialMes" class="totales-item-value">$ 0</strong>
-        </div>
+  <div class="total-parcial-mini">
+    <div class="tot-row">
+      <span>Total Parcial Mes</span>
+      <strong id="tParcialMes" class="totales-item-value">$ 0</strong>
+    </div>
 
-        <div class="tot-row">
-          <span>
-            Total Parcial del Año
-            <small class="op-hint">(Aportes activos acumulado ≤ mes)</small>
-          </span>
-          <strong id="tParcialAnio" class="totales-item-value">$ 0</strong>
-        </div>
-      </div>
+    <div class="tot-row">
+      <span>Total Parcial Año</span>
+      <strong id="tParcialAnio" class="totales-item-value">$ 0</strong>
+    </div>
+  </div>
 
-      <hr style="opacity:.25; margin:6px 0;">
+  <hr style="opacity:.25; margin:6px 0;">
 
-      <!-- 2) OTROS + SALDO -->
-      <div class="otros-saldo-mini">
-        <div class="tot-row">
-          <span>
-            Total Otros Aportes del Mes
-            <small class="op-hint">(Σ otros_aportes mes)</small>
-          </span>
-          <strong id="tOtrosMes" class="totales-item-value otros-span">$ 0</strong>
-        </div>
+  <div class="totales-gastos-mini">
+    <div class="tot-row">
+      <span>Gastos del Mes</span>
+      <strong id="tGastosMes" class="totales-item-value gastos-item">$ 0</strong>
+    </div>
 
-        <div class="tot-row">
-          <span>
-            Total Otros Aportes del Año
-            <small class="op-hint">(Σ otros_aportes acumulado ≤ mes)</small>
-          </span>
-          <strong id="tOtrosAnio" class="totales-item-value otros-span">$ 0</strong>
-        </div>
+    <div class="tot-row">
+      <span>Gastos del Año</span>
+      <strong id="tGastosAnio" class="totales-item-value gastos-item">$ 0</strong>
+    </div>
+  </div>
 
-        <div class="tot-row">
-          <span>
-            Total Saldo Actual Hasta Mes
-            <small class="op-hint">(saldo vigente acumulado)</small>
-          </span>
-          <strong id="tSaldoTotal" class="totales-item-value otros-span">$ 0</strong>
-        </div>
-      </div>
+  <hr style="opacity:.25; margin:6px 0;">
 
-      <hr style="opacity:.25; margin:6px 0;">
+  <div class="totales-finales-mini">
+    <div class="tot-row">
+      <span>Total Estimado Final Mes</span>
+      <strong id="tFinalMes" class="totales-item-value">$ 0</strong>
+    </div>
 
-      <!-- 3) ELIMINADOS -->
-      <div class="totales-aportantes-eliminados">
-        <h4>Aportes de Jugadores Eliminados</h4>
-        <div class="mini-help">
-          No aparecen como activos en planilla, pero sus aportes siguen sumando en el estimado.
-        </div>
+    <div class="tot-row">
+      <span>Total Estimado Final Año</span>
+      <strong id="tFinalAnio" class="totales-item-value">$ 0</strong>
+    </div>
+  </div>
 
-        <div class="tot-row">
-          <span>Total Eliminados del Mes <small class="op-hint">(Aportes inactivos mes)</small></span>
-          <strong id="tEliminadosMes" class="totales-item-value">$ 0</strong>
-        </div>
+  <hr style="opacity:.25; margin:6px 0;">
 
-        <div class="tot-row">
-          <span>Total Eliminados del Año <small class="op-hint">(Aportes inactivos acumulado ≤ mes)</small></span>
-          <strong id="tEliminadosAnio" class="totales-item-value">$ 0</strong>
-        </div>
-        <button type="button" id="btnVerEliminados" class="btn-ver-eliminados">Ver detalle</button>
-      </div>
+  <div class="otros-saldo-mini">
+    <div class="tot-row">
+      <span>Saldo Actual Mes</span>
+      <strong id="tSaldoMes" class="totales-item-value otros-span">$ 0</strong>
+    </div>
 
-      <hr style="opacity:.25; margin:6px 0;">
+    <div class="tot-row">
+      <span>Saldos Acumulados</span>
+      <strong id="tSaldoTotal" class="totales-item-value otros-span">$ 0</strong>
+    </div>
 
-      <!-- 4) ESTIMADOS -->
-      <div class="totales-estimado-mini">
-        <div class="tot-row">
-          <span>
-            Total Estimado del Mes
-            <small class="op-hint">(parcial + otros + saldo + eliminados)</small>
-          </span>
-          <strong id="tEstimadoMes" class="totales-item-value">$ 0</strong>
-        </div>
+    <div class="tot-row">
+      <span>Total Final Año (Con Saldos Acumulados)</span>
+      <strong id="tTotalRealHastaFecha" class="totales-item-value otros-span">$ 0</strong>
+    </div>
+  </div>
 
-        <div class="tot-row">
-          <span>
-            Total Estimado del Año
-            <small class="op-hint">(parcial + otros + saldo + eliminados)</small>
-          </span>
-          <strong id="tEstimadoAnio" class="totales-item-value">$ 0</strong>
-        </div>
-      </div>
-
-      <hr style="opacity:.25; margin:6px 0;">
-
-      <!-- 5) GASTOS -->
-      <div class="totales-gastos-mini">
-        <div class="tot-row">
-          <span>Gastos del Mes <small class="op-hint">(Σ gastos mes)</small></span>
-          <strong id="tGastosMes" class="totales-item-value gastos-item">$ 0</strong>
-        </div>
-
-        <div class="tot-row">
-          <span>Gastos del Año <small class="op-hint">(Σ gastos acumulado ≤ mes)</small></span>
-          <strong id="tGastosAnio" class="totales-item-value gastos-item">$ 0</strong>
-        </div>
-      </div>
-
-      <hr style="opacity:.25; margin:6px 0;">
-
-      <!-- 6) FINALES -->
-      <div class="totales-finales-mini">
-        <div class="tot-row">
-          <span>Total Final del Mes <small class="op-hint">(estimado - gastos)</small></span>
-          <strong id="tFinalMes" class="totales-item-value">$ 0</strong>
-        </div>
-
-        <div class="tot-row">
-          <span>Total Final del Año <small class="op-hint">(estimado - gastos)</small></span>
-          <strong id="tFinalAnio" class="totales-item-value">$ 0</strong>
-        </div>
-      </div>
-    </section>
+  <hr style="opacity:.25; margin:6px 0;">
+    
+</section>
 
     <section id="otrosPartidosPublico" class="otros-partidos-card"></section>
     <div class="box-container-observ">

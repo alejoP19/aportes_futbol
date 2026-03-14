@@ -711,7 +711,141 @@ font-size: 13px !important;
     white-space: nowrap;
 }
 
+/* ==============================
+   ESPORÁDICOS PÚBLICO
+============================== */
+.public-esporadicos-section{
+  width: 98%;
+  margin: 14px auto 0 auto;
+  background: #f1f1f1;
+  border-radius: 10px;
+  box-shadow: -1px 1px 10px white;
+  padding: 8px;
+}
 
+.public-readonly-toolbar{
+  display:flex;
+  justify-content:flex-end;
+}
+
+.esp-public-wrap{
+  width:100%;
+  overflow:auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.esp-readonly-text,
+.esp-readonly-note{
+  display:inline-block;
+  min-width:80px;
+  font-weight:bold;
+  font-size:12px;
+}
+
+.esp-readonly-note{
+  color:#333;
+}
+
+.esporadicos-details{
+  margin-top: 8px;
+  border-radius: 18px;
+}
+
+.esporadicos-summary{
+  cursor: pointer;
+  font-weight: 800;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(238,238,238,.70);
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+.esporadicos-summary small{
+  display:block;
+  font-weight:600;
+  opacity:.85;
+  margin-top:4px;
+  font-style: italic;
+}
+
+.esporadicos-toolbar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin: 10px 0;
+}
+
+.esp-hint{
+  font-size: 12px;
+  opacity: .9;
+  font-style: italic;
+}
+
+.esp-note{
+  margin-top:10px;
+  opacity:.92;
+  font-size: 13px;
+}
+
+.esp-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  border:1px solid rgba(0,0,0,.14);
+  border-radius:12px;
+  overflow:hidden;
+  font-size: 13px;
+  background:#fff;
+}
+
+.esp-table thead th{
+  position: sticky;
+  top: 0;
+  background:#0a83b3;
+  color:#fff;
+  padding:10px;
+  text-align:center;
+}
+
+.esp-table td{
+  padding:8px;
+  border-top:1px solid rgba(0,0,0,.08);
+  border-right:1px solid rgba(0,0,0,.06);
+  text-align:center;
+  white-space:nowrap;
+}
+
+.esp-table td:last-child,
+.esp-table th:last-child{
+  border-right:none;
+}
+
+.esp-cell{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+
+.esp-chip{
+  padding:3px 8px;
+  border-radius:999px;
+  background: rgba(0,199,60,.12);
+  border: 1px solid rgba(0,199,60,.25);
+  font-weight:900;
+}
+
+.esp-chip.zero{
+  background: rgba(0,0,0,.05);
+  border-color: rgba(0,0,0,.08);
+  font-weight:700;
+  opacity:.8;
+}
+
+.esp-tfoot{
+  background:#f7f9fb;
+  font-weight:900;
+}
 
 /* =======================================================
    GASTOS / OBSERVACIONES
@@ -720,7 +854,7 @@ font-size: 13px !important;
 display: flex;
 flex-direction: column;
 align-items: center;
-justify-content: space-around;
+justify-content: center;
 width: 96%;
 margin: 0 auto;
 margin-top: 5%;
@@ -749,7 +883,7 @@ box-shadow: -1px -1px 4px #feffb1, -1px 1px 4px #fff8b8;
 }
 .titulo-gastos{
 align-self: center; 
-margin-top: 12%;
+margin-top: 7%;
 margin-bottom: 8%;
 font-weight: bold;
   color: #ffd900;
@@ -764,6 +898,8 @@ width: 100% !important;
 gap: 5px;
 justify-content:center ;
 padding: 0;
+margin-bottom: 1% !important;
+
  }
 
 .lista-gastos li {
@@ -808,18 +944,26 @@ text-shadow: -1px -1px 1px #ffffff, -1px 1px 1px #ffffff;
 
 }
 .totales-gastos{
-flex-direction: column;
+flex-direction: row;
 align-items: center;
 justify-content: center;
 align-self: center;
 width: 100% !important;
-padding:0px;
+padding:5px;
 text-align: center;
 gap: 0px;
 border-radius: 10px;
 background-color: rgba(241, 241, 241, 0.897);
 border: 1px solid rgba(194, 194, 194, 0.849);
 
+}
+.totales-gastos-item{
+  position: relative;
+display: flex;
+flex-direction: column;
+height: max-content;
+margin-top: 0% !important;
+gap: 0%;
 }
 .gastos-valor-label{
   font-weight: bold;
@@ -1062,7 +1206,7 @@ text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
   flex-direction: column;
   width: 99%;
   justify-self: center;
-  padding: 12px;
+  padding: 8px;
   margin-bottom: 2%;
   background-color: rgba(217, 232, 235, 0.7) !important;
  border: 1px solid rgba(218, 218, 218, 0.849);
@@ -1101,19 +1245,33 @@ text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
 
 /* Contenedor: clave para bordes redondos */
 #otrosPartidosPublico .partidos-extra-container-table{
-  overflow: hidden;              /* ✅ para que se vean las esquinas */
+height: fit-content;
+overflow: auto;
   background: rgba(10, 122, 42, 0.12);
   border-radius: 12px;
  border: 1px solid #edf7f0cc;
   box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+  padding: 5px;
+  
 }
 
 /* Tabla */
 #otrosPartidosPublico table.partidos-extra-table{
-  width: 97%;
-  border-collapse: collapse;
-  margin: auto;                     /* ✅ quita el -7% que te puede tapar el thead */
-  font-size: 15px;
+ border-collapse:collapse; 
+font-size:13px;
+margin-top: 2%;
+justify-self: center;
+position: sticky;
+border-radius: 5px;
+top: 0%;                 /* 👈 ahora sí */
+z-index: 20;
+min-height: fit-content;
+padding: 0px !important;
+font-weight: lighter !important;
+font-size: 15px;
+text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
+width: 160%;
+margin:auto;
 }
 
 
@@ -1595,14 +1753,25 @@ gap: 10px;
   margin-bottom: 1% !important;
   align-self: flex-start;
   min-height: 100%;
+  justify-content: center !important;
 
+}
+.titulo-gastos{
+align-self: center; 
+margin-top: 1% !important;
+margin-bottom: 1% !important;
+font-size: 22px;
+ 
 }
 
 
-.titulo-gastos{
-margin-top: 5%;
-margin-bottom: 6%;
-font-size: 22px; 
+.totales-gastos-item{
+  position: relative;
+display: flex;
+flex-direction: column;
+height: max-content;
+margin-top: 0% !important;
+gap: 0%;
 }
 
 /* UL */
@@ -1618,6 +1787,7 @@ font-size: 22px;
   align-items: stretch;         /* ✅ todos con misma altura */
   list-style: none;
   margin: 0;
+  margin-bottom: 0% !important;
 }
 
 /* LI = “tarjetas” iguales */
@@ -2192,3 +2362,427 @@ border: 1px solid rgba(61, 255, 109, 0.884);
 .right{
   text-align:right;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =======================================================
+   SINCRONIZACIÓN PUBLIC ↔ ADMIN
+======================================================= */
+
+/* .planilla .header-tr-one{
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: linear-gradient(380deg, rgb(53, 189, 121), rgba(0, 85, 50, 0.973)) !important;
+  color: #ffffff;
+  text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
+}
+
+.planilla .header-tr-two{
+  position: sticky;
+  top: 33px;
+  z-index: 21;
+  background: linear-gradient(380deg, rgb(44, 179, 111), rgba(0, 85, 50, 0.973)) !important;
+  color: #fdf46d;
+  text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
+}
+
+.planilla td.col-saldo strong{
+  font-size: 13px !important;
+  color: #00fad0;
+  text-shadow: -1px 1px 1px rgb(0,0,0), -1px 1px 1px rgb(0,0,0);
+}
+
+.planilla td.total-por-jugador strong{
+  font-size: 13px !important;
+  color: #00bb48;
+  text-shadow: -1px 1px 1px black;
+}
+
+.planilla tfoot .tfoot-base-sin-elim{
+  background: linear-gradient(380deg,#6ec585, rgba(0, 85, 50, 0.973)) !important;
+}
+
+.planilla tfoot .tfoot-base-sin-elim p{
+  font-weight: bold;
+  font-size: 13px !important;
+  text-align: left !important;
+  margin-left: 8px !important;
+  margin-bottom: 0;
+  padding: 5px 3px 0 3px;
+  color: #fffc56;
+}
+
+.planilla tfoot .tfoot-base-sin-elim-note{
+  font-weight: bold;
+  color: #ffffff !important;
+  font-size: 12px;
+  padding-bottom: 5px;
+  text-align: left;
+  margin-left: 8px !important;
+}
+
+.planilla tfoot .tfoot-final-mes{
+  background: linear-gradient(380deg,#6ec585, rgba(0, 85, 50, 0.973)) !important;
+}
+
+.planilla tfoot .tfoot-final-mes p{
+  color: #fffc56;
+  font-weight: bold;
+  font-size: 13px !important;
+  text-align: right !important;
+  margin-right: 6px !important;
+  margin-bottom: 0;
+  padding: 8px;
+}
+
+.planilla tfoot .tfoot-final-info td{
+  font-size: 14px;
+  color:#ffffff;
+  text-align: right;
+  text-shadow: -1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;
+  padding:16px;
+  font-weight: bold;
+}
+
+.planilla td.columna-deuda{
+  width: 98px;
+  min-width: 98px;
+  max-width: 98px;
+  text-align: center;
+  padding: 4px 6px !important;
+  font-weight: bold;
+  background-color: #c4ecdf;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(110, 151, 136, 0.55);
+  box-sizing: border-box;
+}
+
+.planilla td.columna-deuda .cell-scroll{
+  display: block;
+  max-height: 52px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  line-height: 1.15;
+}
+
+.planilla td.columna-deuda strong{
+  display:block;
+  margin: 2px;
+  text-align:center;
+  border-radius:15px;
+  padding: 2px 8px;
+  font-size: 11px;
+  background-color: #e7e7e7cb;
+}
+
+.deuda-fecha-item{
+  font-size: 10px !important;
+  line-height: 1.2;
+  color: #007932 !important;
+  text-shadow: -1px 1px 1px rgb(255,255,255);
+  font-weight: bold;
+}
+
+#otrosPartidosPublico .partidos-extra-container-table{
+  overflow: auto;
+}
+
+#otrosPartidosPublico .partidos-extra-table{
+  width: 130%;
+  margin: auto;
+  border-collapse: collapse;
+  background: linear-gradient(380deg, rgba(0, 133, 78, 0.822), rgba(0, 126, 63, 0.973)) !important;
+}
+
+#otrosPartidosPublico .partidos-extra-table thead th{
+  color: #fdf79c !important;
+  text-shadow: -1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
+}
+
+#otrosPartidosPublico .partidos-extra-table tbody td{
+  color: rgb(250,250,250);
+  text-shadow: -1px 1px 1px #080808,-1px 1px 1px #000,-1px 1px 1px #000;
+  border-bottom: 1px dotted #fff8b5cb !important;
+}
+
+#otrosPartidosPublico .partidos-extra-table tbody td:last-child{
+  color: #ffe600 !important;
+  font-weight: bold;
+  text-align: center !important;
+  font-size: 14px;
+  text-shadow: -1px 1px 1px rgb(0,0,0), -1px 1px 1px rgb(0,0,0), -1px 1px 1px rgb(0,0,0);
+}
+
+#otrosPartidosPublico .partidos-extra-tfoot-table{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 130%;
+  min-height: 36px;
+  margin-top: 3px;
+  border-radius: 6px;
+  background: rgba(226, 240, 230, 0.774);
+  border: 1px solid rgba(0, 199, 60, 0.534);
+}
+
+#otrosPartidosPublico .partidos-extra-tfoot-table p{
+  color: #f1c500;
+  font-weight: bold;
+  font-size: 16px;
+  text-shadow: -1px 1px 1px rgb(0,0,0), -1px 1px 1px rgb(0,0,0), -1px 1px 1px rgb(0,0,0);
+}
+
+#otrosPartidosPublico .partidos-extra-tfoot-table span{
+  color: #00c73c !important;
+}
+
+.modal.hidden{ display:none; }
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+  padding:14px;
+  opacity:1;
+  transition: opacity 600ms ease;
+}
+
+.modal.closing{ opacity:0; }
+
+.modal-card{
+  width:min(920px, 96vw);
+  max-height:82vh;
+  overflow:auto;
+  background:#f5f5f5fa;
+  color:#1b1f24;
+  border-radius:16px;
+  border:1px solid rgba(0, 161, 94, 0.445);
+  box-shadow:0 10px 20px rgba(107, 214, 196, 0.637);
+  padding:14px;
+  transform: translateY(18px) scale(.98);
+  opacity:0;
+  animation: modalIn 180ms ease-out forwards;
+}
+
+@keyframes modalIn{
+  to{ transform: translateY(0) scale(1); opacity:1; }
+}
+
+.modal.closing .modal-card{
+  animation: modalOut 180ms cubic-bezier(.4,0,1,1) forwards;
+}
+
+@keyframes modalOut{
+  to{ transform: translateY(18px) scale(.98); opacity:0; }
+}
+
+.modal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  width:100%;
+  margin-bottom:0;
+  background: linear-gradient(180deg, rgba(253, 218, 218, 0.87), rgba(255, 144, 144, 0.95));
+  border: 0.80px solid rgba(211, 135, 145, 0.712);
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+  padding: 5px 10px;
+  box-shadow:0 0 2px rgba(255, 202, 214, 0.842);
+}
+
+.modal-head strong{
+  font-size: medium;
+  font-weight: bold;
+  color: #ffffff !important;
+  margin: auto;
+  text-shadow: -1px 1px 1px rgba(116, 0, 0, 0.986), -1px 1px 1px rgb(133, 0, 0), -1px 1px 1px rgb(117, 0, 0) !important;
+}
+
+.modal-head button{
+  position:absolute;
+  right:5px;
+  top:5px;
+  background: rgba(255, 98, 98, 0.767);
+  border: 1px solid rgba(253, 125, 136, 0.685);
+  border-radius:50%;
+  width:24px;
+  height:24px;
+  color:#ffffff;
+  cursor:pointer;
+  font-size:14px;
+  line-height:1;
+}
+
+.table-container{
+  display:block;
+  overflow-x:auto !important;
+  overflow-y:auto !important;
+  width:100%;
+  justify-self:center;
+  border-bottom-left-radius:18px;
+  border-bottom-right-radius:18px;
+}
+
+.table-mini{
+  border-collapse:separate;
+  border-spacing:0;
+  border:1px solid rgb(207, 207, 207);
+  border-radius:12px;
+  overflow:hidden;
+  font-size:13px;
+  width:100%;
+}
+
+.table-mini thead th{
+  position:sticky;
+  top:0;
+  background:#f8dde0f5;
+  color:#000000;
+  font-weight:bold;
+  text-shadow: -1px 1px 1px white,-1px 1px 1px white;
+  padding:10px 10px;
+  border-bottom:0.70px solid rgba(255, 203, 210, 0.596);
+  text-align:center;
+}
+
+.table-mini th, .table-mini td{
+  border-right:1px solid rgba(196, 169, 172, 0.26);
+}
+
+.table-mini tbody td{
+  padding:7px 10px;
+}
+
+.row-normal td{
+  background-color:#faf9f9 !important;
+  border-bottom:0.80px solid #bdbdbdd0 !important;
+}
+
+.row-otro td{
+  background-color:#c2edfacb !important;
+}
+
+.player-cell{
+  background-color:#ffffff !important;
+}
+
+.player-total{
+  background:#e9eeee;
+}
+
+.player-title{
+  display:flex;
+  align-items:center;
+  flex-direction:column;
+  justify-content:center;
+  gap:1px;
+  font-size:11px;
+}
+
+.baja-pill{
+  background:#ffe5e5;
+  color:#8a1f1f;
+  border:1px solid rgba(138, 31, 31, 0.363);
+  padding:4px 5px;
+  border-radius:18px;
+  font-size:10px;
+  text-align:center;
+  width:100%;
+  margin:2%;
+}
+
+.deuda-cell{
+  display:block;
+  max-height:25px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:10px;
+  margin:5px;
+  box-sizing:border-box;
+}
+
+.deuda-count{
+  font-weight:bold;
+  font-size:14px;
+  color:#f10538;
+}
+
+.deuda-fechas{
+  margin-top:4px;
+  font-size:12px;
+  color:#ec3f29;
+  line-height:1.25;
+  white-space:nowrap;
+}
+
+.eliminados-detalle .player-sep td{
+  background:rgba(248, 132, 132, 0.233) !important;
+  padding:0;
+  height:0.5px;
+  border:0;
+}
+
+.eliminados-detalle tfoot .total-general td{
+  background:#d2ecde;
+  border-top:2px solid rgba(0,0,0,.08);
+}
+
+@media (min-width: 1024px){
+  #otrosPartidosPublico .partidos-extra-table,
+  #otrosPartidosPublico .partidos-extra-tfoot-table{
+    width:100%;
+  }
+}
+
+
+.totales-otros-aportes{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100% !important;
+  padding: 10px;
+  text-align: center;
+  border-radius: 10px;
+  background-color: rgba(241, 241, 241, 0.897);
+  border: 1px solid rgba(194, 194, 194, 0.849);
+}
+
+.totales-otros-aportes-item{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+}
+
+.total-otros-label{
+  font-weight: bold;
+  color: #ff0224;
+  font-size: 18px;
+  text-shadow: -1px 1px 1px #000000, -1px 1px 1px #000000;
+  margin: 0;
+}
+
+.total-otros-valor{
+  color: #000000;
+  font-weight: bold;
+  font-size: 15px;
+  text-shadow: -1px 1px 1px #ffffff, -1px 1px 1px #ffffff;
+  margin: 6px 0 0 0;
+} */
