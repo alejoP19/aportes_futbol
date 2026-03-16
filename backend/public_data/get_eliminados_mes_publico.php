@@ -5,8 +5,6 @@ require_once __DIR__ . "/../../conexion.php";
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-$TOPE = 3000;
-
 function column_exists(mysqli $cx, string $table, string $col): bool {
   $db = $cx->query("SELECT DATABASE() AS db")->fetch_assoc()['db'] ?? '';
   if (!$db) return false;
@@ -71,12 +69,14 @@ function deudas_hasta_fecha(mysqli $cx, int $jid, string $fechaCorte): array {
   $stmt->close();
 
   return [
-    "total" => count($fechas),
+    "total"  => count($fechas),
     "fechas" => $fechas
   ];
 }
 
 try {
+  $TOPE = 3000;
+
   $mes  = intval($_GET['mes']  ?? date('n'));
   $anio = intval($_GET['anio'] ?? date('Y'));
 
@@ -105,21 +105,20 @@ try {
   $players = [];
   $rows    = [];
 
-  $total_eliminados_mes  = 0;
-  $total_otros_elim_mes  = 0;
-  $total_general_aportes = 0;
-  $total_general_saldo   = 0;
+  $total_eliminados_mes   = 0;
+  $total_otros_elim_mes   = 0;
+  $total_general_aportes  = 0;
+  $total_general_saldo    = 0;
 
   while ($j = $res->fetch_assoc()) {
     $jid = (int)$j["id"];
+
     $saldo_fin_mes = saldo_a_fecha($conexion, $jid, $finMes, $TOPE);
     $deudas = deudas_hasta_fecha($conexion, $jid, $finMes);
 
-    $movs = [];
-    $sum_normales_mes = 0;
-    $sum_otros_mes = 0;
-
-    // 1) aportes normales del mes
+    /* =====================================================
+       1) APORTES tipo_aporte NULL del mes
+    ===================================================== */
     $qAportes = $conexion->prepare("
       SELECT
         a.id,
@@ -144,28 +143,34 @@ try {
     $qAportes->execute();
     $rr = $qAportes->get_result();
 
+    $movs = [];
+    $sum_normales_mes = 0;
+
     while ($r = $rr->fetch_assoc()) {
       $fecha    = date("Y-m-d", strtotime($r["fecha"]));
       $cantidad = (int)$r["cantidad"];
+
       $sum_normales_mes += $cantidad;
 
-      $dow = date("N", strtotime($fecha));
-      $kind = ($dow != 3 && $dow != 6) ? "otro_juego" : "normal";
-      $label = ($kind === "otro_juego") ? "Aporte otro juego" : "Aporte";
+      $dow = (int)date('N', strtotime($fecha));
+      $esOtroJuego = !in_array($dow, [3, 6], true);
 
       $movs[] = [
-        "jugador_id" => $jid,
-        "fecha"      => $fecha,
-        "kind"       => $kind,
-        "label"      => $label,
-        "cantidad"   => $cantidad,
-        "total"      => $cantidad,
-        "saldo"      => $saldo_fin_mes
+        "jugador_id"    => $jid,
+        "fecha"         => $fecha,
+        "kind"          => $esOtroJuego ? "otro_juego" : "normal",
+        "label"         => $esOtroJuego ? "Aporte otro juego" : "Aporte",
+        "es_otro_juego" => $esOtroJuego ? 1 : 0,
+        "cantidad"      => $cantidad,
+        "total"         => $cantidad,
+        "saldo"         => $saldo_fin_mes
       ];
     }
     $qAportes->close();
 
-    // 2) otros aportes del mes
+    /* =====================================================
+       2) OTROS APORTES DEL MES (tabla otros_aportes)
+    ===================================================== */
     if ($hasFechaOtros) {
       $qOtros = $conexion->prepare("
         SELECT tipo, valor, DATE(fecha) AS fecha_item
@@ -202,6 +207,8 @@ try {
     $qOtros->execute();
     $ro = $qOtros->get_result();
 
+    $sum_otros_mes = 0;
+
     while ($o = $ro->fetch_assoc()) {
       $fecha_item = $o["fecha_item"] ? date("Y-m-d", strtotime($o["fecha_item"])) : $inicioMes;
       $valor = (int)($o["valor"] ?? 0);
@@ -211,20 +218,33 @@ try {
       $sum_otros_mes += $valor;
 
       $movs[] = [
-        "jugador_id" => $jid,
-        "fecha"      => $fecha_item,
-        "kind"       => "otro",
-        "label"      => "Otro: " . $tipo,
-        "cantidad"   => $valor,
-        "total"      => $valor,
-        "saldo"      => $saldo_fin_mes
+        "jugador_id"    => $jid,
+        "fecha"         => $fecha_item,
+        "kind"          => "otro",
+        "label"         => "Otro: " . $tipo,
+        "es_otro_juego" => 0,
+        "cantidad"      => $valor,
+        "total"         => $valor,
+        "saldo"         => $saldo_fin_mes
       ];
     }
     $qOtros->close();
 
-    usort($movs, function($a, $b){
+    /* =====================================================
+       3) Ordenar por fecha y tipo
+    ===================================================== */
+    $ordenKind = [
+      "normal"     => 1,
+      "otro_juego" => 2,
+      "otro"       => 3,
+    ];
+
+    usort($movs, function($a, $b) use ($ordenKind){
       if ($a["fecha"] === $b["fecha"]) {
-        return strcmp($a["kind"], $b["kind"]);
+        $oa = $ordenKind[$a["kind"]] ?? 99;
+        $ob = $ordenKind[$b["kind"]] ?? 99;
+        if ($oa === $ob) return 0;
+        return $oa <=> $ob;
       }
       return strcmp($a["fecha"], $b["fecha"]);
     });
@@ -236,16 +256,19 @@ try {
       $rows[] = $m;
     }
 
+    /* =====================================================
+       4) Totales por jugador
+    ===================================================== */
     $players[] = [
-      "id"              => $jid,
-      "nombre"          => $j["nombre"],
-      "fecha_baja"      => $j["fecha_baja"],
-      "total_mes"       => $sum_normales_mes,
-      "total_otros_mes" => $sum_otros_mes,
-      "total_listado"   => $sum_normales_mes,
-      "saldo_fin_mes"   => $saldo_fin_mes,
-      "deudas_total"    => (int)$deudas["total"],
-      "deudas_fechas"   => $deudas["fechas"],
+      "id"               => $jid,
+      "nombre"           => $j["nombre"],
+      "fecha_baja"       => $j["fecha_baja"],
+      "total_mes"        => $sum_normales_mes,
+      "total_otros_mes"  => $sum_otros_mes,
+      "total_listado"    => (int)$sum_normales_mes,
+      "saldo_fin_mes"    => $saldo_fin_mes,
+      "deudas_total"     => (int)$deudas["total"],
+      "deudas_fechas"    => $deudas["fechas"],
     ];
 
     $total_eliminados_mes  += $sum_normales_mes;
@@ -261,10 +284,10 @@ try {
     "mes" => $mes,
     "anio" => $anio,
     "totales" => [
-      "eliminados_mes"       => $total_eliminados_mes,
-      "otros_eliminados_mes" => $total_otros_elim_mes,
-      "total_general_aportes"=> $total_general_aportes,
-      "total_general_saldo"  => $total_general_saldo
+      "eliminados_mes"        => $total_eliminados_mes,
+      "otros_eliminados_mes"  => $total_otros_elim_mes,
+      "total_general_aportes" => $total_general_aportes,
+      "total_general_saldo"   => $total_general_saldo
     ],
     "players" => $players,
     "rows"    => $rows
@@ -273,7 +296,8 @@ try {
 } catch (Throwable $e) {
   http_response_code(500);
   echo json_encode([
-    "ok" => false,
+    "ok"    => false,
     "error" => $e->getMessage(),
   ], JSON_UNESCAPED_UNICODE);
+  exit;
 }

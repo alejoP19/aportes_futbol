@@ -263,7 +263,7 @@ function renderTablaPublic(data) {
   html += `
     <tr class="tfoot-base-sin-elim">
       <td colspan="${dias.length + 4}">
-        <p>TOTAL FINAL MES (Sin Aportes De Tabla Eliminados / Sin Otros Aportes de Ambas Tablas) =</p>
+        <p>TOTAL FINAL MES (Sin Aportes De Tabla Eliminados / Sin Otros Aportes de Ambas Tablas)</p>
         <div class="tfoot-base-sin-elim-note">
           Sumando esta cifra con los Aportes Eliminados del Mes saldrá el Total Mes (sin otros aportes de Ambas Tablas).
         </div>
@@ -753,7 +753,7 @@ function renderSelectOtroDia(data, mes, anio){
 }
 
 
-function renderOtrosPartidosPublico(data){
+function renderOtrosPartidosPublico(data) {
   const box = document.getElementById("otrosPartidosPublico");
   if (!box) return;
 
@@ -763,10 +763,12 @@ function renderOtrosPartidosPublico(data){
 
   let html = `<h3 class="partidos-extra-titulo">Datos Columna Otro Juego</h3>`;
 
-  if (!cantidad){
+  if (!cantidad) {
     html += `
       <div class="alert-no-otros-partidos">
-        <p class="alert-no-otros-partidos-label">No Hay Registros de Otros Partidos Jugados (Días NO miércoles/sábado).</p>
+        <p class="alert-no-otros-partidos-label">
+          No Hay Registros de Otros Partidos Jugados (Días NO miércoles/sábado).
+        </p>
       </div>
     `;
     box.innerHTML = html;
@@ -797,33 +799,56 @@ function renderOtrosPartidosPublico(data){
                 <td>${escapeHtml(it.nombre || "")}</td>
                 <td>${escapeHtml(it.fecha_label || it.fecha || "")}</td>
                 <td>${escapeHtml(it.tabla || "")}</td>
-                <td class="partidos-extra-total"><strong>${formatMoney(it.efectivo_total || 0)}</strong></td>
+                <td class="partidos-extra-total">
+                  <strong>${formatMoney(it.efectivo_total || 0)}</strong>
+                </td>
               </tr>
             `).join("")}
           </tbody>
         </table>
 
+        </div>
         <div class="partidos-extra-tfoot-table">
           <p>Total otros partidos: <span>${formatMoney(total)}</span></p>
         </div>
-      </div>
     </div>
   `;
 
   box.innerHTML = html;
 }
 
-
-let __eliminadosMesCache = {};
+/* ================================
+   ELIMINADOS PÚBLICO - IGUAL ADMIN
+================================ */
+window.__eliminadosMesCache = window.__eliminadosMesCache || {};
 
 function keyElim(anio, mes) {
   return `${parseInt(anio, 10)}-${parseInt(mes, 10)}`;
 }
 
-function renderModalEliminadosPublic(data, mes, anio) {
+async function fetchEliminadosMesPublico(mes, anio) {
+  const mesN = parseInt(mes, 10);
+  const anioN = parseInt(anio, 10);
+  const url = `${API_ELIMINADOS_PUBLICO}?mes=${mesN}&anio=${anioN}`;
+
+  const r = await fetch(url, { cache: "no-store" });
+  const txt = await r.text();
+
+  let data;
+  try {
+    data = JSON.parse(txt);
+  } catch (e) {
+    console.error("Respuesta NO JSON get_eliminados_mes_publico.php:", { url, status: r.status, txt });
+    throw e;
+  }
+  return data;
+}
+
+function renderModalEliminadosPublico(data, mes, anio) {
   const modal = document.getElementById("modalEliminados");
   const body  = document.getElementById("modalEliminadosBody");
   if (!modal || !body) return;
+
 
   const players = Array.isArray(data.players) ? data.players : [];
   const rows = Array.isArray(data.rows) ? data.rows : [];
@@ -846,193 +871,202 @@ function renderModalEliminadosPublic(data, mes, anio) {
     const total = Number(pp.deudas_total || 0);
     const fechas = Array.isArray(pp.deudas_fechas) ? pp.deudas_fechas : [];
     if (!total) return `<span style="opacity:.6;">0</span>`;
+
     return `
       <div class="deuda-cell">
         <div class="deuda-count"><strong>${total}</strong></div>
-        <div class="deuda-fechas">${fechas.map(escapeHtml).join("<br>")}</div>
+        <div class="deuda-fechas">${fechas.map(f => escapeHtml(f)).join("<br>")}</div>
       </div>
     `;
   };
 
   body.innerHTML = `
-    <div class="table-container">
-      <table class="table-mini eliminados-detalle">
-        <thead>
-          <tr>
-            <th style="width:40%;">Aportante</th>
-            <th style="width:6%;">#</th>
-            <th style="width:25%;">Fecha</th>
-            <th style="width:14%;" class="right">Cantidad</th>
-            <th style="width:10%;" class="right">Totales</th>
-            <th style="width:10%;" class="right">Saldo</th>
-            <th style="width:10%;" class="right">Deudas</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${players.map(p => {
-            const pr = rowsByPlayer.get(String(p.id)) || [];
-            const fechaBaja = escapeHtml(p.fecha_baja || "");
+<div class="table-container">
+  <table class="table-mini eliminados-detalle">
+    <thead>
+      <tr>
+        <th style="width:40%;">Aportante</th>
+        <th style="width:6%;">#</th>
+        <th style="width:25%;">Fecha</th>
+        <th style="width:14%;" class="right">Cantidad</th>
+        <th style="width:10%;" class="right">Totales</th>
+        <th style="width:10%;" class="right">Saldo</th>
+        <th style="width:10%;" class="right">Deudas</th>
+      </tr>
+    </thead>
 
-            const baja = (p.fecha_baja || "");
-            const bajaObj = baja ? new Date(baja + "T00:00:00") : null;
-            const bajaMes  = bajaObj ? (bajaObj.getMonth() + 1) : null;
-            const bajaAnio = bajaObj ? bajaObj.getFullYear() : null;
-            const bajaInfo = (bajaMes && bajaAnio) ? `${bajaMes}/${bajaAnio}` : "sin fecha";
+    <tbody>
+      ${players.map(p => {
+        const pr = rowsByPlayer.get(String(p.id)) || [];
 
-            const playerCell = `
-              <div class="player-title">
-                <strong>${escapeHtml(p.nombre || "")}</strong>
-                <span class="baja-pill">Baja: ${fechaBaja}</span>
-              </div>
-            `;
+        const baja = (p.fecha_baja || "");
+        const bajaObj = baja ? new Date(baja + "T00:00:00") : null;
+        const bajaMes  = bajaObj ? (bajaObj.getMonth() + 1) : null;
+        const bajaAnio = bajaObj ? bajaObj.getFullYear() : null;
+        const bajaInfo = (bajaMes && bajaAnio) ? `${bajaMes}/${bajaAnio}` : "sin fecha";
+        const fechaBaja = escapeHtml(p.fecha_baja || "");
 
-            if (!pr.length) {
-              return `
-                <tr class="row-empty">
-                  <td class="player-cell">${playerCell}</td>
-                  <td colspan="4" style="opacity:.85;">
-                    Este aportante fue eliminado en <strong>${bajaInfo}</strong>, pero <strong>no tiene aportes registrados en ${mes}/${anio}</strong>.<br>
-                    Si quieres ver sus aportes, revisa <strong>meses anteriores</strong> en la planilla.
-                  </td>
-                  <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
-                  <td class="right">${renderDeudasCell(p)}</td>
-                </tr>
+        const playerCell = `
+          <div class="player-title">
+            <strong>${escapeHtml(p.nombre || "")}</strong>
+            <span class="baja-pill">Baja: ${fechaBaja}</span>
+          </div>
+        `;
 
-                <tr class="player-total">
-                  <td><strong>Total Aportes(Mes)</strong></td>
-                  <td colspan="3"></td>
-                  <td class="right"><strong>${formatMoney(p.total_mes || 0)}</strong></td>
-                  <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
-                  <td></td>
-                </tr>
+        if (!pr.length) {
+          return `
+            <tr class="row-empty">
+              <td class="player-cell">${playerCell}</td>
+              <td colspan="4" style="opacity:.85;">
+                Este aportante fue eliminado en <strong>${bajaInfo}</strong>, pero <strong>no tiene aportes registrados en ${mes}/${anio}</strong>.<br>
+                Si quieres ver sus aportes, revisa <strong>meses anteriores</strong> en la planilla.
+              </td>
+              <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
+              <td class="right">${renderDeudasCell(p)}</td>
+            </tr>
 
-                <tr class="player-sep"><td colspan="7"></td></tr>
-              `;
-            }
+            <tr class="player-total">
+              <td><strong>Total Aportes(Mes)</strong></td>
+              <td colspan="3"></td>
+              <td class="right"><strong>${formatMoney(p.total_mes || 0)}</strong></td>
+              <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
+              <td></td>
+            </tr>
 
-            const rowsHtml = pr.map((r, i) => {
-              const isLast = i === pr.length - 1;
-              let cls = "row-normal";
-              if (r.kind === "otro" || r.kind === "otro_juego") cls = "row-otro";
+            <tr class="player-sep"><td colspan="7"></td></tr>
+          `;
+        }
 
-              const labelHtml = r.label ? `<div class="row-label">${escapeHtml(r.label)}</div>` : "";
-              const saldoHtml  = isLast ? `<strong>${formatMoney(p.saldo_fin_mes || 0)}</strong>` : "";
-              const deudasHtml = isLast ? renderDeudasCell(p) : "";
+        const rowsHtml = pr.map((r, i) => {
+          const isLast = i === pr.length - 1;
 
-              if (i === 0) {
-                return `
-                  <tr class="player-sep"><td colspan="7"></td></tr>
-                  <tr class="${cls}">
-                    <td class="player-cell" rowspan="${pr.length}">${playerCell}</td>
-                    <td>${r.n}</td>
-                    <td>${escapeHtml(r.fecha || "")}${labelHtml}</td>
-                    <td class="right">${formatMoney(r.cantidad || 0)}</td>
-                    <td class="right">${formatMoney(r.total || 0)}</td>
-                    <td class="right">${saldoHtml}</td>
-                    <td class="right">${deudasHtml}</td>
-                  </tr>
-                `;
-              }
+          let cls = "row-normal";
+          if (r.kind === "otro" || r.kind === "otro_juego") cls = "row-otro";
 
-              return `
-                <tr class="${cls}">
-                  <td>${r.n}</td>
-                  <td>${escapeHtml(r.fecha || "")}${labelHtml}</td>
-                  <td class="right">${formatMoney(r.cantidad || 0)}</td>
-                  <td class="right">${formatMoney(r.total || 0)}</td>
-                  <td class="right">${saldoHtml}</td>
-                  <td class="right">${deudasHtml}</td>
-                </tr>
-              `;
-            }).join("");
+          const labelHtml = r.label ? `<div class="row-label">${escapeHtml(r.label)}</div>` : "";
 
-            const footJugador = `
-              <tr class="player-total">
-                <td><strong>Total Aportes</strong></td>
-                <td colspan="3"></td>
-                <td class="right"><strong>${formatMoney(p.total_mes || 0)}</strong></td>
-                <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
-                <td></td>
-              </tr>
+          const saldoHtml  = isLast ? `<strong>${formatMoney(p.saldo_fin_mes || 0)}</strong>` : "";
+          const deudasHtml = isLast ? renderDeudasCell(p) : "";
+
+          if (i === 0) {
+            return `
               <tr class="player-sep"><td colspan="7"></td></tr>
+              <tr class="${cls}">
+                <td class="player-cell" rowspan="${pr.length}">${playerCell}</td>
+                <td>${r.n}</td>
+                <td>${escapeHtml(r.fecha || "")}${labelHtml}</td>
+                <td class="right">${formatMoney(r.cantidad || 0)}</td>
+                <td class="right">${formatMoney(r.total || 0)}</td>
+                <td class="right">${saldoHtml}</td>
+                <td class="right">${deudasHtml}</td>
+              </tr>
             `;
+          }
 
-            return rowsHtml + footJugador;
-          }).join("")}
-        </tbody>
+          return `
+            <tr class="${cls}">
+              <td>${r.n}</td>
+              <td>${escapeHtml(r.fecha || "")}${labelHtml}</td>
+              <td class="right">${formatMoney(r.cantidad || 0)}</td>
+              <td class="right">${formatMoney(r.total || 0)}</td>
+              <td class="right">${saldoHtml}</td>
+              <td class="right">${deudasHtml}</td>
+            </tr>
+          `;
+        }).join("");
 
-        <tfoot>
-          <tr class="total-general">
-            <td><strong>Total General</strong></td>
+        const footJugador = `
+          <tr class="player-total">
+            <td><strong>Total Aportes</strong></td>
             <td colspan="3"></td>
-            <td class="right"><strong>${formatMoney(data.totales?.total_general_aportes || 0)}</strong></td>
-            <td class="right"><strong>${formatMoney(data.totales?.total_general_saldo || 0)}</strong></td>
+            <td class="right"><strong>${formatMoney(p.total_mes || 0)}</strong></td>
+            <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
             <td></td>
           </tr>
-        </tfoot>
-      </table>
-    </div>
+          <tr class="player-sep"><td colspan="7"></td></tr>
+        `;
+
+        return rowsHtml + footJugador;
+      }).join("")}
+    </tbody>
+
+    <tfoot>
+      <tr class="total-general">
+        <td><strong>Total General</strong></td>
+        <td colspan="3"></td>
+        <td class="right"><strong>${formatMoney(data.totales?.total_general_aportes || 0)}</strong></td>
+        <td class="right"><strong>${formatMoney(data.totales?.total_general_saldo || 0)}</strong></td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
   `;
 
   modal.classList.remove("closing");
   modal.classList.remove("hidden");
 }
 
-async function cargarEliminadosMes(mes, anio){
-  const btn   = document.getElementById("btnVerEliminados");
-  const modal = document.getElementById("modalEliminados");
-  const body  = document.getElementById("modalEliminadosBody");
+(function initEliminadosModalPublicOnce(){
+  const btn = document.getElementById("btnVerEliminados");
+  if (!btn || btn.dataset.bound) return;
+  btn.dataset.bound = "1";
+
+  btn.addEventListener("click", async () => {
+    const mesNow = parseInt(document.getElementById("selectMes").value, 10);
+    const anioNow = parseInt(document.getElementById("selectAnio").value, 10);
+    const k = keyElim(anioNow, mesNow);
+
+    try {
+      if (!window.__eliminadosMesCache[k]) {
+        window.__eliminadosMesCache[k] = await fetchEliminadosMesPublico(mesNow, anioNow);
+      }
+      renderModalEliminadosPublico(window.__eliminadosMesCache[k], mesNow, anioNow);
+    } catch (e) {
+      console.error("Error eliminados público:", e);
+      const modal = document.getElementById("modalEliminados");
+      const body  = document.getElementById("modalEliminadosBody");
+      if (body) body.innerHTML = `<div style="opacity:.85;">Error cargando eliminados. Revisa consola.</div>`;
+      if (modal) {
+        modal.classList.remove("closing");
+        modal.classList.remove("hidden");
+      }
+    }
+  });
+
   const close = document.getElementById("closeModalEliminados");
 
-  if (!btn || !modal || !body || !close) return;
+  document.addEventListener("click", (e) => {
+    const modal = document.getElementById("modalEliminados");
+    if (!modal) return;
 
-  const k = keyElim(anio, mes);
-
-  if (!btn.dataset.bound) {
-    btn.dataset.bound = "1";
-
-    btn.addEventListener("click", () => {
-      const data = __eliminadosMesCache[k];
-
-      if (!data || data.ok !== true) {
-        body.innerHTML = `<div style="opacity:.85;">No hay información disponible de eliminados para este mes.</div>`;
-        modal.classList.remove("hidden");
-        return;
-      }
-
-      renderModalEliminadosPublic(data, mes, anio);
-    });
-
-    function closeModal(){
-      modal.classList.add("closing");
-      setTimeout(() => {
-        modal.classList.add("hidden");
-        modal.classList.remove("closing");
-      }, 180);
+    if (e.target === close || e.target === modal) {
+      modal.classList.add("hidden");
+      modal.classList.remove("closing");
     }
+  });
 
-    close.onclick = closeModal;
-    modal.onclick = (e) => { if(e.target === modal) closeModal(); };
-    document.addEventListener("keydown", (ev) => {
-      if(ev.key === "Escape" && !modal.classList.contains("hidden")) closeModal();
-    });
-  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const modal = document.getElementById("modalEliminados");
+    if (!modal) return;
+    modal.classList.add("hidden");
+    modal.classList.remove("closing");
+  });
+})();
+
+async function cargarEliminadosMes(mes, anio) {
+  const mesN = parseInt(mes, 10);
+  const anioN = parseInt(anio, 10);
+  const k = keyElim(anioN, mesN);
 
   try {
-    const r = await fetch(`${API_ELIMINADOS_PUBLICO}?mes=${mes}&anio=${anio}`, { cache:"no-store" });
-    const ct = r.headers.get("content-type") || "";
-    if (!ct.includes("application/json")) throw new Error("Respuesta no es JSON");
-
-    const data = await r.json();
-    __eliminadosMesCache[k] = data;
-
-  } catch (err) {
-    __eliminadosMesCache[k] = { ok:false };
-    console.warn("No se pudo leer eliminados_publico:", err);
+    const data = await fetchEliminadosMesPublico(mesN, anioN);
+    window.__eliminadosMesCache[k] = data;
+  } catch (e) {
+    window.__eliminadosMesCache[k] = { ok:false };
   }
 }
-
-
 
 async function cargarAportesEsporadicosPublico(mes, anio, otroDia) {
   const wrap = document.getElementById("esporadicosWrapPublic");
