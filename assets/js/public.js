@@ -873,16 +873,16 @@ function renderModalEliminadosPublico(data, mes, anio) {
     if (!total) return `<span style="opacity:.6;">0</span>`;
 
     return `
-      <div class="deuda-cell">
-        <div class="deuda-count"><strong>${total}</strong></div>
-        <div class="deuda-fechas">${fechas.map(f => escapeHtml(f)).join("<br>")}</div>
+      <div class="deuda-cell-eliminados">
+        <div class="deuda-count">${total}</div>
+        <div class="deuda-fechas-eliminados">${fechas.map(f => escapeHtml(f)).join("<br>")}</div>
       </div>
     `;
   };
 
   body.innerHTML = `
-<div class="table-container">
-  <table class="table-mini eliminados-detalle">
+<div class="table-container-eliminados">
+  <table class="table-mini-eliminados eliminados-detalle">
     <thead>
       <tr>
         <th style="width:40%;">Aportante</th>
@@ -907,83 +907,84 @@ function renderModalEliminadosPublico(data, mes, anio) {
         const fechaBaja = escapeHtml(p.fecha_baja || "");
 
         const playerCell = `
-          <div class="player-title">
-            <strong>${escapeHtml(p.nombre || "")}</strong>
-            <span class="baja-pill">Baja: ${fechaBaja}</span>
+          <div class="player-title-eliminados">
+            ${escapeHtml(p.nombre || "")}
+            <span class="baja-pill-eliminados">Baja: ${fechaBaja}</span>
           </div>
         `;
 
         if (!pr.length) {
           return `
-            <tr class="row-empty">
-              <td class="player-cell">${playerCell}</td>
+            <tr class="row-empty-eliminados">
+              <td class="player-cell-empty-eliminados">${playerCell}</td>
               <td colspan="4" style="opacity:.85;">
-                Este aportante fue eliminado en <strong>${bajaInfo}</strong>, pero <strong>no tiene aportes registrados en ${mes}/${anio}</strong>.<br>
-                Si quieres ver sus aportes, revisa <strong>meses anteriores</strong> en la planilla.
+                Este aportante fue eliminado en ${bajaInfo}, pero no tiene aportes registrados este mes.<br>
+                Si quieres ver sus aportes, <strong> revisa las planillas principales de los meses anteriores.</strong>
               </td>
-              <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
-              <td class="right">${renderDeudasCell(p)}</td>
+              <td class="right-eliminados">${formatMoney(p.saldo_fin_mes || 0)}</td>
+              <td class="right-eliminados">${renderDeudasCell(p)}</td>
             </tr>
 
-            <tr class="player-total">
-              <td><strong>Total Aportes(Mes)</strong></td>
+            <tr class="player-total-eliminados">
+              <td>Total Aportes(Mes)</td>
               <td colspan="3"></td>
-              <td class="right"><strong>${formatMoney(p.total_mes || 0)}</strong></td>
-              <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
+              <td class="right-eliminados">${formatMoney(p.total_mes || 0)}</td>
+              <td class="right-eliminados">${formatMoney(p.saldo_fin_mes || 0)}</td>
               <td></td>
             </tr>
 
-            <tr class="player-sep"><td colspan="7"></td></tr>
+            <tr class="player-sep-eliminados"><td colspan="7"></td></tr>
           `;
         }
 
         const rowsHtml = pr.map((r, i) => {
           const isLast = i === pr.length - 1;
+         
+          let cls = "row-normal-eliminados";
+          if (r.kind === "otro") cls = "row-otro-aporte-eliminados";
+          else if (r.kind === "otro_juego") cls = "row-otro-juego-eliminados";
+          console.log(cls)
+          const labelHtml = r.label ? `<small class="row-label-eliminados">${escapeHtml(r.label)}</small>` : "";
 
-          let cls = "row-normal";
-          if (r.kind === "otro" || r.kind === "otro_juego") cls = "row-otro";
-
-          const labelHtml = r.label ? `<div class="row-label">${escapeHtml(r.label)}</div>` : "";
-
-          const saldoHtml  = isLast ? `<strong>${formatMoney(p.saldo_fin_mes || 0)}</strong>` : "";
+          const saldoHtml  = isLast ? `${formatMoney(p.saldo_fin_mes || 0)}` : "";
           const deudasHtml = isLast ? renderDeudasCell(p) : "";
 
           if (i === 0) {
             return `
-              <tr class="player-sep"><td colspan="7"></td></tr>
+              <tr class="player-sep-eliminados"><td colspan="7"></td></tr>
               <tr class="${cls}">
-                <td class="player-cell" rowspan="${pr.length}">${playerCell}</td>
-                <td>${r.n}</td>
-                <td>${escapeHtml(r.fecha || "")}${labelHtml}</td>
-                <td class="right">${formatMoney(r.cantidad || 0)}</td>
-                <td class="right">${formatMoney(r.total || 0)}</td>
-                <td class="right">${saldoHtml}</td>
-                <td class="right">${deudasHtml}</td>
+                <td rowspan="${pr.length}" class="player-cell-eliminados"> ${playerCell}</td>
+                <td class="num-aporte_elim">${r.n}</td>
+                <td class="fecha_aporte-elim">${escapeHtml(r.fecha || "")}${labelHtml}</td>
+                <td class="right-eliminados">${formatMoney(r.cantidad || 0)}</td>
+                <td class="right-eliminados">${formatMoney(r.total || 0)}</td>
+                <td class="right-eliminados">${saldoHtml}</td>
+                <td class="right-eliminados">${deudasHtml}</td>
               </tr>
             `;
           }
 
           return `
             <tr class="${cls}">
-              <td>${r.n}</td>
-              <td>${escapeHtml(r.fecha || "")}${labelHtml}</td>
-              <td class="right">${formatMoney(r.cantidad || 0)}</td>
-              <td class="right">${formatMoney(r.total || 0)}</td>
-              <td class="right">${saldoHtml}</td>
-              <td class="right">${deudasHtml}</td>
+              <td class="num-aporte_elim">${r.n}</td>
+              <td class="fecha_aporte-elim">${escapeHtml(r.fecha || "")}${labelHtml}</td>
+              <td class="right-eliminados">${formatMoney(r.cantidad || 0)}</td>
+              <td class="right-eliminados">${formatMoney(r.total || 0)}</td>
+              <td class="right-eliminados">${saldoHtml}</td>
+              <td class="right-eliminados">${deudasHtml}</td>
             </tr>
           `;
         }).join("");
 
         const footJugador = `
-          <tr class="player-total">
-            <td><strong>Total Aportes</strong></td>
+          <tr class="player-total-eliminados">
+            <td>Total Aportes (Mes)</td>
             <td colspan="3"></td>
-            <td class="right"><strong>${formatMoney(p.total_mes || 0)}</strong></td>
-            <td class="right"><strong>${formatMoney(p.saldo_fin_mes || 0)}</strong></td>
+            <td class="right-eliminados">${formatMoney(p.total_mes || 0)}</td>
+            <td class="right-eliminados">${formatMoney(p.saldo_fin_mes || 0)}</td>
             <td></td>
           </tr>
-          <tr class="player-sep"><td colspan="7"></td></tr>
+          <tr class="player-sep-eliminados"><td colspan="7"></td></tr>
         `;
 
         return rowsHtml + footJugador;
@@ -991,11 +992,11 @@ function renderModalEliminadosPublico(data, mes, anio) {
     </tbody>
 
     <tfoot>
-      <tr class="total-general">
-        <td><strong>Total General</strong></td>
+      <tr class="total-general-eliminados">
+        <td class="total-tfoot-eliminados">Total General</td>
         <td colspan="3"></td>
-        <td class="right"><strong>${formatMoney(data.totales?.total_general_aportes || 0)}</strong></td>
-        <td class="right"><strong>${formatMoney(data.totales?.total_general_saldo || 0)}</strong></td>
+        <td class="right-eliminados">${formatMoney(data.totales?.total_general_aportes || 0)}</td>
+        <td class="right-eliminados">${formatMoney(data.totales?.total_general_saldo || 0)}</td>
         <td></td>
       </tr>
     </tfoot>
