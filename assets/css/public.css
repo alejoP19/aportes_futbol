@@ -288,7 +288,8 @@ margin: 2%;
   outline: none;
   background: #61bd9785;
   color: #ffffff;
-  text-shadow: -1px 1px 1px #000000;
+  font-weight: bold;
+  text-shadow: -1px 1px 1px #000000,-1px 1px 1px #000000;
   font-size: 14px;
   padding: 6px 10px;
  
@@ -297,10 +298,10 @@ margin: 2%;
 
 
 .public-search-input::placeholder {
- color: rgba(255, 255, 255, 0.952);
+ color: rgba(255, 255, 255, 0.877);
   font-size: 14px;
-  font-weight: lighter;
-  text-shadow: -1px 1px 1px #000000;
+ font-weight: bold;
+  text-shadow: -1px 1px 1px #000000,-1px 1px 1px #000000;
 }
 .public-search-input:focus-within::placeholder{
    color: #ffffffd0;
@@ -769,12 +770,66 @@ margin-left: 3%;
    ESPORÁDICOS PÚBLICO
 ============================== */
 .public-esporadicos-section{
-  width: 98%;
+  width: 97%;
   margin: 14px auto 0 auto;
-  background: #f1f1f1;
+background: linear-gradient(540deg,
+rgba(1, 88, 69, 0.973),rgb(57, 197, 120)
+) !important;
   border-radius: 10px;
   box-shadow: -1px 1px 10px white;
   padding: 8px;
+}
+.esporadicos-summary::marker{
+  color: #006443;
+    font-weight: bold;
+    border: 1px dotted rgba(5, 255, 47, 0.945);
+
+}
+.esporadicos-summary{
+  cursor: pointer;
+  font-weight: bold;
+  padding: 10px 12px;
+  border-radius: 14px;
+  color: #ffee00;
+background: linear-gradient(540deg,
+rgb(228, 250, 239),
+rgba(55, 219, 143, 0.973)) !important;
+  border: 1px dotted rgba(0, 126, 67, 0.589);
+    text-shadow: -1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0);
+}
+.esporadicos-summary span{
+  margin-left: 3%;
+  top: 0%;
+}
+.esporadicos-summary small{
+  display:block;
+  font-weight:bold;
+  color: #000000;
+  opacity:.85;
+  margin-top:4px;
+  font-style: italic;
+  text-align: center;
+  font-size: 14px;
+     text-shadow: -1px 1px 1px rgb(255, 255, 255),
+-1px 1px 1px rgb(255, 255, 255),
+-1px 1px 1px rgb(255, 255, 255);
+
+;
+}
+.esp-hint{
+font-weight:bold;
+color: #ffffff;
+opacity:.95;
+font-style: italic;
+text-align: center;
+font-size: 14px;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0);
 }
 
 .public-readonly-toolbar{
@@ -788,16 +843,43 @@ margin-left: 3%;
   -webkit-overflow-scrolling: touch;
 }
 
+.esp-table thead th{
+  position: sticky;
+  top: 0;
+  background: linear-gradient(540deg,
+rgb(135, 207, 171),
+rgba(0, 156, 104, 0.973)) !important;
+  color:#fff;
+  padding:5px;
+  text-align:center;
+  font-size: 14px;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0);
+}
 .esp-readonly-text,
 .esp-readonly-note{
   display:inline-block;
   min-width:80px;
   font-weight:bold;
-  font-size:12px;
+  font-size:13px;
 }
 
-.esp-readonly-note{
-  color:#333;
+.esp-table tbody tr :nth-child(11),
+.esp-table tbody tr :nth-child(12){
+font-weight:bold;
+color: #005e17;
+font-style: italic;
+text-align: center;
+font-size: 14px;
+text-shadow: -1px 1px 1px rgb(255, 255, 255),
+-1px 1px 1px rgb(255, 255, 255),
+-1px 1px 1px rgb(255, 255, 255);
+border-radius: 5px;
+border: 1px dotted #00f521;
+background-color: #f5f5f5;
+padding: 0%;
+margin: 0%;
 }
 
 .esporadicos-details{
@@ -805,22 +887,7 @@ margin-left: 3%;
   border-radius: 18px;
 }
 
-.esporadicos-summary{
-  cursor: pointer;
-  font-weight: 800;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(238,238,238,.70);
-  border: 1px solid rgba(0,0,0,.08);
-}
 
-.esporadicos-summary small{
-  display:block;
-  font-weight:600;
-  opacity:.85;
-  margin-top:4px;
-  font-style: italic;
-}
 
 .esporadicos-toolbar{
   display:flex;
@@ -833,12 +900,7 @@ margin-left: 3%;
   font-size: 12px;
   opacity: .9;
   font-style: italic;
-}
-
-.esp-note{
-  margin-top:10px;
-  opacity:.92;
-  font-size: 13px;
+  margin-right: 20px;
 }
 
 .esp-table{
@@ -849,17 +911,13 @@ margin-left: 3%;
   border-radius:12px;
   overflow:hidden;
   font-size: 13px;
+  margin-bottom: 3px;
   background:#fff;
+  border-bottom-left-radius: 0%;
+  border-bottom-right-radius: 0%;
 }
 
-.esp-table thead th{
-  position: sticky;
-  top: 0;
-  background:#0a83b3;
-  color:#fff;
-  padding:10px;
-  text-align:center;
-}
+
 
 .esp-table td{
   padding:8px;
@@ -893,7 +951,7 @@ margin-left: 3%;
   background: rgba(0,0,0,.05);
   border-color: rgba(0,0,0,.08);
   font-weight:700;
-  opacity:.8;
+  opacity:.7;
 }
 
 /* Footers */
@@ -907,6 +965,30 @@ color: #ffee00;
 font-size: 13px !important;
  text-shadow:-1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
 }
+
+.esp-note{
+opacity:.98;
+font-size: 13px;
+font-weight:bold;
+color: #ffffff;
+font-style: italic;
+text-align: center;
+font-size: 14px;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0);
+border: 1px double rgb(209, 209, 209)  ;
+background: linear-gradient(540deg,
+rgb(48, 192, 144),
+rgba(0, 85, 59, 0.973)) !important;
+padding: 8px;
+width: 100%;
+box-sizing: border-box;
+border-bottom-left-radius: 18px;
+border-bottom-right-radius: 18px;
+
+}
+
 
 /* =======================================================
    GASTOS / OBSERVACIONES
@@ -1208,14 +1290,14 @@ padding:28px !important;
 border-radius: 12px;
 font-weight: bold;
 font-style: oblique;
-font-size: 13px !important;
+font-size: 14px !important;
 margin-bottom: 0%;
 }
 
 .parcial-totals-mini-help small{
 color: rgba(59, 55, 0, 0.952) !important;
   text-shadow: -1px 1px 1px #ffffff,-1px 1px 1px #ffffff;
-  font-size: 12px;
+  font-size: 13px;
 
 }
 
@@ -1586,7 +1668,7 @@ padding:18px;
 border-radius: 12px;
 font-weight: bold;
 font-style: oblique;
-font-size: 12px !important;
+font-size: 13px !important;
 }
 
 .btn-ver-eliminados{ 
@@ -2072,18 +2154,32 @@ font-size: 20px;
 }
 
 .observaciones-box {
-  
-  width: 96%;
-  justify-self: center;
-  padding: 12px;
-  margin-bottom: 2%;
-background: #f5f5f2b7;
- border: 1px solid rgba(218, 218, 218, 0.849);
-  font-weight: bold !important;
-  border-radius: 8px;
-  text-align: left;
-  white-space: pre-line;
-  color: #000000;
+display: flex;
+flex-direction: column;
+gap: 10px;
+width: 97%;
+min-height:120px;
+justify-self: center;
+color: #020202f8;
+padding:12px;
+margin-bottom:5%;
+font-weight: bold;
+font-size:15px;
+white-space: pre-line;
+text-align: justify;
+font-family: "Lucida Sans Unicode", sans-serif;
+margin-top: 0%;
+text-shadow: -1px 1px 1px rgb(255, 255, 255),
+-1px 1px 1px rgb(255, 255, 255),
+-1px 1px 1px rgb(255, 255, 255);
+border-radius:12px;
+background: linear-gradient(180deg,
+rgba(248, 248, 248, 0.95),
+rgba(247, 247, 247, 0.95));
+box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+transition: transform .15s ease, box-shadow .15s ease;
+border: 1px dotted  rgba(202, 201, 194, 0.95); 
+
   
 }
 
@@ -2174,7 +2270,7 @@ rgba(0, 143, 76, 0.973)) !important;
     width: fit-content;
     max-width: 90%;
     padding: 10px 20px 10px 5px;   /* opcional */
-    margin-bottom: 30px;
+    margin-bottom: 10px;
     overflow: auto;                 /* X + Y */
     max-height: calc(100vh - 100px);/* ajusta si quieres */
     box-shadow: none;
@@ -2223,10 +2319,13 @@ padding: 6px ;
 .public-search-input{
   font-size: 13px;
   padding: 2px 10px;
+  
 }
 
 .public-search-input::placeholder {
   font-size: 13px;
+
+
 }
 .public-search-input:focus-within::placeholder{
      font-size: 10px;
@@ -2368,6 +2467,78 @@ table tfoot {
 }
 
 
+/* ==============================
+   ESPORÁDICOS PÚBLICO
+============================== */
+.public-esporadicos-section{
+justify-self: center;
+  width: 90%;
+  margin: 0 !important;
+  margin-bottom: 3px;
+  padding: 3px 10px;
+}
+
+.esporadicos-summary{
+  padding: 10px 12px;
+  border-radius: 14px;
+  margin: 10px 3px 8px 3px;
+}
+.esporadicos-summary span{
+  margin-left: 1%;
+  top: 0%;
+}
+
+.esporadicos-summary small{
+  display:flex;
+  opacity:.80;
+  margin-top:0px;
+  justify-self: flex-end;
+  margin-right: 20px;
+  font-size: 13px;
+}
+
+.public-readonly-toolbar{
+  display:flex;
+  justify-content:flex-end;
+}
+
+
+.esp-table thead th{
+  padding:10px;
+  font-size: 13px;
+}
+.esp-readonly-text,
+.esp-readonly-note{
+  font-size:11px;
+}
+
+.esp-table tbody tr :nth-child(11),
+.esp-table tbody tr :nth-child(12){
+font-size: 13px;
+}
+
+.esp-hint{
+  font-size: 12px;
+  opacity: .9;
+  font-style: italic;
+  margin-right: 20px;
+}
+.esp-table{
+  font-size: 12px;
+    margin-bottom: 2px;
+
+}
+
+.esp-chip{
+  padding:3px 12px;
+}
+
+.esp-note{
+  font-size: 12px;
+  padding: 13px;
+}
+
+
 /* <<<<<<<<<<<<< SECCION CARD >>>>>>>>>>>>>>>  */
 
 
@@ -2380,6 +2551,7 @@ padding: 8px;
 flex-direction: row;
 width: 90%;
 margin: auto;
+margin-top: 10px;
 margin-bottom: 7%;
 gap: 10px;
 

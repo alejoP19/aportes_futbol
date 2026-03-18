@@ -142,11 +142,10 @@ function renderTablaPublic(data) {
   `;
 
   data.rows.forEach(row => {
-    if (Number(row.activo) === 0) return;
-
     const deudas = row.deudas || {};
+    const filaClass = Number(row.activo) === 0 ? "eliminado" : "";
 
-    html += `<tr data-player="${row.id}">`;
+    html += `<tr data-player="${row.id}" class="${filaClass}">`;
     html += `<td class="player-name">${escapeHtml(row.nombre)}</td>`;
 
     row.dias.forEach((visible, idx) => {

@@ -45,7 +45,7 @@
   <section class="public-esporadicos-section">
     <details class="esporadicos-details" closed>
       <summary class="esporadicos-summary">
-        Aportes Esporádicos
+         <span>Aportes Esporádicos</span>
         <small>— se suman automáticamente a totales diarios, mensuales y anuales</small>
       </summary>
 

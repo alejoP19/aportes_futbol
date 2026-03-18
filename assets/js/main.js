@@ -347,13 +347,7 @@ async function loadSheet(mes, anio) {
     });
   });
 
-  // Botones eliminar
-  container.querySelectorAll(".btn-del-player").forEach(btn => {
-    btn.addEventListener("click", ev => {
-      ev.stopPropagation(); // para no seleccionar fila
-      eliminarJugador(btn.dataset.id);
-    });
-  });
+
 
     // Click en teléfono
   container.querySelectorAll(".telefono-cell").forEach(cell => {
@@ -947,6 +941,7 @@ const yearSelect = document.getElementById("yearSelect");
 document.addEventListener("DOMContentLoaded", async () => {
   await loadPlayersList();
   await refreshSheet();
+  bindAccionesTabla();
 
   // botones
   const btnAddPlayer = document.getElementById("btnAddPlayer");
@@ -1412,37 +1407,26 @@ document.addEventListener("pointerup", function (e) {
 
 
 
-// =============================
-// EDITAR APORTANTE (NOMBRE / TEL)
-// =============================
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest(".btn-edit-player");
-  if (!btn) return;
-
-  console.log("CLICK EDIT:", btn.dataset);  // 👈 prueba
-  const id = btn.dataset.id;
-  const nombre = btn.dataset.nombre || "";
-  const telefono = btn.dataset.telefono || "";
-
-  Swal.fire({
+async function editarJugador(id, nombreActual, telefonoActual) {
+  const result = await Swal.fire({
     title: "Editar aportante",
     html: `
-          <div style="text-align:left">
-            <label>Nombre del aportante</label>
-            <input id="swalNombre" class="swal2-input" value="${nombre}">
-          </div>
-          <div style="text-align:left; margin-top:8px;">
-            <label>Teléfono</label>
-            <input id="swalTelefono" class="swal2-input" value="${telefono}">
-          </div>
-        `,
+      <div style="text-align:left;">
+        <label style="display:block; margin-bottom:4px;">Nombre del aportante</label>
+        <input id="swalNombre" class="swal2-input" value="${escapeHtml(nombreActual || "")}">
+      </div>
+      <div style="text-align:left; margin-top:8px;">
+        <label style="display:block; margin-bottom:4px;">Teléfono</label>
+        <input id="swalTelefono" class="swal2-input" value="${escapeHtml(telefonoActual || "")}">
+      </div>
+    `,
     focusConfirm: false,
     showCancelButton: true,
     confirmButtonText: "Guardar cambios",
     cancelButtonText: "Cancelar",
     preConfirm: () => {
-      const nuevoNombre = document.getElementById("swalNombre").value.trim();
-      const nuevoTelefono = document.getElementById("swalTelefono").value.trim();
+      const nuevoNombre = document.getElementById("swalNombre")?.value.trim() || "";
+      const nuevoTelefono = document.getElementById("swalTelefono")?.value.trim() || "";
 
       if (!nuevoNombre) {
         Swal.showValidationMessage("El nombre no puede estar vacío");
@@ -1454,45 +1438,94 @@ document.addEventListener("click", (e) => {
         telefono: nuevoTelefono
       };
     }
-  }).then((result) => {
-    if (!result.isConfirmed) return;
+  });
 
-    const { nombre: nuevoNombre, telefono: nuevoTelefono } = result.value;
-    const fd = new FormData();
-    fd.append("id", id);
-    fd.append("nombre", nuevoNombre);
-    fd.append("telefono", nuevoTelefono);
+  if (!result.isConfirmed) return;
 
-    fetch(`${API}/aportes/update_player.php`, {
+  const fd = new FormData();
+  fd.append("id", id);
+  fd.append("nombre", result.value.nombre);
+  fd.append("telefono", result.value.telefono);
+
+  try {
+    const r = await fetch(`${API}/aportantes/update_player.php`, {
       method: "POST",
       body: fd
-    })
-      .then(r => r.json())
-      .then(res => {
-        if (!res.ok) {
-          Swal.fire("Error", res.msg || "No se pudo actualizar el aportante", "error");
-          return;
-        }
+    });
 
-        Swal.fire("Actualizado", "Datos del aportante actualizados correctamente", "success");
+    const res = await r.json();
 
-        // 🔁 Refrescar tabla mensual
-        if (typeof refreshSheet === "function") {
-          refreshSheet();
-        }
+    if (!res?.ok) {
+      Swal.fire("Error", res?.msg || "No se pudo actualizar el aportante", "error");
+      return;
+    }
 
-        // 🔁 Refrescar listado de aportantes del panel izquierdo (select)
-        if (typeof loadPlayersList === "function") {
-          loadPlayersList();
-        }
-      })
-      .catch(() => {
-        Swal.fire("Error", "Error de comunicación con el servidor", "error");
-      });
+    await Swal.fire("Actualizado", "Datos del aportante actualizados correctamente", "success");
+
+    await loadPlayersList();
+    await refreshSheet();
+
+  } catch (e) {
+    console.error("Error editando aportante:", e);
+    Swal.fire("Error", "Error de comunicación con el servidor", "error");
+  }
+}
+
+function bindAccionesTabla() {
+  const container = document.getElementById("monthlyTableContainer");
+  if (!container || container.dataset.boundAcciones === "1") return;
+
+  container.dataset.boundAcciones = "1";
+
+  container.addEventListener("click", async (e) => {
+    const btnEdit = e.target.closest(".btn-edit-player");
+    if (btnEdit) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      await editarJugador(
+        btnEdit.dataset.id,
+        btnEdit.dataset.nombre || "",
+        btnEdit.dataset.telefono || ""
+      );
+      return;
+    }
+
+    const btnDelete = e.target.closest(".btn-del-player");
+    if (btnDelete) {
+      e.preventDefault();
+      e.stopPropagation();
+      await eliminarJugador(btnDelete.dataset.id);
+      return;
+    }
   });
+
+  container.addEventListener("change", async (e) => {
+    const chk = e.target.closest(".chk-activar-player");
+    if (!chk) return;
+
+    if (!chk.checked) return;
+
+    const id = chk.dataset.id;
+    const ok = await activarJugador(id);
+
+    if (!ok) chk.checked = false;
+  });
+}
+
+document.addEventListener("change", async (e) => {
+  const chk = e.target.closest(".chk-activar-player");
+  if (!chk) return;
+
+  if (chk.checked === false) return;
+
+  const id = chk.dataset.id;
+  const ok = await activarJugador(id);
+
+  if (!ok) {
+    chk.checked = false;
+  }
 });
-
-
 
 function findColumnIndex(table, headerText) {
   const head = table.tHead;
@@ -1582,10 +1615,6 @@ function recomputePlanilla(table) {
   // Mejor: buscar en footer por posición fija: tu "TOTAL MES" es la celda antes del saldo.
   // Como tu estructura puede variar, dejamos solo totales por día y por jugador (lo crítico).
 }
-
-
-
-
 
 
 
@@ -1981,3 +2010,50 @@ function bindEspCell(cell) {
 }
 
 
+async function activarJugador(id) {
+  const confirm = await Swal.fire({
+    title: "¿Volver a activar este aportante?",
+    text: "El jugador volverá a estar habilitado en la planilla.",
+    icon: "question",
+    iconColor: "#16cc34ff",
+    showCancelButton: true,
+    confirmButtonColor: "#28a745",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Sí, activar",
+    cancelButtonText: "Cancelar"
+  });
+
+  if (!confirm.isConfirmed) return false;
+
+  const fd = new FormData();
+  fd.append("id", id);
+
+  try {
+    const r = await fetch(`${API}/aportantes/activate_player.php`, {
+      method: "POST",
+      body: fd
+    });
+
+    const resp = await r.json();
+
+    if (resp && resp.ok) {
+      Swal.fire({
+        icon: "success",
+        title: "Aportante activado",
+        text: "El jugador fue habilitado nuevamente.",
+        timer: 1600,
+        showConfirmButton: false
+      });
+
+      await loadPlayersList();
+      await refreshSheet();
+      return true;
+    }
+
+    Swal.fire("Error", resp?.msg || "No se pudo activar el aportante", "error");
+    return false;
+  } catch (e) {
+    Swal.fire("Error", "Error de comunicación con el servidor", "error");
+    return false;
+  }
+}

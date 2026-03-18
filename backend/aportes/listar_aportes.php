@@ -505,18 +505,36 @@ echo "<td class='col-saldo'><strong>" . number_format($saldoAcumulado, 0, ',', '
     $nombreSafe   = htmlspecialchars($jug['nombre'], ENT_QUOTES, 'UTF-8');
     $telefonoSafe = htmlspecialchars($jug['telefono'] ?? '', ENT_QUOTES, 'UTF-8');
 
-    echo "<td class='acciones'>
-            <div class='acciones-buttons'>
-                <button class='btn-edit-player'
-                        data-id='{$jugId}'
-                        data-nombre='{$nombreSafe}'
-                        data-telefono='{$telefonoSafe}'
-                        title='Editar aportante'>✏️</button>
-                <button class='btn-del-player'
-                        data-id='{$jugId}'
-                        title='Eliminar aportante'>🗑️</button>
-            </div>
-          </td>";
+    $activarHtml = "";
+
+if ((int)$jug['activo'] === 0) {
+    $activarHtml = "
+        <label class='activar-player-wrap' title='Activar nuevamente'>
+          <input type='checkbox'
+                 class='chk-activar-player'
+                 data-id='{$jugId}'>
+          <span>Activar</span>
+        </label>
+    ";
+}
+
+echo "<td class='acciones'>
+        <div class='acciones-buttons'>
+            <button type='button'
+                    class='btn-edit-player'
+                    data-id='{$jugId}'
+                    data-nombre='{$nombreSafe}'
+                    data-telefono='{$telefonoSafe}'
+                    title='Editar aportante'>✏️</button>
+
+            <button type='button'
+                    class='btn-del-player'
+                    data-id='{$jugId}'
+                    title='Eliminar aportante'>🗑️</button>
+
+            {$activarHtml}
+        </div>
+      </td>";
 
     $listaFechas = $deudas_lista[$jugId] ?? [];
 
