@@ -470,7 +470,7 @@ function renderGastos(data, mes, anio) {
     });
     html += `</ul>`;
   } else {
-    html += "<p>No hay gastos registrados este mes.</p>";
+    html += "<div class='no-otros-gastos-warning'> <p>No hay Gastos Registrados este mes.</p></div>";
   }
 
   const fecha = new Date(anio, mes - 1, 1);
@@ -521,7 +521,11 @@ function renderOtrosAportesPublico(data, mes, anio){
     });
     html += `</ul>`;
   } else {
-    html += `<p>No hay otros aportes registrados este mes.</p>`;
+    html += `
+    <div class="no-otros-aportes-warning"> 
+    <p>No hay Otros Aportes Registrados este mes.</p>
+    </div>
+    `;
   }
 
   html += `
@@ -537,7 +541,7 @@ function renderOtrosAportesPublico(data, mes, anio){
         <p class="total-otros-valor">${formatMoney(t.otros_anio || 0)}</p>
       </div>
     </div>
-
+    
   `;
 
   box.innerHTML = html;
