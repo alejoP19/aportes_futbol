@@ -62,8 +62,6 @@
   </section>
 
   <div class="cards-container">
-
-
     <!-- Nueva sección para mostrar gastos del mes / año -->
     <section id="gastosMesPublico"></section>
     <section id="otrosAportesPublico"></section>
@@ -103,7 +101,7 @@
       <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">-<small>Aportes de Cada Partido (Miercoles / Sabado) de Ambas Planillas</small></strong><br>
       <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">-<Small>Aportes de Los Jugadores Eliminados.</Small></strong>
       <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;"> Nota: <small> Estos Aportes se Pueden Ver en La Sección de
-          <strong style="color:rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;;">
+          <strong style="color:rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">
             << Aportantes Eliminados (Registros)>> <br>
           </strong> </small></strong>
       <strong style="color: rgba(0, 255, 64, 0.95); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">(Click en Ver Detalle).</strong> <br>
@@ -114,8 +112,8 @@
         << Datos Columna Otro Juego>> <br>
       </strong>
       <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">-<small> Verifica Cada Ingreso de Estos Juegos Usando:
-          <strong style="color: rgba(0, 255, 64, 0.95); text-shadow:-1px 1px 1px black,-1px 1px 1px black">Select Otro (Juego)
-            <br> </strong>,-1px 1px 1px black;
+          <strong style="color: rgba(0, 255, 64, 0.95); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">Select Otro (Juego)
+            <br> </strong>
           <small> en la Planilla Principal.</small>
     </div>
     <section id="public-totals-card">
@@ -148,7 +146,7 @@
 
       <!-- <hr style="opacity:.25; margin:6px 0;"> -->
 
-      <div class="totales-finales-mini">
+      <div class="totales-estimados-mini">
         <div class="tot-row">
           <span>Total Estimado Final Mes</span>
           <strong id="tFinalMes" class="totales-item-value estimados-value">$ 0</strong>
@@ -182,10 +180,11 @@
 
       </div>
     </section>
+   
     <div class="box-container-observ">
-      <h2 id="title-observaciones">Observaciones</h2>
-      <section id="observaciones" class="observaciones-box"></section>
-    </div>
+       <h2 id="title-observaciones">Observaciones</h2>
+       <section id="observaciones" class="observaciones-box"></section>
+     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>

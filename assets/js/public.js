@@ -447,7 +447,18 @@ function setupHeaderColumnHighlight(table) {
 
 function renderObservaciones(text) {
   const el = document.getElementById("observaciones");
-  el.textContent = text?.trim() ? text : "No hay Observaciones este mes...";
+
+  if (!el) return;
+
+  if (text && text.trim() !== "") {
+    el.textContent = text;
+  } else {
+    el.innerHTML = `
+      <div class="no-otros-observ-warning">
+        <p>No hay Observaciones este mes...</p>
+      </div>
+    `;
+  }
 }
 
 /* ==========================================================

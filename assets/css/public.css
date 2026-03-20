@@ -1415,7 +1415,7 @@ text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
 }
 
 .alert-no-otros-partidos,.no-otros-aportes-warning,
-.no-otros-gastos-warning{
+.no-otros-gastos-warning,.no-otros-observ-warning{
 display: flex;
 flex-direction: column;
 align-items: center !important;
@@ -1432,7 +1432,7 @@ border: 1px solid rgba(199, 199, 199, 0.61);
 
 }
 .alert-no-otros-partidos-label,.no-otros-aportes-warning p,
-.no-otros-gastos-warning p{
+.no-otros-gastos-warning p,.no-otros-observ-warning p{
   font-weight: bold;
   color: #f3a7a7fa;
   font-size: 15px;
@@ -1992,8 +1992,6 @@ color: rgba(22, 21, 1, 0.952) !important;
 
 }
 
-
-
 /* =======================================================
     TOTALES CARD 
    ======================================================= */
@@ -2021,7 +2019,7 @@ text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
 
 }
 
-.total-parcial-mini,.totales-gastos-mini,.totales-finales-mini,
+.total-parcial-mini,.totales-gastos-mini,.totales-estimados-mini,
 .otros-saldo-mini,.total-final-mini{
 display: flex;
 flex-direction: column;
@@ -2067,8 +2065,9 @@ gap: 10px;
 }
 
 
-
-/* OBSERVACIONES CARD */
+/* =======================================================
+   OBSERVACIONES CARD
+   ======================================================= */
 
 .box-container-observ{
 flex-direction: column;
@@ -2477,26 +2476,18 @@ font-size: 13px;
 
 
 
-
-
 /* =======================================================
    CARDS INFO
    ======================================================= */
-
-
 .cards-container{
-display: grid;
-grid-template-columns: repeat(2,1fr);
-grid-template-rows:repeat(4,fit-content); ;
-padding: 0px;
-width: 90%;
-max-height: fit-content;
-margin:0;
-justify-self: center;
-margin-top: 12px;
-margin-bottom: 17%;
-gap: 10px;
-background-color:red;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: auto auto auto auto;
+  width: 90%;
+  margin: 12px auto 17%;
+  gap: 10px;
+  align-items: stretch;
+ 
 }
 
 #gastosMesPublico,#otrosAportesPublico,.otros-partidos-card,
@@ -2504,8 +2495,11 @@ background-color:red;
 #public-totals-card,.box-container-observ {
   width: 100%;
   max-width: 100%;
-  box-sizing: border-box !important;
-  margin-top: 0%;
+  padding: 18px;
+  margin: 0;
+  box-sizing: border-box;
+  justify-self: stretch;
+  align-self: stretch;
  
 }
 
@@ -2682,52 +2676,13 @@ text-align: center;
 }
 
 
-
-/* ==============================
-   APORTTANTES ELIMINADOS
-   ============================== */
-
-.totales-aportantes-eliminados{
- grid-column: 1 / span 1;
-grid-row: 2 / span 1;
-justify-content: flex-start !important;
-gap: 5px;
-height:160px ;
-min-height: fit-content;
-}
-
-.totales-aportantes-eliminados h4{
-margin-top: 4%;
-}
-.eliminados-div-button{
-  margin: 0% 2%;
-  gap: 0px;
-  
-}
-
-.mini-help{ 
-width: 100% !important;
-margin:0%;
-box-sizing: border-box; 
-margin-bottom: 5%;
-font-size: 13px !important;
-}
-
-.btn-ver-eliminados{ 
-width: 40% !important;
-right: 0% !important;
-padding:4px 20px;
-margin-bottom: 2%;
-}
-
-
 /* ==============================
    OTROS PARTIDOS (TABLA PEQUEÑA)
    ============================== */
 .otros-partidos-card {
 grid-column: 2 / span 1;
 grid-row: 2 / span 1;
-align-items: center;
+  align-items: stretch;   /* en vez de center */
 overflow: hidden;
 height: 100%;
 }
@@ -2810,112 +2765,227 @@ margin: auto;
 
 
 
+/* ==============================
+   APORTTANTES ELIMINADOS
+   ============================== */
+
+.totales-aportantes-eliminados{
+ grid-column: 1 / span 1;
+grid-row: 2 / span 1;
+justify-content: flex-start !important;
+  justify-self: flex-start;
+gap: 5px;
+height:100% ;
+min-height: fit-content;
+margin:0%; 
+}
+
+.totales-aportantes-eliminados h4{
+margin-top: 8%;
+}
+.eliminados-div-button{
+  margin: 0% 2%;
+  gap: 0px;
+  
+}
+
+.mini-help{ 
+width: 100% !important;
+margin:0%;
+box-sizing: border-box;
+margin-top: 20%; 
+margin-bottom: 5%;
+font-size: 13px !important;
+}
+
+.btn-ver-eliminados{ 
+width: 40% !important;
+right: 0% !important;
+padding:4px 20px;
+margin-bottom: 2%;
+}
+
+
+/* =======================================================
+   TEXT INFO TOTALES 
+   ======================================================= */
+
 .parcial-totals-mini-help{
 grid-column: 1 / span 1;
 grid-row: 3 / span 1 ;
 align-self: flex-start;
-top: 0% !important;
-margin-bottom: 0%;
 min-height: fit-content;
-align-items: center;
+height: fit-content;
+font-size: 14px !important;
+padding: 28px;
+margin:0%; 
+
+}
+.parcial-totals-mini-help h6{
+font-size: 16px;
+margin-top: 7% !important;
+}
+
+.parcial-totals-mini-help small{
+  font-size: 13px;
 }
 
 
-  /* Totales */
+
+
+/* =======================================================
+    TOTALES CARD 
+   ======================================================= */
+
+#public-totals-card {
+  grid-column: 2 / span 1;
+  grid-row: 3 / span 1 ;              /* por si no caben en una línea */
+position: relative;
+display: grid;
+grid-template-columns: repeat(2,auto);
+grid-template-rows:repeat(3,auto); 
+min-height: max-content;
+height: max-content;
+flex-direction: row;
+justify-content: center;
+gap: 7px;
+width: 100% !important;
+padding: 18px;
+align-items: center;         /* ✅ todos con misma altura */
+list-style: none;
  
-.public-totals-card  {
+
+}
+
+.parcial-tot-title{
+  grid-column: 1 / span 2;
+grid-row: 1 / span 1 ; 
+justify-self: center;
+margin-top: 7%;
+margin-bottom: 7%;
+font-size: 18px;
+}
+
+.total-parcial-mini,.totales-gastos-mini,.totales-estimados-mini,
+.otros-saldo-mini,.total-final-mini{
+display: flex;
+flex-direction: column;
+text-align: center;
+justify-self: center;
+padding: 15px  10px;
+margin: 0% 1px;
+top: 0%;
+width: 100%;
+gap: 7px;
+
+}
+.total-parcial-mini{
+grid-column: 1 / span 1;
+grid-row: 2 / span 1 ; 
+}
+.totales-gastos-mini{
+grid-column: 2 / span 1;
+grid-row: 2 / span 1 ; 
+}
+.totales-estimados-mini{
+grid-column: 1 / span 1;
+grid-row: 3 / span 1 ; 
+}
+.otros-saldo-mini{
 grid-column: 2 / span 1;
 grid-row: 3 / span 1 ;
-align-self: flex-start;
-margin-top: 0%;
-margin-bottom: 0%;
-min-height: 100%;
-align-items: center;
-
+align-self: flex-start; 
+top: 0%;
 
 }
-
-.totals-items{
-padding: 5px 0px 3px 0px;
-margin: 0% 0%;
-width: 100%;
-}
- 
-.public-totals-card h2 {
-margin: auto !important;
-margin-top: 10% !important;
-padding: 12px 0px 25px 0px !important;
-margin-bottom: 0%;
-font-size:23px !important;
+.total-final-mini{
+ grid-column: 1 / span 2;
+grid-row: 4 / span 1 ; 
 }
 
-.public-totals-card label {
-
-  font-weight: bold;
-  font-size: 16px;
+.tot-row span {
+  font-size: 14px;
   margin-top: 1%;
   margin-bottom: 0%;
+
+   
 }
 
-.public-totals-card p {
-  padding: 0% 5%;
-  margin-top: 1%;
+.totales-item-value{
    font-size: 13px;
+    color: #76f5a0 !important;
+    text-shadow: -1px 1px 1px #000000,
+   -1px 1px 1px #000000,
+    -1px 1px 1px #000000;
+}
+.totales-item-value.gastos-value{
+    color: #fa3c4c !important;
+   
+}
+.totales-item-value.saldos-value,.totales-item-value.estimados-value{
+    color: #7ecccc !important;
+   
+}
+.totales-item-value.final-value{
+      color: #00ff55 !important;
 }
 
 
-/* Totales “extra” (menos importantes) dentro de la card Totales */
-.public-totals-card :nth-child(6){
-  margin-bottom: 15%;
-}
-.totals-items.extra label{
-  font-size: 17px;
+/* =======================================================
+   OBSERVACIONES CARD
+   ======================================================= */
 
-}
-
-.totals-items.extra p{
-  font-size: 14px;
-}
-
-
-
-
-/* ===== Botón eliminados ===== */
-.btn-ver-eliminados{
-font-size: 12px;
-padding: 3px 5px !important;
-width: 35% !important;
-}
-
-
-
-/* OBSERVACIONES CARD */
 .box-container-observ{
-grid-column: 1 / span 2;
-grid-row: 4 / span 1 ;
-justify-items: center;
-min-height: 100%;
-height: fit-content;
-width: 100%;
-margin-top: 0%;
+  grid-column: 1 / 3;
+  grid-row: 4 / 5;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  justify-self: stretch;
+  box-sizing: border-box;
+
 
 }
-
  #title-observaciones{
-margin-top: 5% !important;
-padding: 10px 0px 25px 0px !important;
-margin-bottom: 0% !important;
-font-size: 22px;
+margin-top: 5%;
+margin-bottom: 6%;
+font-size: 17px;
+
+}
+
+.observaciones-box {
+display: flex;
+flex-direction: column;
+gap: 10px;
+width: 97%;
+min-height:120px;
+justify-self: center;
+color: #020202f8;
+padding:12px;
+margin-bottom:5%;
+font-weight: bold;
+font-size:15px;
+white-space: pre-line;
+text-align: justify;
+font-family: "Lucida Sans Unicode", sans-serif;
+margin-top: 0%;
+text-shadow: -1px 1px 1px rgb(255, 255, 255),
+-1px 1px 1px rgb(255, 255, 255),
+-1px 1px 1px rgb(255, 255, 255);
+border-radius:12px;
+background: linear-gradient(180deg,
+rgba(248, 248, 248, 0.95),
+rgba(247, 247, 247, 0.95));
+box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
+transition: transform .15s ease, box-shadow .15s ease;
+border: 1px dotted  rgba(202, 201, 194, 0.95); 
+ 
 }
 
 
-.observaciones-box { 
-width: 95%;
-margin: 5%; 
-min-height: 120px;
-height: auto;
-padding: 20px; 
-}
 
  
   
