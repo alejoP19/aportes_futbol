@@ -881,11 +881,11 @@ function renderModalEliminadosPublico(data, mes, anio) {
     rowsByPlayer.get(k).push(r);
   }
 
+  // BLOQUE DE DEUDAS DENTRO DEL CAMPO DEUDAS
   const renderDeudasCell = (pp) => {
     const total = Number(pp.deudas_total || 0);
     const fechas = Array.isArray(pp.deudas_fechas) ? pp.deudas_fechas : [];
     if (!total) return `<span style="opacity:.6;">0</span>`;
-
     return `
       <div class="deuda-cell-eliminados">
         <div class="deuda-count">${total}</div>
@@ -935,8 +935,8 @@ function renderModalEliminadosPublico(data, mes, anio) {
                 Este aportante fue eliminado en ${bajaInfo}, pero no tiene aportes registrados este mes.<br>
                 Si quieres ver sus aportes, <strong> revisa las planillas principales de los meses anteriores.</strong>
               </td>
-              <td class="right-eliminados">${formatMoney(p.saldo_fin_mes || 0)}</td>
-              <td class="right-eliminados">${renderDeudasCell(p)}</td>
+              <td  class="cantidad-normal-elim">${formatMoney(p.saldo_fin_mes || 0)}</td>
+              <td class="deuda-cel-elim">${renderDeudasCell(p)}</td>
             </tr>
 
             <tr class="player-total-eliminados">
@@ -957,7 +957,6 @@ function renderModalEliminadosPublico(data, mes, anio) {
           let cls = "row-normal-eliminados";
           if (r.kind === "otro") cls = "row-otro-aporte-eliminados";
           else if (r.kind === "otro_juego") cls = "row-otro-juego-eliminados";
-          console.log(cls)
           const labelHtml = r.label ? `<small class="row-label-eliminados">${escapeHtml(r.label)}</small>` : "";
 
           const saldoHtml  = isLast ? `${formatMoney(p.saldo_fin_mes || 0)}` : "";
@@ -970,10 +969,10 @@ function renderModalEliminadosPublico(data, mes, anio) {
                 <td rowspan="${pr.length}" class="player-cell-eliminados"> ${playerCell}</td>
                 <td class="num-aporte_elim">${r.n}</td>
                 <td class="fecha_aporte-elim">${escapeHtml(r.fecha || "")}${labelHtml}</td>
-                <td class="right-eliminados">${formatMoney(r.cantidad || 0)}</td>
-                <td class="right-eliminados">${formatMoney(r.total || 0)}</td>
-                <td class="right-eliminados">${saldoHtml}</td>
-                <td class="right-eliminados">${deudasHtml}</td>
+                <td class="cantidad-normal-elim">${formatMoney(r.cantidad || 0)}</td>
+                <td class="cantidad-normal-elim">${formatMoney(r.total || 0)}</td>
+                <td class="cantidad-normal-elim">${saldoHtml}</td>
+                <td class="deuda-cell-elim">${deudasHtml}</td>
               </tr>
             `;
           }
@@ -982,10 +981,10 @@ function renderModalEliminadosPublico(data, mes, anio) {
             <tr class="${cls}">
               <td class="num-aporte_elim">${r.n}</td>
               <td class="fecha_aporte-elim">${escapeHtml(r.fecha || "")}${labelHtml}</td>
-              <td class="right-eliminados">${formatMoney(r.cantidad || 0)}</td>
-              <td class="right-eliminados">${formatMoney(r.total || 0)}</td>
-              <td class="right-eliminados">${saldoHtml}</td>
-              <td class="right-eliminados">${deudasHtml}</td>
+              <td class="cantidad-normal-elim">${formatMoney(r.cantidad || 0)}</td>
+              <td class="cantidad-normal-elim">${formatMoney(r.total || 0)}</td>
+              <td class="cantidad-normal-elim">${saldoHtml}</td>
+              <td class="deuda-cell-elim">${deudasHtml}</td>
             </tr>
           `;
         }).join("");
@@ -996,6 +995,7 @@ function renderModalEliminadosPublico(data, mes, anio) {
             <td colspan="3"></td>
             <td class="right-eliminados">${formatMoney(p.total_mes || 0)}</td>
             <td class="right-eliminados">${formatMoney(p.saldo_fin_mes || 0)}</td>
+            
             <td></td>
           </tr>
           <tr class="player-sep-eliminados"><td colspan="7"></td></tr>
@@ -1007,7 +1007,7 @@ function renderModalEliminadosPublico(data, mes, anio) {
 
     <tfoot>
       <tr class="total-general-eliminados">
-        <td class="total-tfoot-eliminados">Total General</td>
+        <td class="total-tfoot-eliminados">Totales Finales</td>
         <td colspan="3"></td>
         <td class="right-eliminados">${formatMoney(data.totales?.total_general_aportes || 0)}</td>
         <td class="right-eliminados">${formatMoney(data.totales?.total_general_saldo || 0)}</td>

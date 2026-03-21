@@ -1725,6 +1725,7 @@ border-bottom: 0.80px solid  #e9e9e9fa !important;
 /* NOMBRE DEL ELIMINADO */
 .player-title-eliminados,.num-aporte_elim {
 color: #000000;
+font-weight: bold;
 font-size: 13px !important;
 text-shadow: -1px 1px 1px white,-1px 1px 1px white,-1px 1px 1px white;
 }
@@ -1780,21 +1781,34 @@ rgba(223, 216, 216, 0.973)) !important;
 .player-total-eliminados :first-child{
 display: flex;
 margin-left: 3% !important;
-font-weight: lighter;
-color: #fffd8f;
+font-weight: bold;
+color: #eeeeec;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0);
+font-size: small;
 }
 .player-total-eliminados :nth-child(3),
-.player-total-eliminados :nth-child(4),
-.row-empty-eliminados :nth-child(3){
-font-weight: lighter !important;
-color: #fffd80;
+.player-total-eliminados :nth-child(4){
+font-weight: bold !important;
+color: #f3f3f3;
+font-size: small;
 text-shadow: -1px 1px 1px rgb(0, 0, 0),
 -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
 }
-.player-total-eliminados :nth-child(4),
-.row-empty-eliminados :nth-child(3){
-color: #e2f0ed !important;
+
+
+.cantidad-normal-elim,.total-normal-elim,
+.player-title-eliminados :nth-child(3){
+color: #000000 !important;
+text-shadow: -1px 1px 1px rgb(255, 255, 255),
+-1px 1px 1px rgb(255, 255, 255),-1px 1px 1px rgb(255, 255, 255);
+font-weight: lighter;
+font-size: smaller;
+text-align: center;
 }
+
+
 .player-total-eliminados strong{
    font-size: 12px;
 }
@@ -1807,11 +1821,7 @@ text-align: center;
 gap: 0;
 
 }
- .right-eliminados{
-  font-weight: bold !important;
-  color: #000000;
-  text-shadow: -1px 1px 1px rgb(255, 255, 255),-1px 1px 1px rgb(255, 255, 255);
-}
+ 
 .row-otro-juego-eliminados td:nth-child(3) .row-label-eliminados{
 color: #00f521;
 margin-top: 0%;
@@ -1864,6 +1874,7 @@ text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
   margin: 5px;        
   box-sizing: border-box;
   scrollbar-gutter: stable;
+
 }
 .deuda-count{
   color: #cc0710;
@@ -1899,11 +1910,12 @@ text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
   .eliminados-detalle th:nth-child(5),
   .eliminados-detalle td:nth-child(5),
   .eliminados-detalle th:nth-child(6),
-  .eliminados-detalle td:nth-child(6){
+  .eliminados-detalle td:nth-child(6),
+  .row-otro-juego-eliminados td,.row-otro-aporte-eliminados td{
  width: 10vw !important;
-    min-width: 30px !important;
-
-     text-align: center;
+  min-width: 30px !important;
+  text-align: center;
+ text-indent: initial;
   }
 
 /* Separador por jugador */
@@ -1941,14 +1953,12 @@ font-size: 13px !important;
 height: 38px;
 
 }
-.total-general-eliminados :nth-child(3){
+.total-general-eliminados :nth-child(3),
+.total-general-eliminados :nth-child(4){
 color: #ffff7d !important;
  text-shadow:-1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
 }
-.total-general-eliminados :nth-child(4){
-color: #f8f8f7 !important;
- text-shadow:-1px 1px 1px #000,-1px 1px 1px #000,-1px 1px 1px #000;
-}
+
 
 /* =======================================================
    TEXT INFO TOTALES 
@@ -1980,7 +1990,7 @@ text-shadow: -1px 1px 1px rgb(0, 0, 0),
 font-size: 16px;
 text-align: center;
 margin-top: 7% !important;
-padding-bottom: 0% !important;
+padding-bottom: 7% !important;
 
 }
 
@@ -1990,6 +2000,23 @@ color: rgba(22, 21, 1, 0.952) !important;
   text-shadow: -1px 1px 1px #ffffff,-1px 1px 1px #ffffff;
   font-size: 13px;
 
+}
+
+.guion-decorador,.nota-decorador{
+  color: rgba(255, 196, 0, 0.952);
+  text-shadow: -1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
+}
+.info-seccion-decorador{
+  color: rgba(0, 255, 64, 0.95);
+   text-shadow: -1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0);
+}
+.info{
+   color: rgba(0, 192, 74, 0.95);
+   text-shadow: -1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
 }
 
 /* =======================================================
@@ -2115,7 +2142,7 @@ rgba(248, 248, 248, 0.95),
 rgba(247, 247, 247, 0.95));
 box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
 transition: transform .15s ease, box-shadow .15s ease;
-border: 1px dotted  rgba(202, 201, 194, 0.95); 
+border: 1px dotted  rgba(141, 141, 141, 0.95); 
  
 }
 
@@ -2484,6 +2511,7 @@ font-size: 13px;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: auto auto auto auto;
   width: 90%;
+  height: fit-content;
   margin: 12px auto 17%;
   gap: 10px;
   align-items: stretch;
@@ -2513,7 +2541,6 @@ font-size: 13px;
   flex-wrap: wrap;
   gap: 3px;
    flex-direction: row !important;
-
   margin-bottom: 1% !important;
 
  
@@ -2813,9 +2840,8 @@ margin-bottom: 2%;
 .parcial-totals-mini-help{
 grid-column: 1 / span 1;
 grid-row: 3 / span 1 ;
-align-self: flex-start;
 min-height: fit-content;
-height: fit-content;
+height: 100%;
 font-size: 14px !important;
 padding: 28px;
 margin:0%; 
@@ -2840,12 +2866,11 @@ margin-top: 7% !important;
 #public-totals-card {
   grid-column: 2 / span 1;
   grid-row: 3 / span 1 ;              /* por si no caben en una línea */
-position: relative;
 display: grid;
 grid-template-columns: repeat(2,auto);
 grid-template-rows:repeat(3,auto); 
-min-height: max-content;
-height: max-content;
+min-height:fit-content;
+height: 100%;
 flex-direction: row;
 justify-content: center;
 gap: 7px;
@@ -2946,13 +2971,12 @@ grid-row: 4 / span 1 ;
   align-self: stretch;
   justify-self: stretch;
   box-sizing: border-box;
-
-
+  padding: 0%;
 }
  #title-observaciones{
-margin-top: 5%;
-margin-bottom: 6%;
-font-size: 17px;
+margin-top: 3%;
+margin-bottom: 3%;
+font-size: 18px;
 
 }
 
@@ -2960,34 +2984,12 @@ font-size: 17px;
 display: flex;
 flex-direction: column;
 gap: 10px;
-width: 97%;
-min-height:120px;
+width: 95%;
+min-height:fit-content;
 justify-self: center;
-color: #020202f8;
-padding:12px;
-margin-bottom:5%;
-font-weight: bold;
-font-size:15px;
-white-space: pre-line;
-text-align: justify;
-font-family: "Lucida Sans Unicode", sans-serif;
-margin-top: 0%;
-text-shadow: -1px 1px 1px rgb(255, 255, 255),
--1px 1px 1px rgb(255, 255, 255),
--1px 1px 1px rgb(255, 255, 255);
-border-radius:12px;
-background: linear-gradient(180deg,
-rgba(248, 248, 248, 0.95),
-rgba(247, 247, 247, 0.95));
-box-shadow: 0 0 2px rgba(245, 245, 245, 0.918);
-transition: transform .15s ease, box-shadow .15s ease;
-border: 1px dotted  rgba(202, 201, 194, 0.95); 
- 
+margin-bottom:3%;
+font-size:14px;
 }
-
-
-
- 
   
 }
 
