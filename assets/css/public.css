@@ -996,7 +996,7 @@ border-bottom-right-radius: 18px;
 #gastosMesPublico,#otrosAportesPublico,.otros-partidos-card,
 .totales-aportantes-eliminados,.parcial-totals-mini-help,
 #public-totals-card,.box-container-observ {
-background-color: #f3f3f3e3 !important;
+background-color: #f3f3f3e5 !important;
   border-radius: 8px;
   justify-self: center;
   width: 97%;
@@ -1671,6 +1671,9 @@ background: linear-gradient(380deg,
 rgb(236, 182, 165),
 rgba(247, 141, 123, 0.973)) !important;
   color:#ffffff;
+  text-shadow: -1px 1px 1px rgba(116, 0, 0, 0.986), 
+-1px 1px 1px rgb(133, 0, 0),
+-1px 1px 1px rgb(117, 0, 0) !important;
   font-weight: bold;
   padding:6px 10px;
   border-bottom:0.70px solid rgba(224, 81, 81, 0.685);
@@ -1701,6 +1704,13 @@ background: linear-gradient(540deg,
 rgb(255, 255, 255),
 rgba(255, 240, 240, 0.973)) !important; 
 
+}
+
+.row-empty-eliminados :nth-child(2){
+  font-size: small;
+}
+.deuda-cell-elim span,.row-empty-eliminados :nth-child(4){
+    font-size: 13px;
 }
 
 .row-normal-eliminados td,
@@ -1752,21 +1762,24 @@ text-shadow: -1px 1px 1px white,-1px 1px 1px white,-1px 1px 1px white;
 }
 
 .row-empty-eliminados :nth-child(2){
-color: #fc0015;
+color: #ffb5b5;
 font-weight: bold;
-text-shadow: -1px 1px 1px rgb(255, 255, 255),-1px 1px 1px rgb(255, 255, 255),
--1px 1px 1px rgb(255, 255, 255);
-background-color: #eee9e8;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0);
+background-color: #f1f1f1;
 text-align: center;
 border: 1px dotted rgba(238, 141, 141, 0.918);
 font-style: italic;
 
 }
 .row-empty-eliminados :nth-child(2) strong{
-color: #eb2626;
-font-weight: lighter !important;
-text-shadow: -1px 1px 1px rgb(235, 0, 0),-1px 1px 1px rgb(236, 0, 0),
--1px 1px 1px rgb(233, 0, 0);
+color: #27ffff;
+font-weight: bold;
+text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0),
+-1px 1px 1px rgb(0, 0, 0);
+background-color: #eee9e8;
+text-align: center;
+font-style: italic;
 border: none;
 }
 
@@ -1859,10 +1872,10 @@ text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
 
 .deuda-cell-eliminados{
   
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-    align-items:flex-start;
+display:flex;
+flex-direction:column;
+gap:6px;
+align-items:flex-start;
   text-align:right;
   line-height:1.15;
   display: block;
@@ -1880,9 +1893,9 @@ text-shadow: -1px 1px 1px rgb(0, 0, 0),-1px 1px 1px rgb(0, 0, 0);
   color: #cc0710;
    text-shadow:-1px 1px 1px #ffffff,-1px 1px 1px #ffffff,-1px 1px 1px #ffffff;
 }
-.deuda-count-eliminados{
+.deuda-count{
   font-weight:bold;
-  font-size:14px;
+  font-size:13px;
   color:#f10538;   /* gris oscuro elegante */
 }
 
@@ -2029,7 +2042,7 @@ flex-direction: column;
 align-items: center;
 justify-content: space-around;
 gap: 7px;
-background: #008d6fb0 !important;
+background: #1da88ac4 !important;
 border-radius: 8px;
 border: 1px dotted rgba(8, 231, 157, 0.849);
 
@@ -2047,12 +2060,11 @@ text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
 }
 
 .total-parcial-mini,.totales-gastos-mini,.totales-estimados-mini,
-.otros-saldo-mini,.total-final-mini{
+.otros-saldo-mini,.total-final-mini,.total-caja-general-mini{
 display: flex;
 flex-direction: column;
 text-align: center;
 border-radius: 10px;
-border: 1px dotted rgba(0, 255, 128, 0.849);
 background-color: #f1f1f1;
 padding: 20px  10px;
 margin: 0% 15px;
@@ -2060,6 +2072,31 @@ width: 105%;
 gap: 10px;
 
 }
+.totales-gastos-mini{
+    background-color: #f7dcde !important;
+       border: 1px dotted rgba(255, 30, 0, 0.849);
+}
+.total-parcial-mini{
+      background-color: #fff9d5e7 !important;
+      border: 1px dotted rgba(255, 208, 0, 0.849);
+}
+.totales-estimados-mini{
+     background-color: #f1fff7d2 !important;
+     border: 1px dotted rgba(140, 253, 196, 0.849);
+}
+.otros-saldo-mini{
+  background-color: #edf0efe7 !important;
+  border: 1px dotted rgba(160, 199, 202, 0.849);
+}
+.total-final-mini{
+  background-color: #eaf1f0d2 !important;
+  border: 1px dotted rgba(255, 255, 255, 0.849);
+}
+.total-caja-general-mini{
+      background-color: #c6ffd0d2 !important;
+      border: 1px dotted rgba(0, 255, 21, 0.849);
+}
+
 .tot-row span {
   color: #000000 !important;
   font-weight: bold;
@@ -2088,7 +2125,10 @@ gap: 10px;
    
 }
 .totales-item-value.final-value{
-      color: #00ff55 !important;
+       color: #ffbb00 !important;
+}
+.totales-item-value.final-caja-value{
+       color: #fffb00 !important;
 }
 
 
@@ -2108,8 +2148,8 @@ text-align: center;
 }
  #title-observaciones{
 align-self: center;
-margin-top: 8%;
-margin-bottom: 6%;
+margin-top: 4% !important;
+margin-bottom: 3% !important;
 font-weight: bold;
 color: #ffd900;
 text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
@@ -2126,13 +2166,13 @@ min-height:120px;
 justify-self: center;
 color: #020202f8;
 padding:12px;
-margin-bottom:5%;
+margin-top: 0%;
+margin-bottom:5% !important;
 font-weight: bold;
 font-size:15px;
 white-space: pre-line;
 text-align: justify;
 font-family: "Lucida Sans Unicode", sans-serif;
-margin-top: 0%;
 text-shadow: -1px 1px 1px rgb(255, 255, 255),
 -1px 1px 1px rgb(255, 255, 255),
 -1px 1px 1px rgb(255, 255, 255);
@@ -2828,8 +2868,99 @@ font-size: 13px !important;
 .btn-ver-eliminados{ 
 width: 40% !important;
 right: 0% !important;
-padding:4px 20px;
-margin-bottom: 2%;
+padding:3px 20px;
+}
+
+/* =====  MODAL DE ELIMINADOS ===== */
+
+/* tarjeta */
+.modal-card{
+  width:min(920px, 96vw);
+  max-height:82vh;
+}
+
+.modal-head{
+  padding:7px 10px;
+}
+
+.modal-head strong{
+font-size: 15px;
+margin-left: 43%;
+
+}
+/* botón cerrar modal */
+#closeModalEliminados {
+  width: 23px;
+  height: 23px;
+}
+
+#closeModalEliminados {
+  transform: scale(1.2);
+}
+
+
+
+.table-mini-eliminados thead th{
+  padding:6px 10px;
+  font-size: 13px;
+}
+
+
+/* NOMBRE DEL ELIMINADO */
+.player-title-eliminados,.num-aporte_elim {
+font-size: 12px !important;
+}
+
+ .baja-pill-eliminados{
+  font-size:11px;
+  width: 75%;
+}
+
+.player-total-eliminados :nth-child(3),
+.player-total-eliminados :nth-child(4){
+font-size: 12px !important;
+}
+
+.cantidad-normal-elim,.total-normal-elim,
+.player-title-eliminados :nth-child(3){
+font-size: 12px !important;
+
+}
+
+.player-total-eliminados strong{
+   font-size: 12px;
+}
+.fecha_aporte-elim{
+font-size: 11px;
+}
+ 
+.row-empty-eliminados :nth-child(2){
+    font-size: 12px;
+}
+}
+.deuda-cell-elim span,.row-empty-eliminados :nth-child(4){
+    font-size: 12px;
+}
+
+.deuda-fechas-eliminados{
+  margin-top:4px;
+  font-size:12px !important;
+  
+}
+
+.deuda-count{
+  font-size:14px !important;
+
+}
+.row-label-eliminados{
+  margin-top:4px;
+  font-size:11px;
+}
+
+/* Total general */
+/* Footers */
+.total-general-eliminados{
+font-size: 13px !important;
 }
 
 
@@ -2892,7 +3023,7 @@ font-size: 18px;
 }
 
 .total-parcial-mini,.totales-gastos-mini,.totales-estimados-mini,
-.otros-saldo-mini,.total-final-mini{
+.otros-saldo-mini,.total-final-mini,.total-caja-general-mini{
 display: flex;
 flex-direction: column;
 text-align: center;
@@ -2926,6 +3057,10 @@ top: 0%;
 .total-final-mini{
  grid-column: 1 / span 2;
 grid-row: 4 / span 1 ; 
+}
+.total-caja-general-mini{
+   grid-column: 1 / span 2;
+grid-row: 5 / span 1 ; 
 }
 
 .tot-row span {
@@ -2991,7 +3126,7 @@ margin-bottom:3%;
 font-size:14px;
 }
   
-}
+
 
 
 /* =======================================================

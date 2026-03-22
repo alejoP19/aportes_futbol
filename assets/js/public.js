@@ -648,6 +648,7 @@ function renderTotales(data) {
   set("tTotalRealHastaFecha", t.total_real_hasta_fecha);
   
     set("tEliminadosMes",  data?.tfoot?.eliminados_mes_total_footer || 0);
+    set("tCajaGeneralAcumulada", t.caja_general_acumulada);
 }
 
 /* ==========================================================

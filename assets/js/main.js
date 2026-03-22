@@ -621,6 +621,9 @@ async function loadTotals(mes, anio) {
   // Total real hasta la fecha (si lo pintas)
   const tr = document.getElementById("tTotalRealHastaFecha");
   if (tr) tr.innerText = formatMoney(j.total_real_hasta_fecha);
+
+  const caja = document.getElementById("tCajaGeneralAcumulada");
+if (caja) caja.innerText = formatMoney(j.caja_general_acumulada);
 }
 
 

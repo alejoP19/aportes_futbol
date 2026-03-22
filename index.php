@@ -243,11 +243,11 @@ include "conexion.php";
             <small>(Saldos Generados Este Mes)</small>
             <strong id="tSaldoMes" class="totales-blocks-item-value saldo-mes">$ 0</strong>
           </div>
-            <div class="showing-saldos-item">
-              <span>Saldos Acumulados</span>
-              <small>(Saldos Generados Este Mes + Heredados Meses Anteriores)</small>
-              <strong id="tSaldoTotal" class="totales-blocks-item-value saldo-acumulado">$ 0</strong>
-            </div>
+          <div class="showing-saldos-item">
+            <span>Saldos Acumulados</span>
+            <small>(Saldos Generados Este Mes + Heredados Meses Anteriores)</small>
+            <strong id="tSaldoTotal" class="totales-blocks-item-value saldo-acumulado">$ 0</strong>
+          </div>
         </div>
 
         <hr style="opacity:.25; margin:1px 0;">
@@ -259,6 +259,15 @@ include "conexion.php";
           </div>
         </div>
         <hr style="opacity:.25; margin:1px 0;">
+      </div>
+      
+       <hr style="opacity:.25; margin:1px 0;">
+      <div class="showing-total-final">
+        <div class="showing-total-final-items">
+          <span>Caja General Acumulada</span>
+          <small>(Suma de cierres reales de años anteriores + total real del año actual)</small>
+          <strong id="tCajaGeneralAcumulada" class="totales-blocks-item-value"></strong>
+        </div>
       </div>
 
       <hr style="opacity:.25; margin:8px 0;">
@@ -314,7 +323,7 @@ include "conexion.php";
         </div>
       </div>
       </div>
-  
+
       <!-- Observaciones -->
       <div class="observaciones-container" id="gastosWrapper">
         <h3>Observaciones Del Mes</h3>

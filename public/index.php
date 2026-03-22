@@ -96,70 +96,45 @@
       </div>
     </div>
 
-    <!-- <div class="parcial-totals-mini-help">
-      <h6> Total Parcial Mes Incluye: </h6> <br>
-      <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">
-      - <small>Aportes de Cada Partido (Miercoles / Sabado) de Ambas Planillas</small></strong><br>
-      <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">
-      - <Small>Aportes de Los Jugadores Eliminados.</Small></strong>
-      <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">
-      Nota: <small> Estos Aportes se Pueden Ver en La Sección de <br>
-      <strong style="color:rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">
-      << Aportantes Eliminados (Registros)>></strong>
-      <strong style="color: rgba(0, 255, 64, 0.95); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">
-      (Click en Ver Detalle).</strong> <br> <br>
-      <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">
-      -<small> Aportes de Columna (Otro Juego) de Ambas Planillas (Cada Dia Jugado);</small> </strong>
-      <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">
-      Nota: <small> Estos Juegos Quedan Registrados En La Sección</small> </strong> <br>
-      <strong style="color:rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;;">
-      << Datos Columna Otro Juego>> <br> <br>
-      </strong>
-      <strong style="color: rgba(255, 196, 0, 0.952); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">
-      - <small> Verifica Cada Ingreso de Estos Juegos Usando:
-      <strong style="color: rgba(0, 255, 64, 0.95); text-shadow:-1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;">
-      Select Otro (Juego) </strong>
-      <small> en la Planilla Principal.</small>
-    </div> -->
-<div class="parcial-totals-mini-help">
-  <h6>Total Parcial Mes Incluye:</h6>
+    <div class="parcial-totals-mini-help">
+      <h6>Total Parcial Mes Incluye:</h6>
 
-  <p>
-    <strong class="guion-decorador"> - </strong>
-    <small>Aportes de Cada Partido (Miércoles / Sábado) de Ambas Planillas.</small>
-  </p>
+      <p>
+        <strong class="guion-decorador"> - </strong>
+        <small>Aportes de Cada Partido (Miércoles / Sábado) de Ambas Planillas.</small>
+      </p>
 
-  <p>
-    <strong class="guion-decorador"> - </strong>
-    <small>Aportes de los Jugadores Eliminados.</small>
-  </p>
+      <p>
+        <strong class="guion-decorador"> - </strong>
+        <small>Aportes de los Jugadores Eliminados.</small>
+      </p>
 
-  <p>
-    <strong class="nota-decorador" >Nota: </strong>
-    <small>Estos aportes se pueden ver en la sección de</small><br>
-    <strong  class="nota-decorador" >
-     &lt;&lt; Aportantes Eliminados (Registros) &gt;&gt;</strong><br>
-    <strong class="info-seccion-decorador">(Click en Ver Detalle).</strong>
-  </p>
+      <p>
+        <strong class="nota-decorador">Nota: </strong>
+        <small>Estos aportes se pueden ver en la sección de</small><br>
+        <strong class="nota-decorador">
+          &lt;&lt; Aportantes Eliminados (Registros) &gt;&gt;</strong><br>
+        <strong class="info-seccion-decorador">(Click en Ver Detalle).</strong>
+      </p>
 
-  <p>
-    <strong class="guion-decorador"> - </strong>
-    <small>Aportes de Columna <strong class="info"> (Otro Juego) </strong class="info">de Ambas Planillas <strong class="info">(Cada Día Jugado).</strong></small>
-  </p>
+      <p>
+        <strong class="guion-decorador"> - </strong>
+        <small>Aportes de Columna <strong class="info"> (Otro Juego) </strong class="info">de Ambas Planillas <strong class="info">(Cada Día Jugado).</strong></small>
+      </p>
 
-  <p>
-    <strong class="nota-decorador" >Nota: </strong>
-    <small>Estos juegos quedan registrados en la sección</small><br>
-    <strong class="nota-decorador">&lt;&lt; Datos Columna Otro Juego &gt;&gt;</strong>
-  </p>
+      <p>
+        <strong class="nota-decorador">Nota: </strong>
+        <small>Estos juegos quedan registrados en la sección</small><br>
+        <strong class="nota-decorador">&lt;&lt; Datos Columna Otro Juego &gt;&gt;</strong>
+      </p>
 
-  <p>
-    <strong class="guion-decorador"> - </strong>
-    <small>Verifica cada ingreso de estos juegos usando:</small>
-    <strong class="info-seccion-decorador">Select Otro (Juego)</strong>
-    <small>en la planilla principal.</small>
-  </p>
-</div>
+      <p>
+        <strong class="guion-decorador"> - </strong>
+        <small>Verifica cada ingreso de estos juegos usando:</small>
+        <strong class="info-seccion-decorador">Select Otro (Juego)</strong>
+        <small>en la planilla principal.</small>
+      </p>
+    </div>
     <section id="public-totals-card">
       <h4 class="parcial-tot-title">Totales (COP)</h4>
       <div class="total-parcial-mini">
@@ -218,6 +193,12 @@
         <div class="tot-row">
           <span>Total Final Año (Con Saldos Acumulados)</span>
           <strong id="tTotalRealHastaFecha" class="totales-item-value final-value">$ 0</strong>
+        </div>
+      </div>
+      <div class="total-caja-general-mini">
+        <div class="tot-row">
+          <span>Caja General Acumulada</span>
+          <strong id="tCajaGeneralAcumulada" class="totales-item-value final-caja-value">$ 0</strong>
         </div>
       </div>
     </section>

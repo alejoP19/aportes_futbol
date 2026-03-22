@@ -163,6 +163,7 @@ for ($m = 1; $m <= $mes; $m++) {
   $otros_anio      += (int)$tmp["otros_mes"];
   $gastos_anio     += (int)$tmp["gastos_mes"];
   $final_anio_neto += (int)$tmp["final_neto_mes"];
+  
 }
 
 // Saldo acumulado real al corte del mes consultado
@@ -170,6 +171,68 @@ $saldo_total = (int)$mesActual["saldo_total"];
 
 // Total final año con saldos acumulados
 $total_real_hasta_fecha = (int)($final_anio_neto + $saldo_total);
+$caja_general_acumulada = calcular_caja_general_acumulada($conexion, $anio, $mes, $TOPE);
+
+function calcular_cierre_real_anual(mysqli $cx, int $anio, int $TOPE = 3000): int {
+    $parcial_anio    = 0;
+    $final_anio_neto = 0;
+    $saldo_total_dic = 0;
+
+    for ($m = 1; $m <= 12; $m++) {
+        $tmp = calcular_totales_mes($cx, $anio, $m, $TOPE);
+        $parcial_anio    += (int)$tmp["parcial_mes"];
+        $final_anio_neto += (int)$tmp["final_neto_mes"];
+
+        if ($m === 12) {
+            $saldo_total_dic = (int)$tmp["saldo_total"];
+        }
+    }
+
+    return (int)($final_anio_neto + $saldo_total_dic);
+}
+
+function calcular_caja_general_acumulada(mysqli $cx, int $anioActual, int $mesActual, int $TOPE = 3000): int {
+    $acumulado = 0;
+
+    // 1) sumar cierres reales de todos los años anteriores
+    $q = $cx->query("
+        SELECT DISTINCT anio
+        FROM (
+            SELECT YEAR(fecha) AS anio FROM aportes
+            UNION
+            SELECT anio FROM gastos
+            UNION
+            SELECT anio FROM otros_aportes
+        ) t
+        WHERE anio < {$anioActual}
+        ORDER BY anio ASC
+    ");
+
+    while ($row = $q->fetch_assoc()) {
+        $anio = (int)$row["anio"];
+        if ($anio > 0) {
+            $acumulado += calcular_cierre_real_anual($cx, $anio, $TOPE);
+        }
+    }
+
+    // 2) sumar el total real del año actual hasta el mes seleccionado
+    $final_anio_neto_actual = 0;
+    $saldo_total_actual = 0;
+
+    for ($m = 1; $m <= $mesActual; $m++) {
+        $tmp = calcular_totales_mes($cx, $anioActual, $m, $TOPE);
+        $final_anio_neto_actual += (int)$tmp["final_neto_mes"];
+
+        if ($m === $mesActual) {
+            $saldo_total_actual = (int)$tmp["saldo_total"];
+        }
+    }
+
+    $acumulado += ($final_anio_neto_actual + $saldo_total_actual);
+
+    return (int)$acumulado;
+}
+
 
 echo json_encode([
   "ok" => true,
@@ -196,5 +259,7 @@ echo json_encode([
 
   // Total final año con saldo acumulado
   "total_real_hasta_fecha" => (int)$total_real_hasta_fecha,
+  "caja_general_acumulada" => (int)$caja_general_acumulada
+  
 
 ], JSON_UNESCAPED_UNICODE);
