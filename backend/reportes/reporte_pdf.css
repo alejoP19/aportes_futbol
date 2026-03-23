@@ -45,13 +45,15 @@ h3{
 }
 
 .pdf-table th{
-  background: #0a83b3;
-  color: #fff;
+  background: #009e5cf8;
+  color: #feffcefb;
+  text-shadow: -1px 1px 1px black,-1px 1px 1px black,-1px 1px 1px black;
   font-weight: 700;
   text-align: center;
    padding: 4px 6px;   /* arriba/abajo | lados */
    justify-items: center;
    align-items: center;
+     align-items: center;
 }
 .col-especial,
 .col-otros{
@@ -116,6 +118,14 @@ tr.eliminado td{
   line-height: 10pt;
 }
 
+.pdf-table--eliminados thead tr th{
+
+color: rgb(105, 53, 55);
+  text-shadow: -1px 1px 1px rgb(255, 255, 255),
+  -1px 1px 1px rgb(255, 255, 255),
+  -1px 1px 1px rgb(255, 255, 255);
+}
+
 /* ===========================
    TOTALES (MISMA ESTRUCTURA ADMIN)
 =========================== */
@@ -168,8 +178,8 @@ table.totales-table td.money.strong{ font-size: 11.5pt; }
 table.totales-table td.money.neg{ color: #b00020; }
 
 .note{
-  font-size: 9pt;
-  color: #555;
+  font-size: 10pt;
+  color: #3a3a3ae0;
   margin-top: 2px;
 }
 

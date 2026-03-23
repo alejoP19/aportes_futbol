@@ -993,9 +993,10 @@ border-bottom-right-radius: 18px;
 /* =======================================================
    CARDS INFO
    ======================================================= */
+
 #gastosMesPublico,#otrosAportesPublico,.otros-partidos-card,
 .totales-aportantes-eliminados,.parcial-totals-mini-help,
-#public-totals-card,.box-container-observ {
+.box-container-observ {
 background-color: #f3f3f3e5 !important;
   border-radius: 8px;
   justify-self: center;
@@ -1008,7 +1009,6 @@ background-color: #f3f3f3e5 !important;
   box-shadow: -1px -1px 1px #b1ffe8, -1px 1px 4px #b8ffde;
   border: 1px dotted rgba(66, 92, 92, 0.938);
 }
-
 
 /* ======================
    GASTOS 
@@ -1958,7 +1958,7 @@ align-items:flex-start;
   background: linear-gradient(380deg,
 rgba(187, 46, 41, 0.973),rgb(228, 116, 96)
 ) !important;
-font-weight: lighter;
+font-weight: bold;
 color: #f8f07c;
 text-align: center;
 font-size: 13px !important;
@@ -2037,64 +2037,70 @@ color: rgba(22, 21, 1, 0.952) !important;
    ======================================================= */
 
 #public-totals-card {
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: space-around;
-gap: 7px;
-background: #1da88ac4 !important;
-border-radius: 8px;
-border: 1px dotted rgba(8, 231, 157, 0.849);
-
+  display: flex !important;
+  flex-direction: column !important;
+  max-width: 95%;
+  width: 95%;
+  margin: 12px 0;
+  min-height: fit-content;
+  height: auto;
+  justify-self: center;
+  gap: 7px;
+  background: #1da88ac4 !important;
+  border-radius: 8px;
+  border: 1px dotted rgba(8, 231, 157, 0.849);
+  padding: 12px;
+  box-sizing: border-box;
 }
 
 .parcial-tot-title{
-justify-self: center;
-margin-top: 4%;
-margin-bottom: 5%;
-font-weight: bold;
-color: #ffd900;
-font-size: 18px;
-text-shadow: -1px 1px 1px #000,-1px 1px 1px #000;
-
+  width: 100%;
+  text-align: center;
+  margin-top: 4%;
+  margin-bottom: 5%;
+  font-weight: bold;
+  color: #ffd900;
+  font-size: 18px;
+  text-shadow: -1px 1px 1px #000, -1px 1px 1px #000;
 }
 
-.total-parcial-mini,.totales-gastos-mini,.totales-estimados-mini,
-.otros-saldo-mini,.total-final-mini,.total-caja-general-mini{
-display: flex;
-flex-direction: column;
-text-align: center;
-border-radius: 10px;
-background-color: #f1f1f1;
-padding: 20px  10px;
-margin: 0% 15px;
-width: 105%;
-gap: 10px;
+.total-parcial-mini,
+.totales-gastos-mini,
+.totales-estimados-mini,
+.otros-saldo-mini,
+.total-final-mini,
+.total-caja-general-mini{
+  width: 100%;
+  margin: 0;
+  padding: 20px 10px;
+  text-align: center;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
 
+.total-parcial-mini{
+background-color: #fff9d5e7 !important;
+border: 1px dotted rgba(255, 208, 0, 0.849);
 }
 .totales-gastos-mini{
-    background-color: #f7dcde !important;
-       border: 1px dotted rgba(255, 30, 0, 0.849);
-}
-.total-parcial-mini{
-      background-color: #fff9d5e7 !important;
-      border: 1px dotted rgba(255, 208, 0, 0.849);
+background-color: #f7dcde !important;
+border: 1px dotted rgba(255, 30, 0, 0.849);
 }
 .totales-estimados-mini{
-     background-color: #f1fff7d2 !important;
-     border: 1px dotted rgba(140, 253, 196, 0.849);
+background-color: #f1fff7d2 !important;
+border: 1px dotted rgba(140, 253, 196, 0.849);
 }
 .otros-saldo-mini{
-  background-color: #edf0efe7 !important;
-  border: 1px dotted rgba(160, 199, 202, 0.849);
+background-color: #edf0efe7 !important;
+border: 1px dotted rgba(160, 199, 202, 0.849);
 }
 .total-final-mini{
-  background-color: #eaf1f0d2 !important;
-  border: 1px dotted rgba(255, 255, 255, 0.849);
+background-color: #eaf1f0d2 !important;
+border: 1px dotted rgba(255, 255, 255, 0.849);
 }
 .total-caja-general-mini{
-      background-color: #c6ffd0d2 !important;
-      border: 1px dotted rgba(0, 255, 21, 0.849);
+background-color: #c6ffd0d2 !important;
+border: 1px dotted rgba(0, 255, 21, 0.849);
 }
 
 .tot-row span {
@@ -2137,13 +2143,15 @@ gap: 10px;
    ======================================================= */
 
 .box-container-observ{
+display: flex;
 flex-direction: column;
 align-items: center;
 justify-content: center;
-align-self: center;
-width: 100% !important;
+width: 94% !important;
 padding:0px;
 text-align: center;
+margin: auto !important;
+margin-bottom: 20% !important;
 
 }
  #title-observaciones{
@@ -2167,7 +2175,7 @@ justify-self: center;
 color: #020202f8;
 padding:12px;
 margin-top: 0%;
-margin-bottom:5% !important;
+margin-bottom:8% !important;
 font-weight: bold;
 font-size:15px;
 white-space: pre-line;
@@ -2560,7 +2568,7 @@ font-size: 13px;
 
 #gastosMesPublico,#otrosAportesPublico,.otros-partidos-card,
 .totales-aportantes-eliminados,.parcial-totals-mini-help,
-#public-totals-card,.box-container-observ {
+.box-container-observ {
   width: 100%;
   max-width: 100%;
   padding: 18px;
@@ -2937,7 +2945,7 @@ font-size: 11px;
 .row-empty-eliminados :nth-child(2){
     font-size: 12px;
 }
-}
+
 .deuda-cell-elim span,.row-empty-eliminados :nth-child(4){
     font-size: 12px;
 }
@@ -2995,21 +3003,25 @@ margin-top: 7% !important;
    ======================================================= */
 
 #public-totals-card {
-  grid-column: 2 / span 1;
-  grid-row: 3 / span 1 ;              /* por si no caben en una línea */
-display: grid;
-grid-template-columns: repeat(2,auto);
-grid-template-rows:repeat(3,auto); 
+grid-column: 2 / span 1;
+grid-row: 3 / span 1 ;              /* por si no caben en una línea */
+display: grid !important;
+grid-template-columns: 1fr 1fr;
+width: 100%;
+max-width: 100%;
 min-height:fit-content;
 height: 100%;
 flex-direction: row;
 justify-content: center;
+justify-self: stretch;
+align-self: stretch;
 gap: 7px;
-width: 100% !important;
 padding: 18px;
 align-items: center;         /* ✅ todos con misma altura */
 list-style: none;
- 
+margin: 0;
+box-sizing: border-box;
+
 
 }
 
@@ -3127,7 +3139,7 @@ font-size:14px;
 }
   
 
-
+}
 
 /* =======================================================
    📊 TABLET — 768px–1023px

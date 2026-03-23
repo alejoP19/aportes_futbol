@@ -8,26 +8,6 @@ $anio = isset($_GET['anio']) ? intval($_GET['anio']) : intval(date("Y"));
 $_GET['mes']  = $mes;
 $_GET['anio'] = $anio;
 
-// ✅ calcular el mismo "otroDia" que usa reporte_mes.php (para mostrarlo en el header del PDF)
-$days = [];
-$days_count = cal_days_in_month(CAL_GREGORIAN, $mes, $anio);
-for ($d = 1; $d <= $days_count; $d++) {
-    $date = sprintf("%04d-%02d-%02d", $anio, $mes, $d);
-    $w = date('N', strtotime($date));
-    if ($w == 3 || $w == 6) $days[] = $d;
-}
-
-function pick_default_otro_dia_pdf($days, $days_count) {
-    if (!in_array(28, $days) && 28 <= $days_count) return 28;
-    for ($d = 1; $d <= $days_count; $d++) {
-        if (!in_array($d, $days)) return $d;
-    }
-    return 1;
-}
-
-$otroDiaPdf = pick_default_otro_dia_pdf($days, $days_count);
-$otroLabelPdf = str_pad((string)$otroDiaPdf, 2, "0", STR_PAD_LEFT);
-
 
 // --- renderizar HTML del reporte ---
 ob_start();
@@ -75,7 +55,7 @@ $meses = [
 $mesName = $meses[$mes];
 
 $canvas->page_script(function($pageNumber, $pageCount, $canvas, $fontMetrics)
-        use ($logoPath, $logoWidth, $logoY, $mesName, $anio, $otroLabelPdf) {
+        use ($logoPath, $logoWidth, $logoY, $mesName, $anio) {
 
     $w = $canvas->get_width();
     $h = $canvas->get_height();
@@ -86,7 +66,7 @@ $canvas->page_script(function($pageNumber, $pageCount, $canvas, $fontMetrics)
     }
 
     // Título del reporte
-    $canvas->text($w / 2 - 180, $logoY + 15, "Reporte Mensual - {$mesName} {$anio} | Especial ({$otroLabelPdf})", null, 14);
+    $canvas->text($w / 2 - 180, $logoY + 15, "Reporte Mensual - {$mesName} {$anio})", null, 14);
 
     // Fecha en esquina superior derecha
     $canvas->text($w - 120, $logoY - 65, date("Y-m-d"), null, 11);
