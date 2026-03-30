@@ -99,7 +99,10 @@ function get_consumo_saldo_target($conexion, $id_jugador, $fecha)
         SELECT IFNULL(SUM(m.amount),0) AS c
         FROM aportes a
         INNER JOIN aportes_saldo_moves m ON m.target_aporte_id = a.id
-        WHERE a.id_jugador=? AND a.fecha=?
+        INNER JOIN aportes s ON s.id = m.source_aporte_id
+        WHERE a.id_jugador = ?
+          AND a.fecha = ?
+          AND s.aporte_principal > 3000
     ");
     $stmt->bind_param("is", $id_jugador, $fecha);
     $stmt->execute();
@@ -120,6 +123,7 @@ function get_otros($conexion, $id_jugador, $mes, $anio)
     return $list;
 }
 
+// 
 function get_saldo_acumulado($conexion, $id_jugador, $mes, $anio)
 {
     $fechaCorte = date('Y-m-t', strtotime("$anio-$mes-01"));
@@ -129,6 +133,7 @@ function get_saldo_acumulado($conexion, $id_jugador, $mes, $anio)
         FROM aportes
         WHERE id_jugador = ?
           AND fecha <= ?
+          AND tipo_aporte IS NULL
     ");
     $q1->bind_param("is", $id_jugador, $fechaCorte);
     $q1->execute();
@@ -136,10 +141,12 @@ function get_saldo_acumulado($conexion, $id_jugador, $mes, $anio)
     $q1->close();
 
     $q2 = $conexion->prepare("
-        SELECT IFNULL(SUM(amount), 0) AS consumido
-        FROM aportes_saldo_moves
-        WHERE id_jugador = ?
-          AND fecha_consumo <= ?
+        SELECT IFNULL(SUM(m.amount), 0) AS consumido
+        FROM aportes_saldo_moves m
+        INNER JOIN aportes s ON s.id = m.source_aporte_id
+        WHERE m.id_jugador = ?
+          AND m.fecha_consumo <= ?
+          AND s.aporte_principal > 3000
     ");
     $q2->bind_param("is", $id_jugador, $fechaCorte);
     $q2->execute();
@@ -164,9 +171,11 @@ function total_efectivo_registrados_por_fecha($conexion, $fecha, $TOPE = 3000)
         ),0) AS s
         FROM aportes a
         LEFT JOIN (
-            SELECT target_aporte_id, SUM(amount) AS consumido
-            FROM aportes_saldo_moves
-            GROUP BY target_aporte_id
+            SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+            FROM aportes_saldo_moves m
+            INNER JOIN aportes s ON s.id = m.source_aporte_id
+            WHERE s.aporte_principal > 3000
+            GROUP BY m.target_aporte_id
         ) t ON t.target_aporte_id = a.id
         WHERE a.fecha = ?
           AND a.id_jugador IS NOT NULL
@@ -639,10 +648,12 @@ $eliminados_mes_total_footer = (int)($conexion->query("
     ),0) AS s
     FROM aportes a
     LEFT JOIN (
-        SELECT target_aporte_id, SUM(amount) AS consumido
-        FROM aportes_saldo_moves
-        GROUP BY target_aporte_id
-    ) t ON t.target_aporte_id=a.id
+        SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+        FROM aportes_saldo_moves m
+        INNER JOIN aportes s ON s.id = m.source_aporte_id
+        WHERE s.aporte_principal > 3000
+        GROUP BY m.target_aporte_id
+    ) t ON t.target_aporte_id = a.id
     WHERE YEAR(a.fecha)=$anio AND MONTH(a.fecha)=$mes
       AND a.tipo_aporte IS NULL
       AND a.id_jugador IN ($inMes)
@@ -667,12 +678,14 @@ $rowSaldo = $conexion->query("
           AND tipo_aporte IS NULL
         GROUP BY id_jugador
     ) ex ON ex.id_jugador = j.id
-    LEFT JOIN (
-        SELECT id_jugador, SUM(amount) AS consumido
-        FROM aportes_saldo_moves
-        WHERE fecha_consumo <= '$fechaCorteMes'
-        GROUP BY id_jugador
-    ) co ON co.id_jugador = j.id
+  LEFT JOIN (
+    SELECT m.id_jugador, SUM(m.amount) AS consumido
+    FROM aportes_saldo_moves m
+    INNER JOIN aportes s ON s.id = m.source_aporte_id
+    WHERE m.fecha_consumo <= '$fechaCorteMes'
+      AND s.aporte_principal > 3000
+    GROUP BY m.id_jugador
+) co ON co.id_jugador = j.id
 ")->fetch_assoc();
 $saldo_total_footer = (int)($rowSaldo['saldo'] ?? 0);
 

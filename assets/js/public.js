@@ -148,12 +148,13 @@ function renderTablaPublic(data) {
     html += `<tr data-player="${row.id}" class="${filaClass}">`;
     html += `<td class="player-name">${escapeHtml(row.nombre)}</td>`;
 
-    row.dias.forEach((visible, idx) => {
-      const real = Number((row.real_dias || [])[idx] ?? visible ?? 0);
+    row.dias.forEach((_, idx) => {
+      const real = Number((row.real_dias || [])[idx] ?? 0);
+      const visible = Number((row.efectivo_dias || [])[idx] ?? 0);
       const consumo = Number((row.consumo_dias || [])[idx] ?? 0);
       const diaNumero = dias[idx];
       const hayDeuda = deudas[diaNumero] === true;
-      const hayExcedente = real > 3000 && Number(visible || 0) > 0;
+      const hayExcedente = real > 3000 && visible > 0;
 
       const deudaHtml = hayDeuda
         ? `<span class="deuda-x-publica" title="Día no pagado">✖</span>`
@@ -179,7 +180,7 @@ function renderTablaPublic(data) {
     });
 
     const realEsp = Number(row.real_especial || 0);
-    const visibleEsp = Number(row.especial || 0);
+    const visibleEsp = Number(row.efectivo_especial || 0);
     const consumoEsp = Number(row.consumo_especial || 0);
     const hayExcEsp = realEsp > 3000 && visibleEsp > 0;
     const hayDeudaEsp = deudas[fechaEspecial] === true;

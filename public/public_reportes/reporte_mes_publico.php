@@ -78,7 +78,9 @@ function get_consumo_saldo_target($conexion, $id_jugador, $fecha){
     SELECT IFNULL(SUM(m.amount),0) AS c
     FROM aportes a
     INNER JOIN aportes_saldo_moves m ON m.target_aporte_id = a.id
+    INNER JOIN aportes s ON s.id = m.source_aporte_id
     WHERE a.id_jugador=? AND a.fecha=?
+      AND s.aporte_principal > 3000
   ");
   $stmt->bind_param("is", $id_jugador, $fecha);
   $stmt->execute();
@@ -119,11 +121,13 @@ function get_saldo_hasta_mes($conexion, $id, $mes, $anio){
   $excedente = (int)$q1->get_result()->fetch_row()[0];
   $q1->close();
 
-  $q2 = $conexion->prepare("
-    SELECT IFNULL(SUM(amount),0)
-    FROM aportes_saldo_moves
-    WHERE id_jugador=? AND fecha_consumo<=?
-  ");
+ $q2 = $conexion->prepare("
+  SELECT IFNULL(SUM(m.amount),0)
+  FROM aportes_saldo_moves m
+  INNER JOIN aportes s ON s.id = m.source_aporte_id
+  WHERE m.id_jugador=? AND m.fecha_consumo<=?
+    AND s.aporte_principal > 3000
+");
   $q2->bind_param("is", $id, $fechaCorte);
   $q2->execute();
   $consumido = (int)$q2->get_result()->fetch_row()[0];
@@ -144,11 +148,13 @@ function get_saldo_hasta_fecha($conexion, $id, $fechaCorte, $TOPE = 3000){
   $excedente = (int)($q1->get_result()->fetch_assoc()["excedente"] ?? 0);
   $q1->close();
 
-  $q2 = $conexion->prepare("
-    SELECT IFNULL(SUM(amount),0) AS consumido
-    FROM aportes_saldo_moves
-    WHERE id_jugador=? AND fecha_consumo<=?
-  ");
+$q2 = $conexion->prepare("
+  SELECT IFNULL(SUM(m.amount),0) AS consumido
+  FROM aportes_saldo_moves m
+  INNER JOIN aportes s ON s.id = m.source_aporte_id
+  WHERE m.id_jugador=? AND m.fecha_consumo<=?
+    AND s.aporte_principal > 3000
+");
   $q2->bind_param("is", $id, $fechaCorte);
   $q2->execute();
   $consumido = (int)($q2->get_result()->fetch_assoc()["consumido"] ?? 0);
@@ -170,9 +176,11 @@ function get_aportes_eliminado_hasta_mes($conexion, $jid, $anio, $mes, $TOPE = 3
       ) AS efectivo
     FROM aportes a
     LEFT JOIN (
-      SELECT target_aporte_id, SUM(amount) AS consumido
-      FROM aportes_saldo_moves
-      GROUP BY target_aporte_id
+     SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+FROM aportes_saldo_moves m
+INNER JOIN aportes s ON s.id = m.source_aporte_id
+WHERE s.aporte_principal > 3000
+GROUP BY m.target_aporte_id
     ) t ON t.target_aporte_id = a.id
     WHERE a.id_jugador = ?
       AND a.tipo_aporte IS NULL
@@ -486,9 +494,11 @@ $eliminados_normales_mes_no_visibles = q_scalar_assoc($conexion, "
   ),0) AS s
   FROM aportes a
   LEFT JOIN (
-    SELECT target_aporte_id, SUM(amount) AS consumido
-    FROM aportes_saldo_moves
-    GROUP BY target_aporte_id
+   SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+FROM aportes_saldo_moves m
+INNER JOIN aportes s ON s.id = m.source_aporte_id
+WHERE s.aporte_principal > 3000
+GROUP BY m.target_aporte_id
   ) t ON t.target_aporte_id = a.id
   WHERE YEAR(a.fecha)=$anio
     AND MONTH(a.fecha)=$mes
@@ -507,9 +517,11 @@ $eliminados_otros_juegos_mes = q_scalar_assoc($conexion, "
   ),0) AS s
   FROM aportes a
   LEFT JOIN (
-    SELECT target_aporte_id, SUM(amount) AS consumido
-    FROM aportes_saldo_moves
-    GROUP BY target_aporte_id
+ SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+FROM aportes_saldo_moves m
+INNER JOIN aportes s ON s.id = m.source_aporte_id
+WHERE s.aporte_principal > 3000
+GROUP BY m.target_aporte_id
   ) t ON t.target_aporte_id = a.id
   WHERE YEAR(a.fecha)=$anio
     AND MONTH(a.fecha)=$mes
@@ -589,9 +601,11 @@ for ($mm = 1; $mm <= $mes; $mm++) {
     ),0) AS s
     FROM aportes a
     LEFT JOIN (
-      SELECT target_aporte_id, SUM(amount) AS consumido
-      FROM aportes_saldo_moves
-      GROUP BY target_aporte_id
+   SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+FROM aportes_saldo_moves m
+INNER JOIN aportes s ON s.id = m.source_aporte_id
+WHERE s.aporte_principal > 3000
+GROUP BY m.target_aporte_id
     ) t ON t.target_aporte_id = a.id
     WHERE YEAR(a.fecha)=$anio
       AND MONTH(a.fecha)=$mm
@@ -638,9 +652,11 @@ for ($mm = 1; $mm <= $mes; $mm++) {
     ),0) AS s
     FROM aportes a
     LEFT JOIN (
-      SELECT target_aporte_id, SUM(amount) AS consumido
-      FROM aportes_saldo_moves
-      GROUP BY target_aporte_id
+     SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+FROM aportes_saldo_moves m
+INNER JOIN aportes s ON s.id = m.source_aporte_id
+WHERE s.aporte_principal > 3000
+GROUP BY m.target_aporte_id
     ) t ON t.target_aporte_id = a.id
     WHERE YEAR(a.fecha)=$anio
       AND MONTH(a.fecha)=$mm
@@ -669,9 +685,11 @@ for ($mm = 1; $mm <= $mes; $mm++) {
     ),0) AS s
     FROM aportes a
     LEFT JOIN (
-      SELECT target_aporte_id, SUM(amount) AS consumido
-      FROM aportes_saldo_moves
-      GROUP BY target_aporte_id
+    SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+FROM aportes_saldo_moves m
+INNER JOIN aportes s ON s.id = m.source_aporte_id
+WHERE s.aporte_principal > 3000
+GROUP BY m.target_aporte_id
     ) t ON t.target_aporte_id = a.id
     WHERE YEAR(a.fecha)=$anio
       AND MONTH(a.fecha)=$mm
@@ -690,9 +708,11 @@ for ($mm = 1; $mm <= $mes; $mm++) {
     ),0) AS s
     FROM aportes a
     LEFT JOIN (
-      SELECT target_aporte_id, SUM(amount) AS consumido
-      FROM aportes_saldo_moves
-      GROUP BY target_aporte_id
+     SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+FROM aportes_saldo_moves m
+INNER JOIN aportes s ON s.id = m.source_aporte_id
+WHERE s.aporte_principal > 3000
+GROUP BY m.target_aporte_id
     ) t ON t.target_aporte_id = a.id
     WHERE YEAR(a.fecha)=$anio
       AND MONTH(a.fecha)=$mm
@@ -837,9 +857,11 @@ for ($yy = 1900; $yy <= $anio; $yy++) {
       ),0) AS s
       FROM aportes a
       LEFT JOIN (
-        SELECT target_aporte_id, SUM(amount) AS consumido
-        FROM aportes_saldo_moves
-        GROUP BY target_aporte_id
+       SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+FROM aportes_saldo_moves m
+INNER JOIN aportes s ON s.id = m.source_aporte_id
+WHERE s.aporte_principal > 3000
+GROUP BY m.target_aporte_id
       ) t ON t.target_aporte_id = a.id
       WHERE YEAR(a.fecha)=$yy
         AND MONTH(a.fecha)=$mm
@@ -882,9 +904,11 @@ for ($yy = 1900; $yy <= $anio; $yy++) {
       ),0) AS s
       FROM aportes a
       LEFT JOIN (
-        SELECT target_aporte_id, SUM(amount) AS consumido
-        FROM aportes_saldo_moves
-        GROUP BY target_aporte_id
+       SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+FROM aportes_saldo_moves m
+INNER JOIN aportes s ON s.id = m.source_aporte_id
+WHERE s.aporte_principal > 3000
+GROUP BY m.target_aporte_id
       ) t ON t.target_aporte_id = a.id
       WHERE YEAR(a.fecha)=$yy
         AND MONTH(a.fecha)=$mm
@@ -911,9 +935,11 @@ for ($yy = 1900; $yy <= $anio; $yy++) {
       ),0) AS s
       FROM aportes a
       LEFT JOIN (
-        SELECT target_aporte_id, SUM(amount) AS consumido
-        FROM aportes_saldo_moves
-        GROUP BY target_aporte_id
+       SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+FROM aportes_saldo_moves m
+INNER JOIN aportes s ON s.id = m.source_aporte_id
+WHERE s.aporte_principal > 3000
+GROUP BY m.target_aporte_id
       ) t ON t.target_aporte_id = a.id
       WHERE YEAR(a.fecha)=$yy
         AND MONTH(a.fecha)=$mm
@@ -931,9 +957,11 @@ for ($yy = 1900; $yy <= $anio; $yy++) {
       ),0) AS s
       FROM aportes a
       LEFT JOIN (
-        SELECT target_aporte_id, SUM(amount) AS consumido
-        FROM aportes_saldo_moves
-        GROUP BY target_aporte_id
+       SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+FROM aportes_saldo_moves m
+INNER JOIN aportes s ON s.id = m.source_aporte_id
+WHERE s.aporte_principal > 3000
+GROUP BY m.target_aporte_id
       ) t ON t.target_aporte_id = a.id
       WHERE YEAR(a.fecha)=$yy
         AND MONTH(a.fecha)=$mm
@@ -1012,9 +1040,11 @@ $eliminados_mes_total = q_scalar_assoc($conexion, "
   ),0) AS s
   FROM aportes a
   LEFT JOIN (
-    SELECT target_aporte_id, SUM(amount) AS consumido
-    FROM aportes_saldo_moves
-    GROUP BY target_aporte_id
+    SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+FROM aportes_saldo_moves m
+INNER JOIN aportes s ON s.id = m.source_aporte_id
+WHERE s.aporte_principal > 3000
+GROUP BY m.target_aporte_id
   ) t ON t.target_aporte_id=a.id
   WHERE YEAR(a.fecha)=$anio AND MONTH(a.fecha)=$mes
     AND a.id_jugador IN ($inMes)
@@ -1157,29 +1187,35 @@ $obs = trim(get_obs($conexion, $mes, $anio));
     </tfoot>
   </table>
   <div class="note" style="margin-top:6px;">
-    Nota: El Total Mes de la Tabla Principal NO incluye el Total Mes de la Tabla Aportes Esporádicos (De Abajo).
-    Tampoco incluye los aportes de la tabla Aportantes Eliminados (Detalle), los aportes de la columna Otros Juego (Todos Los Días)
-    referenciados en la tabla Otros Juegos (Principal + Esporádicos / (De Abajo)) y los saldos;
+   <strong> Nota:</strong> El Total Mes de la Tabla Principal <strong> NO incluye:</strong><br>
+     <strong>-</strong> Totales días normales de la Tabla Aportes Esporádicos  <strong>(De Abajo).</strong> <br>
+     <strong>-</strong> Aportes de la tabla Aportantes Eliminados <strong>(Detalle).</strong> <br>
+     <strong>-</strong> Aportes de la columna Otros Juego <strong>(Cada día)</strong> registrados en la tabla Otros Juegos (Principal + Esporádicos / <strong>(De Abajo)</strong>). <br>
+     <strong>-</strong> Saldos de ambas tablas.
+  </div><br> <br>
+  <div class="note" style="margin-top:6px;">
+    <strong>Para Confirmar el Total Parcial del Mes se debe:</strong>
   </div><br>
   <div class="note" style="margin-top:6px;">
-    Para Confirmar el Total Parcial del Mes se debe:
+    1. Sumar los totales de todos los días normales de cada tabla (Principal + Esporádicos / <strong>(De Abajo)</strong>).
   </div><br>
   <div class="note" style="margin-top:6px;">
-    1. Sumar los totales de todos los días normales de cada tabla (Principal + Esporádicos / (De Abajo)).
+    2. Sumar el Total Final de la tabla Otros Juegos (Principal + Esporádicos <strong>(De Abajo)</strong>).
   </div><br>
   <div class="note" style="margin-top:6px;">
-    2. Sumar el Total Final de la tabla Otros Juegos (Principal + Esporádicos (De Abajo)).
+    3. Sumar los otros aportes del mes de la tabla Otros Aportes Mes (solo informativo <strong>(De Abajo)</strong>).
   </div><br>
   <div class="note" style="margin-top:6px;">
-    3. Sumar los aportes del mes actual (columna Cantidad / Filas en azul claro) de la tabla Aportantes Eliminados (Detalle)
-  </div><br>
-  <div class="note" style="margin-top:6px;">
-    4. Finalmente sumar los otros aportes del mes de la tabla Otros Aportes Mes (solo informativo (De Abajo)).
+    3. Sumar los aportes de la tabla Aportantes Eliminados (Detalle)<strong>(De Abajo)</strong> del mes actual <strong style="color:brown">(columna Cantidad </strong>/ <strong style="color:cornflowerblue">Filas en azul claro)</strong>. 
   </div><br>
 
-  <div class="note" style="margin-top:6px;">
-    Con esto se tendrá el total Parcial Del Mes para luego restar los Gastos del Mes
-    y finalmente sumarle los Saldos Acumulados dando el Total Final Año (Con Saldos Acumulados).
+  <div class="note" style="margin-top:6px; color: darkgreen;">
+   ➦ Con esto se obtiene el <strong> total Parcial Del Mes</strong>. <br>
+   ➦ Resta los <strong>Gastos del Mes</strong> para obtener el <strong> total Estimado Del Mes</strong>.<br>
+   ➦ Suma los <strong> Totales Estimados De Cada Mes</strong>. <br>
+   ➦ Suma los <strong>Saldos Acumulados</strong> y se obtiene el <strong style="color:goldenrod;">Total Final Año (Con Saldos Acumulados)</strong>. <br>
+   ➦ Suma la <strong>Caja General Acumulada</strong> de Años Anteriores con el <strong style="color:goldenrod;">Total Final Año (Con Saldos Acumulados <strong style="color:green;">(Año Actual)</strong>)</strong>
+      y se Obtiene la <strong  style="color:goldenrod;">Caja General Acumulada <strong style="color:green;">(Año Actual)</strong></strong> 
   </div> <br>
 
   <div class="section-block">
@@ -1215,10 +1251,10 @@ $obs = trim(get_obs($conexion, $mes, $anio));
       </tbody>
     </table>
 
-    <div class="note" style="margin-top:6px;">
-      Nota: Los “Otros Juegos” de Esporádicos se muestran en la tabla “Otros Juegos” (abajo) con la columna TABLA = Esporádico.
+    <div class="note" style="margin-top:6px;color: darkgreen;">
+     <strong>Nota:</strong>Los “Otros Juegos” de Esporádicos se muestran en la tabla <strong>“Otros Juegos” (De abajo)</strong> con la columna TABLA = Esporádico.
     </div>
-  </div>
+  </div> <br> <br>
 
   <div class="section-block">
     <h3 class="keep-title">Otros Juegos (Principal + Esporádicos)</h3>
@@ -1261,11 +1297,32 @@ $obs = trim(get_obs($conexion, $mes, $anio));
         </tfoot>
       </table>
     <?php endif; ?>
-  </div>
+  </div> <br> <br>
 
+  <div class="sep"></div>
+
+      <table class="totales-table final">
+        <tr>
+          <td class="label">
+            <strong>Otros Aportes Mes</strong>
+            <div class="note">(Solo Informativo)</div>
+          </td>
+          <td class="money">$ <?= number_format((int)$otros_aportes_mes_info, 0, ',', '.') ?></td>
+        </tr>
+        <tr>
+          <td class="label">
+            <strong>Otros Aportes Año</strong>
+            <div class="note">(Solo Informativo)</div>
+          </td>
+          <td class="money">$ <?= number_format((int)$otros_aportes_anio_info, 0, ',', '.') ?></td>
+        </tr>
+      </table>
   <div class="section-block">
     <h3 class="keep-title">Aportantes Eliminados (Detalle)</h3>
-
+    <div class="note" style="margin-top:6px;">
+         <strong>Nota:</strong> filas del mes actual se marcan en <strong style="color:cornflowerblue">azul claro</strong> y las filas de meses anteriores se marcan con <strong style="color:brown"> Filas Rojas </strong>.
+      </div>
+    
     <?php
     $stmtEl = $conexion->prepare("
       SELECT id, nombre, fecha_baja
@@ -1413,15 +1470,10 @@ $obs = trim(get_obs($conexion, $mes, $anio));
             <td style="text-align:right;"><strong>$ <?= number_format($totalGeneralSaldoEl, 0, ',', '.') ?></strong></td>
           </tr>
         </tfoot>
-      </table>
-
-      <div class="note" style="margin-top:6px;">
-        Nota: filas del mes actual se marcan en azul; filas de meses anteriores se marcan en rojo.
-      </div>
+    </table>
 
     <?php endif; ?>
   </div>
-
   <div class="section-block">
     <h3 class="keep-title">Resumen General</h3>
     <h3 class="keep-title">Totales (COP)</h3><br>
@@ -1533,24 +1585,6 @@ $obs = trim(get_obs($conexion, $mes, $anio));
         </tr>
       </table>
 
-      <div class="sep"></div>
-
-      <table class="totales-table">
-        <tr>
-          <td class="label">
-            <strong>Otros Aportes Mes</strong>
-            <div class="note">(Solo Informativo)</div>
-          </td>
-          <td class="money">$ <?= number_format((int)$otros_aportes_mes_info, 0, ',', '.') ?></td>
-        </tr>
-        <tr>
-          <td class="label">
-            <strong>Otros Aportes Año</strong>
-            <div class="note">(Solo Informativo)</div>
-          </td>
-          <td class="money">$ <?= number_format((int)$otros_aportes_anio_info, 0, ',', '.') ?></td>
-        </tr>
-      </table>
 
     </div>
   </div>

@@ -21,7 +21,7 @@ $TOPE = 3000;
 function get_saldo_acumulado_hasta_mes($conexion, $id_jugador, $mes, $anio) {
     $fechaCorte = date('Y-m-t', strtotime("$anio-$mes-01"));
 
-    // Excedente generado (con base en valor REAL guardado)
+    // 1) Excedente real generado hasta la fecha de corte
     $q1 = $conexion->prepare("
         SELECT IFNULL(SUM(GREATEST(aporte_principal - 3000, 0)), 0) AS excedente
         FROM aportes
@@ -33,12 +33,15 @@ function get_saldo_acumulado_hasta_mes($conexion, $id_jugador, $mes, $anio) {
     $excedente = (int)($q1->get_result()->fetch_assoc()['excedente'] ?? 0);
     $q1->close();
 
-    // Consumo acumulado (por fecha_consumo real)
+    // 2) Consumo acumulado válido hasta la fecha de corte
     $q2 = $conexion->prepare("
-        SELECT IFNULL(SUM(amount), 0) AS consumido
-        FROM aportes_saldo_moves
-        WHERE id_jugador = ?
-          AND fecha_consumo <= ?
+        SELECT IFNULL(SUM(m.amount), 0) AS consumido
+        FROM aportes_saldo_moves m
+        INNER JOIN aportes s ON s.id = m.source_aporte_id
+        INNER JOIN aportes t ON t.id = m.target_aporte_id
+        WHERE m.id_jugador = ?
+          AND m.fecha_consumo <= ?
+          AND s.fecha <= t.fecha
     ");
     $q2->bind_param("is", $id_jugador, $fechaCorte);
     $q2->execute();

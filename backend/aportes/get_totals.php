@@ -49,19 +49,20 @@ function calcular_saldo_acumulado_real(mysqli $cx, string $fechaCorte, int $TOPE
         AND tipo_aporte IS NULL
       GROUP BY id_jugador
     ) ex ON ex.id_jugador = j.id
-    LEFT JOIN (
-      SELECT id_jugador, SUM(amount) AS consumido
-      FROM aportes_saldo_moves
-      WHERE fecha_consumo <= '$fechaCorte'
-        AND id_jugador IS NOT NULL
-      GROUP BY id_jugador
-    ) co ON co.id_jugador = j.id
+   LEFT JOIN (
+  SELECT m.id_jugador, SUM(m.amount) AS consumido
+  FROM aportes_saldo_moves m
+  INNER JOIN aportes s ON s.id = m.source_aporte_id
+  WHERE m.fecha_consumo <= '$fechaCorte'
+    AND m.id_jugador IS NOT NULL
+    AND s.aporte_principal > 3000
+  GROUP BY m.id_jugador
+) co ON co.id_jugador = j.id
   ";
 
   $res = $cx->query($sql);
   return (int)($res->fetch_assoc()['saldo'] ?? 0);
 }
-
 /**
  * Totales de un mes
  */
@@ -70,24 +71,25 @@ function calcular_totales_mes(mysqli $cx, int $anio, int $mes, int $TOPE = 3000)
 
   // 1) Aportes normales del mes
   $month_total = (int)($cx->query("
-    SELECT IFNULL(SUM(
-      LEAST(
-        LEAST(IFNULL(a.aporte_principal,0), $TOPE) + IFNULL(t.consumido,0),
-        $TOPE
-      )
-    ),0) AS total_mes
-    FROM aportes a
-    LEFT JOIN (
-      SELECT target_aporte_id, SUM(amount) AS consumido
-      FROM aportes_saldo_moves
-      GROUP BY target_aporte_id
-    ) t ON t.target_aporte_id = a.id
-    WHERE YEAR(a.fecha) = $anio
-      AND MONTH(a.fecha) = $mes
-      AND a.id_jugador IS NOT NULL
-      AND a.tipo_aporte IS NULL
-  ")->fetch_assoc()['total_mes'] ?? 0);
-
+  SELECT IFNULL(SUM(
+    LEAST(
+      LEAST(IFNULL(a.aporte_principal,0), $TOPE) + IFNULL(t.consumido,0),
+      $TOPE
+    )
+  ),0) AS total_mes
+  FROM aportes a
+  LEFT JOIN (
+  SELECT m.target_aporte_id, SUM(m.amount) AS consumido
+  FROM aportes_saldo_moves m
+  INNER JOIN aportes s ON s.id = m.source_aporte_id
+  WHERE s.aporte_principal > 3000
+  GROUP BY m.target_aporte_id
+) t ON t.target_aporte_id = a.id
+  WHERE YEAR(a.fecha) = $anio
+    AND MONTH(a.fecha) = $mes
+    AND a.id_jugador IS NOT NULL
+    AND a.tipo_aporte IS NULL
+")->fetch_assoc()['total_mes'] ?? 0);
   // 2) Esporádicos
   $esporadicos_mes = (int)($cx->query("
     SELECT IFNULL(SUM(aporte_principal),0) AS s
