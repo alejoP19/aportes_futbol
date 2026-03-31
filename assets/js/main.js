@@ -884,6 +884,248 @@ async function cargarEliminadosMes(mes, anio) {
 }
 
 
+async function fetchTodosEliminados() {
+  const r = await fetch(`${API}/aportantes/get_eliminados_todos.php`, {
+    cache: "no-store",
+    credentials: "include"
+  });
+
+  const txt = await r.text();
+  let data;
+
+  try {
+    data = JSON.parse(txt);
+  } catch (e) {
+    console.error("Respuesta NO JSON get_eliminados_todos.php:", txt);
+    throw e;
+  }
+
+  return data;
+}
+
+function renderModalTodosEliminados(data) {
+  const modal = document.getElementById("modalTodosEliminados");
+  const body = document.getElementById("modalTodosEliminadosBody");
+  if (!modal || !body) return;
+
+  const items = Array.isArray(data?.items) ? data.items : [];
+  console.log("ELIMINADOS ACTUALES:", items);
+console.log("AÑOS DETECTADOS:", items.map(p => p.anio_baja));
+
+  if (!items.length) {
+    body.innerHTML = `
+      <div style="padding:16px; opacity:.85;">
+        No hay aportantes eliminados.
+      </div>
+    `;
+    modal.classList.remove("hidden");
+    modal.classList.remove("closing");
+    return;
+  }
+
+const years = [...new Set(
+  items
+    .map(p => Number(p.anio_baja || 0))
+    .filter(y => y > 0)
+)].sort((a, b) => b - a);
+
+
+  body.innerHTML = `
+    <div class="filtros-eliminados-todos" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+      <input
+        type="text"
+        id="searchTodosEliminados"
+        placeholder="Buscar por nombre..."
+        class="swal2-input"
+        style="margin:0; max-width:260px;"
+      >
+
+      <select id="filterMesBaja" class="swal2-select" style="margin:0; max-width:180px;">
+        <option value="">Todos los meses</option>
+        <option value="01">Enero</option>
+        <option value="02">Febrero</option>
+        <option value="03">Marzo</option>
+        <option value="04">Abril</option>
+        <option value="05">Mayo</option>
+        <option value="06">Junio</option>
+        <option value="07">Julio</option>
+        <option value="08">Agosto</option>
+        <option value="09">Septiembre</option>
+        <option value="10">Octubre</option>
+        <option value="11">Noviembre</option>
+        <option value="12">Diciembre</option>
+      </select>
+
+      <select id="filterAnioBaja" class="swal2-select" style="margin:0; max-width:140px;">
+        <option value="">Todos los años</option>
+        ${years.map(y => `<option value="${y}">${y}</option>`).join("")}
+      </select>
+    </div>
+
+    <div class="table-container-eliminados-todos">
+      <table class="table-mini-eliminados-todos">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Aportante</th>
+            <th>Teléfono</th>
+            <th>Fecha Baja</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyTodosEliminados"></tbody>
+      </table>
+    </div>
+  `;
+
+  const tbody = document.getElementById("tbodyTodosEliminados");
+  const input = document.getElementById("searchTodosEliminados");
+  const selMes = document.getElementById("filterMesBaja");
+  const selAnio = document.getElementById("filterAnioBaja");
+
+  function pintarFilas() {
+    const txt = (input?.value || "").trim().toLowerCase();
+    const mes = selMes?.value || "";
+    const anio = selAnio?.value || "";
+
+    const filtrados = items.filter(p => {
+      const nombre = (p.nombre || "").toLowerCase();
+ const yyyy = Number(p.anio_baja || 0);
+const mm = String(Number(p.mes_baja || 0)).padStart(2, "0");
+
+const okNombre = !txt || nombre.includes(txt);
+const okMes = !mes || mm === mes;
+const okAnio = !anio || String(yyyy) === String(anio);
+
+      return okNombre && okMes && okAnio;
+    });
+
+    if (!filtrados.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" style="padding:14px; opacity:.8;">
+            No hay resultados con ese filtro.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = filtrados.map((p, idx) => {
+      const fechaFormateada = p.fecha_baja
+        ? new Date(p.fecha_baja + "T00:00:00").toLocaleDateString("es-CO")
+        : "Sin fecha";
+
+      return `
+        <tr>
+          <td>${idx + 1}</td>
+          <td style="text-align:left;"><strong>${escapeHtml(p.nombre || "")}</strong></td>
+          <td>${escapeHtml(p.telefono || "")}</td>
+          <td>${escapeHtml(fechaFormateada)}</td>
+         <td>
+  ${
+    Number(p.activo) === 0
+      ? `
+        <label class="switch-activar-player">
+          <input
+            type="checkbox"
+            class="chk-activar-player-modal"
+            data-id="${p.id}"
+          >
+          <span>Activar</span>
+        </label>
+      `
+      : `<span style="opacity:.7; font-weight:bold;">Ya activo</span>`
+  }
+</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  input?.addEventListener("input", pintarFilas);
+  selMes?.addEventListener("change", pintarFilas);
+  selAnio?.addEventListener("change", pintarFilas);
+
+  pintarFilas();
+
+  modal.classList.remove("hidden");
+  modal.classList.remove("closing");
+}
+
+function initTodosEliminadosModal() {
+  const container = document.getElementById("monthlyTableContainer");
+
+  if (!container || container.dataset.boundTodosElim === "1") return;
+  container.dataset.boundTodosElim = "1";
+
+  container.addEventListener("click", async (e) => {
+    const btn = e.target.closest("#btnVerTodosEliminados");
+    if (!btn) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    try {
+      const data = await fetchTodosEliminados();
+
+      if (!data?.ok) {
+        Swal.fire("Error", data?.msg || "No se pudo cargar la lista", "error");
+        return;
+      }
+
+      renderModalTodosEliminados(data);
+    } catch (err) {
+      console.error("Error cargando todos los eliminados:", err);
+      Swal.fire("Error", "No se pudo cargar la lista de eliminados", "error");
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    const modal = document.getElementById("modalTodosEliminados");
+    const close = document.getElementById("closeModalTodosEliminados");
+    if (!modal) return;
+
+    if (e.target === close || e.target === modal) {
+      modal.classList.add("hidden");
+      modal.classList.remove("closing");
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    const modal = document.getElementById("modalTodosEliminados");
+    if (!modal) return;
+
+    modal.classList.add("hidden");
+    modal.classList.remove("closing");
+  });
+
+  document.addEventListener("change", async (e) => {
+  const chk = e.target.closest(".chk-activar-player-modal");
+  if (!chk) return;
+  if (!chk.checked) return;
+
+  const id = chk.dataset.id;
+
+  // cerrar primero el modal para que Swal quede al frente
+  const modal = document.getElementById("modalTodosEliminados");
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.classList.remove("closing");
+  }
+
+  const ok = await activarJugador(id);
+
+  if (!ok) {
+    chk.checked = false;
+    return;
+  }
+
+  await refreshSheet();
+});
+
+}
 // ----------- REFRESH COMPLETA -----------------
 
 
@@ -913,6 +1155,7 @@ async function refreshSheet() {
   }
   await loadOtrosPartidosInfo(mes, anio);
   loadObservaciones(mes, anio);
+  initTodosEliminadosModal();
 }
 
 // ----------- PANEL IZQUIERDO -----------------
@@ -942,9 +1185,11 @@ const monthSelect = document.getElementById("monthSelect");
 const yearSelect = document.getElementById("yearSelect");
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await loadPlayersList();
+   await loadPlayersList();
   await refreshSheet();
   bindAccionesTabla();
+  initTodosEliminadosModal();
+
 
   // botones
   const btnAddPlayer = document.getElementById("btnAddPlayer");
@@ -1099,8 +1344,10 @@ async function eliminarJugador(id) {
     if (result.isConfirmed) {
 
       // --- ENVÍO CORRECTO DEL ID ---
-      const form = new FormData();
+     const form = new FormData();
       form.append("id", id);
+      form.append("mes", monthSelect.value);
+      form.append("anio", yearSelect.value);
 
       const response = await fetch(`${API}/aportantes/delete_player.php`, {
         method: "POST",

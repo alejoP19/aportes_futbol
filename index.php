@@ -104,6 +104,7 @@ include "conexion.php";
 
       <div id="playersTableContainer">
         <div class="loading"></div>
+
       </div>
 
       <div class="pagination" id="paginationContainer">
@@ -260,8 +261,8 @@ include "conexion.php";
         </div>
         <hr style="opacity:.25; margin:1px 0;">
       </div>
-      
-       <hr style="opacity:.25; margin:1px 0;">
+
+      <hr style="opacity:.25; margin:1px 0;">
       <div class="showing-total-final">
         <div class="showing-total-final-items">
           <span>Caja General Acumulada</span>
@@ -322,6 +323,14 @@ include "conexion.php";
           <div id="modalEliminadosBody"></div>
         </div>
       </div>
+      <div id="modalTodosEliminados" class="modal hidden">
+        <div class="modal-card">
+          <div class="modal-head">
+            <strong>Todos los aportantes eliminados</strong>
+            <button type="button" id="closeModalTodosEliminados">✕</button>
+          </div>
+          <div id="modalTodosEliminadosBody"></div>
+        </div>
       </div>
 
       <!-- Observaciones -->

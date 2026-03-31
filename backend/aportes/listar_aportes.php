@@ -255,9 +255,18 @@ while ($row = $resLista->fetch_assoc()) {
    HTML
 =========================== */
 $mesesEsp = [
-    1 => "Enero", 2 => "Febrero", 3 => "Marzo", 4 => "Abril",
-    5 => "Mayo", 6 => "Junio", 7 => "Julio", 8 => "Agosto",
-    9 => "Septiembre", 10 => "Octubre", 11 => "Noviembre", 12 => "Diciembre"
+    1 => "Enero",
+    2 => "Febrero",
+    3 => "Marzo",
+    4 => "Abril",
+    5 => "Mayo",
+    6 => "Junio",
+    7 => "Julio",
+    8 => "Agosto",
+    9 => "Septiembre",
+    10 => "Octubre",
+    11 => "Noviembre",
+    12 => "Diciembre"
 ];
 
 // Select de "Otro juego"
@@ -268,31 +277,36 @@ for ($d = 1; $d <= $days_count; $d++) {
 $otroLabel = sprintf("%02d", $otroDia);
 
 echo "
-  <div class='month-header'>
-    Mes: <strong>{$mesesEsp[$mes]} $anio</strong>
-    <div>
-      <div class='buscador-jugadores'>
-        <span class='icono-buscar'>🔍</span>
-        <input type='text' id='searchJugador' placeholder='Buscar aportante…' autocomplete='off'>
-        <button type='button' id='clearSearch' title='Limpiar'>✕</button>
-      </div>
+    <div class='month-header'>
+        <div class='title-month-header'>
+            Mes: <strong>{$mesesEsp[$mes]} $anio</strong>
+        </div>
+         <div class='otro-juego-picker'>
+            <h6>Otro juego</h6>
+            <select id='selectOtroDia'>
+                ";
+                foreach ($opcionesOtro as $dopt) {
+                    $sel = ($dopt == $otroDia) ? "selected" : "";
+                    echo "<option value='{$dopt}' {$sel}>Día {$dopt}</option>";
+                }
+                echo "
+            </select>
+        </div>
+            <button id='btnVerTodosEliminados' class='btn-ver-eliminados-todos'>
+                Lista De Eliminados
+            </button>
     </div>
-
-    <div class='otro-juego-picker'>
-      <h6>Otro juego</h6>
-      <select id='selectOtroDia'>
-";
-foreach ($opcionesOtro as $dopt) {
-    $sel = ($dopt == $otroDia) ? "selected" : "";
-    echo "<option value='{$dopt}' {$sel}>Día {$dopt}</option>";
-}
-echo "
-      </select>
-    </div>
-  </div>
+   
 ";
 
 echo "<table class='planilla'>";
+echo "  <div class='buscador-jugadores'>
+            <span class='icono-buscar'>🔍</span>
+            <input type='text' id='searchJugador' placeholder='Buscar aportante…' autocomplete='off'>
+            <button type='button' id='clearSearch' title='Limpiar'>✕</button>
+        </div>";
+       
+       
 echo "<thead>";
 echo "<tr class='header-tr-one'>";
 echo "<th>Nombres</th>";
@@ -345,23 +359,23 @@ $stmt = $conexion->prepare("
 $stmt->bind_param("ii", $anio, $mes);
 $stmt->execute();
 $res = $stmt->get_result();
-while($r = $res->fetch_assoc()){
-  $esp_por_fecha[$r['fecha']] = (int)$r['s'];
+while ($r = $res->fetch_assoc()) {
+    $esp_por_fecha[$r['fecha']] = (int)$r['s'];
 }
 $stmt->close();
 
 // Sumar esporádicos a días / otros
 $esp_total_otro = 0;
 
-foreach($esp_por_fecha as $f => $s){
-  $dia = (int)date("j", strtotime($f));
+foreach ($esp_por_fecha as $f => $s) {
+    $dia = (int)date("j", strtotime($f));
 
-  $idx = array_search($dia, $days, true);
-  if ($idx !== false) {
-    $totales_por_dia[$idx] += $s;
-  } else {
-    $esp_total_otro += $s;
-  }
+    $idx = array_search($dia, $days, true);
+    if ($idx !== false) {
+        $totales_por_dia[$idx] += $s;
+    } else {
+        $esp_total_otro += $s;
+    }
 }
 $total_otro_col_all += $esp_total_otro;
 
@@ -505,10 +519,10 @@ foreach ($jugadores as $jug) {
 
     echo "<td class='tipo'>" . (empty($tipos) ? '' : implode("<br>", $tipos)) . "</td>";
     echo "<td class='valor'>" . ($valor_otros ? number_format($valor_otros, 0, ',', '.') : '') . "</td>";
-   echo "<td class='col-total-mes'><strong>" . number_format($total_jugador_mes, 0, ',', '.') . "</strong></td>";
+    echo "<td class='col-total-mes'><strong>" . number_format($total_jugador_mes, 0, ',', '.') . "</strong></td>";
 
-$saldoAcumulado = get_saldo_acumulado($conexion, $jugId, $mes, $anio);
-echo "<td class='col-saldo'><strong>" . number_format($saldoAcumulado, 0, ',', '.') . "</strong></td>";
+    $saldoAcumulado = get_saldo_acumulado($conexion, $jugId, $mes, $anio);
+    echo "<td class='col-saldo'><strong>" . number_format($saldoAcumulado, 0, ',', '.') . "</strong></td>";
     $total_saldo_global += $saldoAcumulado;
 
     $nombreSafe   = htmlspecialchars($jug['nombre'], ENT_QUOTES, 'UTF-8');
@@ -516,8 +530,8 @@ echo "<td class='col-saldo'><strong>" . number_format($saldoAcumulado, 0, ',', '
 
     $activarHtml = "";
 
-if ((int)$jug['activo'] === 0) {
-    $activarHtml = "
+    if ((int)$jug['activo'] === 0) {
+        $activarHtml = "
         <label class='activar-player-wrap' title='Activar nuevamente'>
           <input type='checkbox'
                  class='chk-activar-player'
@@ -525,9 +539,9 @@ if ((int)$jug['activo'] === 0) {
           <span>Activar</span>
         </label>
     ";
-}
+    }
 
-echo "<td class='acciones'>
+    echo "<td class='acciones'>
         <div class='acciones-buttons'>
             <button type='button'
                     class='btn-edit-player'
@@ -637,10 +651,10 @@ $stmt = $conexion->prepare("
 $stmt->bind_param("ss", $inicioMes, $finMes);
 $stmt->execute();
 $resE = $stmt->get_result();
-while($r = $resE->fetch_assoc()) $elimIdsMes[] = (int)$r['id'];
+while ($r = $resE->fetch_assoc()) $elimIdsMes[] = (int)$r['id'];
 $stmt->close();
 
-$inMes = (empty($elimIdsMes)) ? "NULL" : implode(",", array_map("intval",$elimIdsMes));
+$inMes = (empty($elimIdsMes)) ? "NULL" : implode(",", array_map("intval", $elimIdsMes));
 
 $eliminados_mes_total_footer = (int)($conexion->query("
     SELECT IFNULL(SUM(
@@ -763,10 +777,10 @@ echo "</tr>";
 
 // ===== Fila explicativa (si la quieres mantener) =====
 echo "<tr class='tfoot-final-info'>
-  <td colspan='" . (count($days)+0) . "'></td>
+  <td colspan='" . (count($days) + 0) . "'></td>
   <td colspan='12'>
     ✔ Eliminados Del Mes Suman un Total de: <strong>$ "
-    . number_format($eliminados_mes_total_footer,0,',','.')
+    . number_format($eliminados_mes_total_footer, 0, ',', '.')
     . "</strong>
   </td>
 </tr>";
