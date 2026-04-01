@@ -932,13 +932,7 @@ const years = [...new Set(
 
   body.innerHTML = `
     <div class="filtros-eliminados-todos">
-    <div class='buscador-jugadores-elim'>
-            <span class='icono-buscar'>🔍</span>
-            <input type='text'  id="searchTodosEliminados"  class="swal2-input" placeholder="Buscar por nombre..." autocomplete='off'>
-            <button type='button' id='clearSearch' title='Limpiar'>✕</button>
-        </div>";
-
-      <select id="filterMesBaja" class="swal2-select" style="margin:0; max-width:180px;">
+      <select id="filterMesBaja" class="">
         <option value="">Todos los meses</option>
         <option value="01">Enero</option>
         <option value="02">Febrero</option>
@@ -954,10 +948,16 @@ const years = [...new Set(
         <option value="12">Diciembre</option>
       </select>
 
-      <select id="filterAnioBaja" class="swal2-select" style="margin:0; max-width:140px;">
+      <select id="filterAnioBaja" class="form">
         <option value="">Todos los años</option>
         ${years.map(y => `<option value="${y}">${y}</option>`).join("")}
       </select>
+
+       <div class='buscador-jugadores-elim'>
+            <span class='icono-buscar'>🔍</span>
+            <input type='text'  id="searchTodosEliminados" placeholder="Buscar por nombre..." autocomplete='off'>
+            <button type='button' id='clearSearch' title='Limpiar'>✕</button>
+    </div>
     </div>
 
     <div class="table-container-eliminados-todos">
