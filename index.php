@@ -324,10 +324,10 @@ include "conexion.php";
         </div>
       </div>
       <div id="modalTodosEliminados" class="modal hidden">
-        <div class="modal-card">
-          <div class="modal-head">
-            <strong>Todos los aportantes eliminados</strong>
-            <button type="button" id="closeModalTodosEliminados">✕</button>
+        <div class="modal-card-ver-elim">
+          <div class="modal-head-ver-elim">
+            <strong>Aportantes Eliminados (Todos)</strong>
+            <button type="button" id="closeModalTodosEliminados" >✕</button>
           </div>
           <div id="modalTodosEliminadosBody"></div>
         </div>

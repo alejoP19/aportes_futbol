@@ -931,14 +931,12 @@ const years = [...new Set(
 
 
   body.innerHTML = `
-    <div class="filtros-eliminados-todos" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
-      <input
-        type="text"
-        id="searchTodosEliminados"
-        placeholder="Buscar por nombre..."
-        class="swal2-input"
-        style="margin:0; max-width:260px;"
-      >
+    <div class="filtros-eliminados-todos">
+    <div class='buscador-jugadores-elim'>
+            <span class='icono-buscar'>🔍</span>
+            <input type='text'  id="searchTodosEliminados"  class="swal2-input" placeholder="Buscar por nombre..." autocomplete='off'>
+            <button type='button' id='clearSearch' title='Limpiar'>✕</button>
+        </div>";
 
       <select id="filterMesBaja" class="swal2-select" style="margin:0; max-width:180px;">
         <option value="">Todos los meses</option>
@@ -973,7 +971,7 @@ const years = [...new Set(
             <th>Acción</th>
           </tr>
         </thead>
-        <tbody id="tbodyTodosEliminados"></tbody>
+        <tbody id="tbodyTodosEliminados" class="body-table"></tbody>
       </table>
     </div>
   `;
@@ -1019,7 +1017,7 @@ const okAnio = !anio || String(yyyy) === String(anio);
       return `
         <tr>
           <td>${idx + 1}</td>
-          <td style="text-align:left;"><strong>${escapeHtml(p.nombre || "")}</strong></td>
+          <td><strong>${escapeHtml(p.nombre || "")}</strong></td>
           <td>${escapeHtml(p.telefono || "")}</td>
           <td>${escapeHtml(fechaFormateada)}</td>
          <td>
@@ -1029,7 +1027,7 @@ const okAnio = !anio || String(yyyy) === String(anio);
         <label class="switch-activar-player">
           <input
             type="checkbox"
-            class="chk-activar-player-modal"
+            class="form-control chk-activar-player-modal"
             data-id="${p.id}"
           >
           <span>Activar</span>
