@@ -101,8 +101,9 @@ function get_consumo_saldo_target($conexion, $id_jugador, $fecha)
         INNER JOIN aportes_saldo_moves m ON m.target_aporte_id = a.id
         INNER JOIN aportes s ON s.id = m.source_aporte_id
         WHERE a.id_jugador = ?
-          AND a.fecha = ?
-          AND s.aporte_principal > 3000
+        AND a.fecha = ?
+        AND s.aporte_principal > 3000
+        AND (s.tipo_aporte IS NULL OR s.tipo_aporte = '')
     ");
     $stmt->bind_param("is", $id_jugador, $fecha);
     $stmt->execute();
@@ -133,7 +134,7 @@ function get_saldo_acumulado($conexion, $id_jugador, $mes, $anio)
         FROM aportes
         WHERE id_jugador = ?
           AND fecha <= ?
-          AND tipo_aporte IS NULL
+          AND (tipo_aporte IS NULL OR tipo_aporte = '')
     ");
     $q1->bind_param("is", $id_jugador, $fechaCorte);
     $q1->execute();
@@ -179,7 +180,7 @@ function total_efectivo_registrados_por_fecha($conexion, $fecha, $TOPE = 3000)
         ) t ON t.target_aporte_id = a.id
         WHERE a.fecha = ?
           AND a.id_jugador IS NOT NULL
-          AND a.tipo_aporte IS NULL
+         AND (a.tipo_aporte IS NULL OR a.tipo_aporte = '')
     ");
     $stmt->bind_param("iis", $TOPE, $TOPE, $fecha);
     $stmt->execute();
@@ -415,26 +416,40 @@ foreach ($jugadores as $jug) {
         }
 
         $saldoAttr = ($consumo > 0) ? " data-saldo-uso='{$consumo}' " : "";
-
+        $saldoFullChecked = ($real === 0 && $consumo === 3000) ? "checked" : "";
         echo "
 <td class='celda-dia {$excedenteAttr}' {$tooltip} {$saldoAttr}>
   <div class='aporte-wrapper'>
+  
     <input class='cell-aporte'
            data-player='{$jugId}'
            data-fecha='{$fecha}'
            type='number'
            placeholder='$'
            value='" . ($efectivo > 0 ? $efectivo : "") . "'>
+           
     <span class='saldo-flag " . ($flag ? "show" : "") . "'>★</span>
     <span class='saldo-uso-flag " . ($consumo > 0 ? "show" : "") . "'>✚</span>
 
-    <label class='chk-deuda-label " . ($hayDeuda ? "con-deuda" : "") . "'>
-      <input type='checkbox'
-             class='chk-deuda'
+    <label class='chk-saldo-full-label' title='Cubrir 3000 con saldo'>
+    <span>Sld</span>
+    <input type='checkbox'
+             class='chk-saldo-full'
              data-player='{$jugId}'
              data-fecha='{$fecha}'
-             " . ($hayDeuda ? "checked" : "") . ">
+             {$saldoFullChecked}>
+
+             <label class='chk-deuda-label " . ($hayDeuda ? "con-deuda" : "") . "'title='Check Para Crear Deuda'>
+               <span>D</span>
+               <input type='checkbox'
+                      class='chk-deuda'
+                      data-player='{$jugId}'
+                      data-fecha='{$fecha}'
+                      " . ($hayDeuda ? "checked" : "") . ">
+                     
+             </label>
     </label>
+
   </div>
 </td>";
     }
@@ -482,6 +497,7 @@ foreach ($jugadores as $jug) {
         $tooltipO = "data-real='{$realO_sel}' title='Aportó " . number_format($realO_sel, 0, ',', '.') . "'";
     }
     $saldoAttrO = ($consumoO_sel > 0) ? " data-saldo-uso='{$consumoO_sel}' " : "";
+    $saldoFullCheckedO = ($realO_sel === 0 && $consumoO_sel === 3000) ? "checked" : "";
 
     echo "
 <td class='celda-dia {$excedenteAttrO}' {$tooltipO} {$saldoAttrO}>
@@ -495,13 +511,24 @@ foreach ($jugadores as $jug) {
     <span class='saldo-flag " . ($flagO ? "show" : "") . "'>★</span>
     <span class='saldo-uso-flag " . ($consumoO_sel > 0 ? "show" : "") . "'>✚</span>
 
-    <label class='chk-deuda-label " . ($hayDeudaOtro ? "con-deuda" : "") . "'>
+      <label class='chk-saldo-full-label' title='Cubrir 3000 con saldo'>
+      <span>Sld</span>
       <input type='checkbox'
-             class='chk-deuda'
+             class='chk-saldo-full'
              data-player='{$jugId}'
              data-fecha='{$fechaOtro}'
-             " . ($hayDeudaOtro ? "checked" : "") . ">
+             {$saldoFullCheckedO}>
+
+             <label class='chk-deuda-label " . ($hayDeudaOtro ? "con-deuda" : "") . "'>
+             <span>D</span>
+               <input type='checkbox'
+                      class='chk-deuda'
+                      data-player='{$jugId}'
+                      data-fecha='{$fechaOtro}'
+                      " . ($hayDeudaOtro ? "checked" : "") . ">
+             </label>
     </label>
+
   </div>
 </td>";
 

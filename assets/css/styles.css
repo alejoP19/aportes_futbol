@@ -2310,7 +2310,46 @@ td.celda-dia.saldo-usado {
 .aporte-wrapper {
     position: relative;
 }
-
+.chk-saldo-full-label{
+  display:inline-flex;
+  align-items:center;
+gap:0px !important;
+margin: 0%;
+  font-size:10px;
+  font-weight:bold;
+  color:#00e479;
+  text-shadow: -1px 1px 1px rgb(0, 0, 0), -1px 1px 1px rgb(0, 0, 0);
+  cursor:pointer;
+}
+.chk-deuda-label{
+display:inline-flex;
+align-items:center;
+gap:0px !important;
+margin: 0%;
+font-size:9px;
+font-weight:bold;
+color:#fd4463;
+text-shadow: -1px 1px 1px rgb(0, 0, 0), -1px 1px 1px rgb(0, 0, 0);
+cursor:pointer;
+}
+.chk-saldo-full span{
+  margin-right: -2px;
+  margin-left: 0px;
+ 
+}
+.chk-saldo-full{
+  accent-color:#23ff98;
+  transform:scale(1.05);
+}
+.chk-deuda-label span{
+  margin-right: -2px;
+  margin-left: 2px;
+ 
+}
+.chk-deuda-label{
+   accent-color:#ff2340;
+  transform:scale(1.05);
+}
 
 /* Estrella animada dentro del input */
 .saldo-flag {

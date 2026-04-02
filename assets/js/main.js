@@ -7,6 +7,7 @@ let selectedPlayerId = null; // fila seleccionada global
 const API_ESP_GET = `${API}/aportes_esporadicos/get.php`;
 const API_ESP_SAVE = `${API}/aportes_esporadicos/save.php`;
 const API_ESP_META_SAVE = `${API}/aportes_esporadicos/save_meta.php`;
+const API_SALDO_FULL = `${API}/aportes/tomar_saldo_completo.php`;
 
 let __espCache = null;
 let __espSlots = 10;
@@ -155,6 +156,7 @@ async function loadSheet(mes, anio) {
 
   // ✅ Al cargar la tabla (recarga / cambio de mes), activar clase + title del saldo
   initSaldoFromHTML(container);
+
   const table = container.querySelector(".planilla");
   setupHeaderColumnHighlight(table);
 
@@ -282,6 +284,11 @@ async function loadSheet(mes, anio) {
       const id = ev.target.dataset.player;
       const fecha = ev.target.dataset.fecha;
       const raw = (ev.target.value || "").toString().trim();
+      const td = ev.target.closest("td.celda-dia");
+      const chkSaldoFull = td?.querySelector(".chk-saldo-full");
+      if (chkSaldoFull && raw !== "") {
+        chkSaldoFull.checked = false;
+      }
 
       let valorToSend = null;
 
@@ -366,6 +373,7 @@ async function loadSheet(mes, anio) {
       });
     });
   });
+
 }
 
 /* ==========================================================
@@ -1187,7 +1195,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await refreshSheet();
   bindAccionesTabla();
   initTodosEliminadosModal();
-
+  initSaldoFullDelegado();
 
   // botones
   const btnAddPlayer = document.getElementById("btnAddPlayer");
@@ -1898,6 +1906,53 @@ function applySaldoMarker(inputEl, resp) {
     }
   }
 }
+
+function initSaldoFullDelegado() {
+  const container = document.getElementById("monthlyTableContainer");
+  if (!container || container.dataset.boundSaldoFull === "1") return;
+  container.dataset.boundSaldoFull = "1";
+
+  container.addEventListener("change", async (e) => {
+    const checkbox = e.target.closest(".chk-saldo-full");
+    if (!checkbox) return;
+
+    e.stopPropagation();
+
+    const id = checkbox.dataset.player;
+    const fecha = checkbox.dataset.fecha;
+    const activar = checkbox.checked;
+
+    try {
+      const resp = await postJSON(API_SALDO_FULL, {
+        id_jugador: id,
+        fecha,
+        activar
+      });
+
+      if (!resp?.ok) {
+        checkbox.checked = !activar;
+
+        Swal.fire({
+          icon: "info",
+          title: "Saldo insuficiente",
+          text: resp?.msg || "El aportante no tiene saldo suficiente para cubrir 3000"
+        });
+        return;
+      }
+
+      await refreshSheet(); // refreshSheet ya refresca tabla + totales
+    } catch (err) {
+      console.error("Error saldo completo:", err);
+      checkbox.checked = !activar;
+
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo aplicar el saldo completo"
+      });
+    }
+  });
+} 
 
 
 function applyExcedenteMarker(inputEl, realValue) {
