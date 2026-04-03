@@ -956,7 +956,7 @@ const years = [...new Set(
         <option value="12">Diciembre</option>
       </select>
 
-      <select id="filterAnioBaja" class="form">
+      <select id="filterAnioBaja">
         <option value="">Todos los años</option>
         ${years.map(y => `<option value="${y}">${y}</option>`).join("")}
       </select>
